@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,7 +49,7 @@ public class App extends JPanel implements Runnable, KeyListener {
         public int x = 0, y = 0, width = 16, height = 16;
 
         public float dx = 0, dy = 0;
-        public float friction = 0.33f;
+        public float friction = 0.13f;
         public float elasticity = 0.98f;
 
         public BufferedImage image;
@@ -157,6 +158,14 @@ public class App extends JPanel implements Runnable, KeyListener {
 
     private static final long serialVersionUID = 2924281870738631982L;
 
+    /**
+     * default path to store image captures.
+     */
+    private static String path = System.getProperty("user.home");
+
+    /**
+     * Game display size and scale.
+     */
     public static int WIDTH = 320;
     public static int HEIGHT = 240;
     public static int SCALE = 2;
@@ -243,7 +252,7 @@ public class App extends JPanel implements Runnable, KeyListener {
         this.addKeyListener(this);
 
         GameObject player = new GameObject("player");
-        player.setSize(24, 24).setPosition(0, 0).setColor(Color.RED).setVelocity(0.5f, 0.5f);
+        player.setSize(24, 24).setPosition(0, 0).setColor(Color.RED).setVelocity(0.2f, 0.2f);
 
         add(player);
 
@@ -299,6 +308,11 @@ public class App extends JPanel implements Runnable, KeyListener {
         }
     }
 
+    /**
+     * Contained object to App viewport display.
+     * 
+     * @param o
+     */
     private void constrains(GameObject o) {
         if (!this.viewport.contains(o.boundingBox)) {
             if (o.x + o.width > viewport.width || o.x < 0) {
@@ -307,6 +321,13 @@ public class App extends JPanel implements Runnable, KeyListener {
             if (o.y + o.height > viewport.height || o.y < 0) {
                 o.dy = -o.dy * o.friction * o.elasticity;
             }
+            if (Math.abs(o.dx) < 0.01f) {
+                o.dx = 0.0f;
+            }
+            if (Math.abs(o.dy) < 0.01f) {
+                o.dy = 0.0f;
+            }
+
         }
     }
 
@@ -492,23 +513,39 @@ public class App extends JPanel implements Runnable, KeyListener {
         renderingList.remove(go);
     }
 
+    /**
+     * Take a screenshot from the image to the default `user.dir`.
+     * 
+     * @param image image to be saved to disk.
+     */
+    public static void screenshot(BufferedImage image) {
+        try {
+            java.io.File out = new java.io.File(path + File.separator + "screenshot " + System.nanoTime() + ".jpg");
+            javax.imageio.ImageIO.write(image.getSubimage(0, 0, App.WIDTH, App.HEIGHT), "JPG", out);
+        } catch (Exception e) {
+            System.err.println("Unable to write screenshot to user.dir: " + path);
+        }
+    }
+
     private void parseArgs(String[] args) {
-        for (String arg : args) {
-            if (arg.contains("=")) {
-                String[] argSplit = arg.split("=");
-                switch (argSplit[0].toLowerCase()) {
-                case "w":
-                case "width":
-                    WIDTH = Integer.parseInt(argSplit[1]);
-                    break;
-                case "h":
-                case "height":
-                    HEIGHT = Integer.parseInt(argSplit[1]);
-                    break;
-                case "d":
-                case "debug":
-                    debug = Integer.parseInt(argSplit[1]);
-                    break;
+        if (args.length > 0) {
+            for (String arg : args) {
+                if (arg.contains("=")) {
+                    String[] argSplit = arg.split("=");
+                    switch (argSplit[0].toLowerCase()) {
+                    case "w":
+                    case "width":
+                        WIDTH = Integer.parseInt(argSplit[1]);
+                        break;
+                    case "h":
+                    case "height":
+                        HEIGHT = Integer.parseInt(argSplit[1]);
+                        break;
+                    case "d":
+                    case "debug":
+                        debug = Integer.parseInt(argSplit[1]);
+                        break;
+                    }
                 }
             }
         }
