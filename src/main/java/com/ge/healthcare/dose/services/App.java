@@ -43,12 +43,18 @@ public class App extends JPanel implements Runnable, KeyListener {
         public String name;
 
         public int layer = 0;
-        public int property = 0;
+        public int priority = 0;
 
         public int x = 0, y = 0, width = 16, height = 16;
 
-        BufferedImage image;
+        public float dx = 0, dy = 0;
+        public float friction = 0.33f;
+        public float elasticity = 0.98f;
+
+        public BufferedImage image;
         public Color color;
+
+        public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
 
         /**
          * Create a new Gobject.
@@ -69,8 +75,7 @@ public class App extends JPanel implements Runnable, KeyListener {
          */
         public GameObject(String name, int x, int y, BufferedImage image) {
             this(name);
-            this.x = x;
-            this.y = y;
+            setPosition(x, y);
         }
 
         /**
@@ -79,7 +84,7 @@ public class App extends JPanel implements Runnable, KeyListener {
          * @param dt
          */
         public void update(long dt) {
-
+            setPosition((int) (x + (dx * dt)), (int) (y + (dy * dt)));
         }
 
         /**
@@ -92,18 +97,8 @@ public class App extends JPanel implements Runnable, KeyListener {
                 g.drawImage(image, x, y, null);
             } else {
                 g.setColor(color);
-                g.drawRect(x, y, width, height);
+                g.fillRect(x, y, width, height);
             }
-        }
-
-        /**
-         * Builder pattern for GObject.
-         * 
-         * @param name
-         * @return
-         */
-        public GameObject builder(String name) {
-            return new GameObject(name);
         }
 
         /**
@@ -116,6 +111,14 @@ public class App extends JPanel implements Runnable, KeyListener {
         public GameObject setPosition(int x, int y) {
             this.x = x;
             this.y = y;
+            boundingBox.x = x;
+            boundingBox.x = y;
+            return this;
+        }
+
+        public GameObject setVelocity(float dx, float dy) {
+            this.dx = dx;
+            this.dy = dy;
             return this;
         }
 
@@ -129,6 +132,8 @@ public class App extends JPanel implements Runnable, KeyListener {
         public GameObject setSize(int width, int height) {
             this.width = width;
             this.height = height;
+            boundingBox.width = width;
+            boundingBox.height = height;
             return this;
         }
 
@@ -143,6 +148,11 @@ public class App extends JPanel implements Runnable, KeyListener {
             return this;
         }
 
+        public GameObject setColor(Color color) {
+            this.color = color;
+            return this;
+        }
+
     }
 
     private static final long serialVersionUID = 2924281870738631982L;
@@ -154,7 +164,7 @@ public class App extends JPanel implements Runnable, KeyListener {
     /**
      * title of the application;
      */
-    private String title = "NONAME";
+    private String title = "NoName";
 
     /**
      * internal tread.
@@ -233,7 +243,8 @@ public class App extends JPanel implements Runnable, KeyListener {
         this.addKeyListener(this);
 
         GameObject player = new GameObject("player");
-        player.setSize(24, 24).setPosition(WIDTH / 2, HEIGHT / 2);
+        player.setSize(24, 24).setPosition(0, 0).setColor(Color.RED).setVelocity(0.5f, 0.5f);
+
         add(player);
 
     }
@@ -284,6 +295,18 @@ public class App extends JPanel implements Runnable, KeyListener {
     private void update(long elapsed) {
         for (Entry<String, GameObject> entry : objects.entrySet()) {
             entry.getValue().update(elapsed);
+            constrains(entry.getValue());
+        }
+    }
+
+    private void constrains(GameObject o) {
+        if (!this.viewport.contains(o.boundingBox)) {
+            if (o.x + o.width > viewport.width || o.x < 0) {
+                o.dx = -o.dx * o.friction * o.elasticity;
+            }
+            if (o.y + o.height > viewport.height || o.y < 0) {
+                o.dy = -o.dy * o.friction * o.elasticity;
+            }
         }
     }
 
@@ -311,13 +334,32 @@ public class App extends JPanel implements Runnable, KeyListener {
         // render anything game ?
         for (GameObject o : renderingList) {
             o.render(g);
+            if (debug > 0) {
+                renderDebugInfo(g, o);
+            }
         }
 
         // render pause status
-        // TODO render the Pause status
+        if (pause) {
+            String pauseLabel = getLabel("app.pause");
+            g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
+            g.fillRect(0, HEIGHT / 2, WIDTH, 32);
+            g.drawString(pauseLabel, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
+                    (HEIGHT - g.getFontMetrics().getHeight()) / 2);
+        }
 
         // render debug information
         drawDebugInformation(g);
+    }
+
+    private void renderDebugInfo(Graphics2D g, GameObject o) {
+        g.setFont(dbgFont);
+        g.setColor(Color.GREEN);
+        g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y);
+        g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + 12);
+        g.drawString(String.format("vel:%03f,%03f", o.dx, o.dy), o.x + o.width + 4, o.y + 24);
+        g.drawString(String.format("L:%d,%d", o.layer, o.priority), o.x + o.width + 4, o.y + 36);
+
     }
 
     /**
@@ -327,12 +369,8 @@ public class App extends JPanel implements Runnable, KeyListener {
      */
     private void drawDebugInformation(Graphics2D g) {
         g.setFont(dbgFont);
-        String debugString = String.format(
-                "dbg:%s FPS:%d objs:%d rendered:%d", 
-                (debug == 0 ? "off" : "" + debug),
-                objects.size(), 
-                renderingList.size(), 
-                realFPS);
+        String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
+                (debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
         // int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
         int dbgStringHeight = g.getFontMetrics().getHeight();
         g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
@@ -372,7 +410,7 @@ public class App extends JPanel implements Runnable, KeyListener {
     public void keyPressed(KeyEvent e) {
         prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
         keys[e.getKeyCode()] = true;
-
+        logger.fine(e.getKeyCode() + " has been pressed");
     }
 
     /**
@@ -383,20 +421,21 @@ public class App extends JPanel implements Runnable, KeyListener {
     public void keyReleased(KeyEvent e) {
         prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
         keys[e.getKeyCode()] = false;
+        logger.fine(e.getKeyCode() + " has been released");
 
         /**
          * process the exit request.
          */
         if (keys[KeyEvent.VK_ESCAPE]) {
             this.exit = !exit;
-            System.out.println("Request exiting");
+            logger.fine("Request exiting");
         }
         /**
          * process the pause request.
          */
         if (keys[KeyEvent.VK_PAUSE] || keys[KeyEvent.VK_P]) {
             this.pause = !pause;
-            System.out.printf("Pause reuqest %b", this.pause);
+            logger.fine(String.format("Pause reuqest %b", this.pause));
         }
     }
 
@@ -438,7 +477,7 @@ public class App extends JPanel implements Runnable, KeyListener {
         renderingList.add(go);
         Collections.sort(renderingList, new Comparator<GameObject>() {
             public int compare(GameObject o1, GameObject o2) {
-                return (o1.layer < o2.layer ? -1 : (o1.property < o2.property ? -1 : 1));
+                return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
             }
         });
     }
@@ -453,6 +492,28 @@ public class App extends JPanel implements Runnable, KeyListener {
         renderingList.remove(go);
     }
 
+    private void parseArgs(String[] args) {
+        for (String arg : args) {
+            if (arg.contains("=")) {
+                String[] argSplit = arg.split("=");
+                switch (argSplit[0].toLowerCase()) {
+                case "w":
+                case "width":
+                    WIDTH = Integer.parseInt(argSplit[1]);
+                    break;
+                case "h":
+                case "height":
+                    HEIGHT = Integer.parseInt(argSplit[1]);
+                    break;
+                case "d":
+                case "debug":
+                    debug = Integer.parseInt(argSplit[1]);
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * App execution EntryPoint.
      * 
@@ -461,17 +522,22 @@ public class App extends JPanel implements Runnable, KeyListener {
     public static void main(String[] args) {
 
         App app = new App("MyApp");
+
+        app.parseArgs(args);
         Dimension dim = new Dimension(App.WIDTH * App.SCALE, App.HEIGHT * App.SCALE);
 
         JFrame frame = new JFrame(app.getTitle());
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
         frame.setContentPane(app);
+        frame.setLayout(new BorderLayout());
+
         frame.setSize(dim);
         frame.setPreferredSize(dim);
         frame.setMaximumSize(dim);
         frame.setMinimumSize(dim);
         frame.setResizable(false);
+
         frame.addKeyListener(app);
         frame.pack();
 

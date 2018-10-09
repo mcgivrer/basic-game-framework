@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.ge.healthcare.dose.services</groupId>
@@ -10,8 +10,64 @@
   <name>docker-sample-service</name>
   <url>http://maven.apache.org</url>
 
+  <prerequisites>
+    <maven>3.5.3</maven>
+  </prerequisites>
+
+  <organization>
+    <name>SnapGames</name>
+    <url>http://snapgames.fr</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <name>Frédéric Delorme</name>
+      <email>frederic.delorme@snapgames.fr</email>
+      <url>https://snapgames.fr/blog/fred</url>
+      <organization>SnapGames</organization>
+      <organizationUrl>https://snapgames.fr</organizationUrl>
+      <timezone>Europe/Paris</timezone>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+        <role>utopist</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/snapgames/dss/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>Travis CI</system>
+    <url>https://travis-ci.org/snapgames/dss</url>
+    <notifiers>
+      <notifier>
+        <type>mail</type>
+        <sendOnError>true</sendOnError>
+        <sendOnFailure>true</sendOnFailure>
+        <sendOnSuccess>false</sendOnSuccess>
+        <sendOnWarning>false</sendOnWarning>
+        <configuration>
+          <address>ci@snapgames.fr</address>
+        </configuration>
+      </notifier>
+    </notifiers>
+  </ciManagement>
+
+  <scm>
+    <connection>scm:git:git@github.com:snapgames/dss.git</connection>
+    <developerConnection>scm:git:git@github.com:snapgames/dss.git</developerConnection>
+    <url>scm:git:https://github.com/snapgames/dss</url>
+  </scm>
+  <>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -22,4 +78,50 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>${project.name}</finalName>
+    <plugins>
+      <!-- Sources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Javadoc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <encoding>UTF-8F</encoding>
+        </configuration>
+      </plugin>
+      <!-- Release -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.22.0</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
