@@ -2,13 +2,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.ge.healthcare.dose.services</groupId>
-  <artifactId>docker-sample-service</artifactId>
+  <groupId>fr.snapgames.app</groupId>
+  <artifactId>basic-game-framework</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>docker-sample-service</name>
-  <url>http://maven.apache.org</url>
+  <name>Basic Game Framework</name>
+  <url>https://github.com/snapgames/basic-game-framework/</url>
+  <description>This small application is a basic engine to develop a game on the JDK only.</description>
+  <inceptionYear>2018</inceptionYear>
 
   <prerequisites>
     <maven>3.5.3</maven>
