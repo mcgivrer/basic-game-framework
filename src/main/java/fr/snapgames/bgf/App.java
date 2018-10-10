@@ -1,4 +1,4 @@
-package com.ge.healthcare.dose.services;
+package fr.snapgames.bgf;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

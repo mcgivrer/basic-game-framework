@@ -3,6 +3,7 @@ package com.ge.healthcare.dose.services;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import fr.snapgames.bgf.App;
 import junit.framework.Assert;
 
 /**
