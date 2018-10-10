@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
@@ -13,7 +14,6 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,7 @@ import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -32,9 +33,9 @@ import javax.swing.JPanel;
  * 
  * @author Frédéric Delorme.
  * @year 2018
- * @see https://github.com/snapgames/basic-game-framwork/wiki
+ * @see https://github.com/snapgames/basic-game-framework/wiki
  */
-public class App extends JPanel implements Runnable, KeyListener {
+public class App extends JPanel implements KeyListener {
 
 	private static final long serialVersionUID = 2924281870738631982L;
 
@@ -58,15 +59,11 @@ public class App extends JPanel implements Runnable, KeyListener {
 	private String title = "NoName";
 
 	/**
-	 * internal tread.
-	 */
-	private Thread thread = null;
-
-	/**
 	 * internal flags.
 	 */
 	private boolean exit = false;
 	private boolean pause = false;
+	private boolean pauseRendering = false;
 	private int debug = 0;
 	private Font dbgFont;
 
@@ -80,6 +77,8 @@ public class App extends JPanel implements Runnable, KeyListener {
 	private long FPS = 60;
 	private long timeFrame = (long) (1000 / FPS);
 	private long realFPS = 0;
+
+	private int score = 0;
 
 	/**
 	 * Translated Messages
@@ -96,14 +95,18 @@ public class App extends JPanel implements Runnable, KeyListener {
 	/**
 	 * GameObject list managed by the game.
 	 */
-	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>(50);
+	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>(2000);
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameObject> renderingList = new ArrayList<GameObject>();
+	private List<GameObject> renderingList = new CopyOnWriteArrayList<GameObject>();
+
+	private UIText scoreUI;
+
+	private Font scoreFont;
 
 	/**
-	 * Craet a new App with <code>title</code> as main title.
+	 * Create a new Application with <code>title</code> as main title.
 	 * 
 	 * @param title the title of this app.
 	 */
@@ -111,9 +114,6 @@ public class App extends JPanel implements Runnable, KeyListener {
 		super();
 		this.title = title;
 		this.addKeyListener(this);
-
-		this.thread = new Thread(this);
-
 	}
 
 	/**
@@ -134,30 +134,73 @@ public class App extends JPanel implements Runnable, KeyListener {
 		viewport = new Rectangle(WIDTH, HEIGHT);
 
 		dbgFont = g.getFont().deriveFont(9.0f);
+		scoreFont = g.getFont().deriveFont(16.0f);
 		this.addKeyListener(this);
 
-		GameObject player = GameObject.builder("player")
-				.setSize(24, 24)
-				.setPosition(0, 0)
-				.setColor(Color.GREEN)
-				.setVelocity(0.2f, 0.2f)
-				.setLayer(2)
-				.setPriority(1);
+		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
+				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f);
+		add(scoreUI);
 
+		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.2f, 0.2f).setLayer(2).setPriority(0).setElasticity(0.98f).setFriction(0.98f);
 		add(player);
 
+		createGameObjects("enemy_", 10);
+
+	}
+
+	/**
+	 * Create nbEnemies in the playground.
+	 * 
+	 * @param nbEnemies
+	 */
+	private void createGameObjects(String baseName, int nbEnemies) {
+		pauseRendering = true;
 		for (int i = 0; i < 10; i++) {
-			GameObject enemy = GameObject.builder("enemy_" + i)
+			GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
 					.setSize(16, 16)
 					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
-					.setColor(new Color((float)Math.random(),(float)Math.random(),(float)Math.random()))
-					.setVelocity(0.1f, -0.12f)
+					.setColor(randomColor())
+					.setVelocity((float) (Math.random() * 0.2f)-0.1f, (float) (Math.random() * 0.2f)-0.1f)
+					.setPriority(i)
 					.setLayer(1)
-					.setPriority(i);
-
+					.setElasticity(0.98f)
+					.setFriction(0.98f);
 			add(enemy);
 		}
+		pauseRendering = false;
+	}
 
+	/**
+	 * Generate a random Color.
+	 * 
+	 * @return
+	 */
+	private Color randomColor() {
+		return new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
+	}
+
+	/**
+	 * Remove GameObject from App where name contains with nameFilter
+	 * 
+	 * @param nameFilter
+	 * @param i
+	 */
+	private void removeGameObjects(String nameFilter, int nbToRemove) {
+		List<GameObject> toBeRemoved = new ArrayList<>();
+		pauseRendering = true;
+		for (Entry<String, GameObject> o : objects.entrySet()) {
+			if (o.getValue().name.contains(nameFilter)) {
+				toBeRemoved.add(o.getValue());
+				nbToRemove--;
+				objects.remove(o.getKey());
+				if(nbToRemove==0) {
+					break;
+				}
+			}
+		}
+		renderingList.removeAll(toBeRemoved);
+		pauseRendering = false;
 	}
 
 	/**
@@ -176,9 +219,11 @@ public class App extends JPanel implements Runnable, KeyListener {
 			if (!pause) {
 				update(elapsed);
 			}
-			clearRenderBuffer(g);
-			render(g);
-			drawToScreen();
+			if (!pauseRendering) {
+				clearRenderBuffer(g);
+				render(g);
+				drawToScreen();
+			}
 			elapsed = System.currentTimeMillis() - previous;
 			cumulation += elapsed;
 			frames++;
@@ -196,6 +241,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 			}
 			previous = current;
 		}
+		System.exit(0);
 	}
 
 	/**
@@ -208,6 +254,8 @@ public class App extends JPanel implements Runnable, KeyListener {
 			entry.getValue().update(elapsed);
 			constrains(entry.getValue());
 		}
+		score++;
+		scoreUI.setText(String.format("%05d", score));
 	}
 
 	/**
@@ -257,14 +305,14 @@ public class App extends JPanel implements Runnable, KeyListener {
 		// render anything game ?
 		for (GameObject o : renderingList) {
 			o.render(g);
-			if (debug > 0) {
+			if (debug >= 2) {
 				renderObjectDebugInfo(g, o);
 			}
 		}
 
 		// render pause status
 		if (pause) {
-			String pauseLabel = getLabel("app.pause");
+			String pauseLabel = getLabel("app.label.pause");
 			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
 			g.drawString(pauseLabel, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
@@ -272,15 +320,17 @@ public class App extends JPanel implements Runnable, KeyListener {
 		}
 
 		// render debug information
-		drawDebugInformation(g);
+		if (debug > 0) {
+			drawDebugInformation(g);
+		}
 	}
 
 	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
 		g.setFont(dbgFont);
-		g.setColor(new Color(0.1f,0.1f,0.1f,0.80f));
-		g.fillRect(o.x+o.width+2, o.y, 80, 60);
+		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
+		g.fillRect(o.x + o.width + 2, o.y, 80, 60);
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect(o.x+o.width+2, o.y, 80, 60);
+		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
 		g.setColor(Color.GREEN);
 		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y+(12*1));
 		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+(12*2));
@@ -301,9 +351,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 		// int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
 		int dbgStringHeight = g.getFontMetrics().getHeight();
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - 32, WIDTH, 32);
+		g.fillRect(0, HEIGHT - 48, WIDTH, 48);
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - 32 + dbgStringHeight);
+		g.drawString(debugString, 8, HEIGHT - 48 + dbgStringHeight);
 	}
 
 	/**
@@ -334,6 +384,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyPressed(KeyEvent e) {
 		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = true;
@@ -345,35 +396,54 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyReleased(KeyEvent e) {
 		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = false;
 		logger.fine(e.getKeyCode() + " has been released");
 
+		switch (e.getKeyCode()) {
 		/**
 		 * process the exit request.
 		 */
-		if (keys[KeyEvent.VK_ESCAPE]) {
-			this.exit = !exit;
+		case KeyEvent.VK_ESCAPE:
+			this.exit = true;
 			logger.fine("Request exiting");
-		}
+			break;
 		/**
 		 * process the pause request.
 		 */
-		if (keys[KeyEvent.VK_PAUSE] || keys[KeyEvent.VK_P]) {
+		case KeyEvent.VK_PAUSE:
+		case KeyEvent.VK_P:
 			this.pause = !pause;
 			logger.fine(String.format("Pause reuqest %b", this.pause));
-		}
-		
+			break;
+		/**
+		 * Manage Enemies set.
+		 */
+		case KeyEvent.VK_UP:
+			createGameObjects("enemy_", 10);
+			break;
+		case KeyEvent.VK_DOWN:
+			removeGameObjects("enemy_", 10);
+			break;
 		/**
 		 * Write a screenshot to User home folder.
 		 */
-		if(keys[KeyEvent.VK_S]) {
-			pause=true;
+		case KeyEvent.VK_S:
+			pause = true;
 			screenshot(buffer);
-			pause=false;
+			pause = false;
+			break;
+
+		/**
+		 * Manage Debug level.
+		 */
+		case KeyEvent.VK_D:
+			debug = (debug < 5 ? debug + 1 : 0);
+			break;
 		}
-		
+
 	}
 
 	/**
@@ -381,6 +451,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyTyped(KeyEvent e) {
 		keyQueue.add(e);
 	}
@@ -412,11 +483,13 @@ public class App extends JPanel implements Runnable, KeyListener {
 	public void add(GameObject go) {
 		objects.put(go.name, go);
 		renderingList.add(go);
-		Collections.sort(renderingList, new Comparator<GameObject>() {
+		pauseRendering = true;
+		renderingList.sort(new Comparator<GameObject>() {
 			public int compare(GameObject o1, GameObject o2) {
 				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
 			}
 		});
+		pauseRendering = false;
 	}
 
 	/**
@@ -439,7 +512,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 			java.io.File out = new java.io.File(path + File.separator + "screenshot " + System.nanoTime() + ".jpg");
 			javax.imageio.ImageIO.write(image.getSubimage(0, 0, App.WIDTH, App.HEIGHT), "JPG", out);
 		} catch (Exception e) {
-			System.err.println("Unable to write screenshot to user.dir: " + path);
+			System.err.println("Unable to write screenshot to " + path);
 		}
 	}
 
@@ -479,13 +552,20 @@ public class App extends JPanel implements Runnable, KeyListener {
 	public static void main(String[] args) {
 
 		App app = new App("MyApp");
-
 		app.parseArgs(args);
-		Dimension dim = new Dimension(
+
+    Dimension dim = new Dimension(
 				(int)(App.WIDTH * App.SCALE), 
 				(int)(App.HEIGHT * App.SCALE));
 
 		JFrame frame = new JFrame(app.getTitle());
+		// fix a platform linked issue about window sizing.
+		Insets insets = frame.getInsets();
+		int addedWidth = insets.left + insets.right;
+		int addedHeight = insets.top + insets.bottom;
+
+		final int fWidth = (int) (App.WIDTH * App.SCALE) + addedWidth;
+		final int fHeight = (int) (App.HEIGHT * App.SCALE) + addedHeight;
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(app);
@@ -496,7 +576,12 @@ public class App extends JPanel implements Runnable, KeyListener {
 		frame.setMaximumSize(dim);
 		frame.setMinimumSize(dim);
 		frame.setResizable(false);
+
+		// TODO set a default icon for the window
+		// frame.setIconImage();
+
 		frame.addKeyListener(app);
+
 		frame.pack();
 
 		frame.setVisible(true);

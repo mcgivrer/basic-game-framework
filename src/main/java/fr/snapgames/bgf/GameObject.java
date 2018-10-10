@@ -107,7 +107,7 @@ public class GameObject {
 	 */
 	public GameObject(String name, int x, int y, BufferedImage image) {
 		this(name);
-		setPosition(x, y);
+		setPosition(x, y); 
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class GameObject {
 	}
 
 	/**
-	 * Set the Drawin color for this `GameObject`.
+	 * Set the drawing color for this `GameObject`.
 	 * 
 	 * @param color
 	 * @return
@@ -217,6 +217,28 @@ public class GameObject {
 	 */
 	public GameObject setPriority(int priority) {
 		this.priority = priority;
+		return this;
+	}
+
+	/**
+	 * Set the physic elasticity parameter for this `GameObject`.
+	 * 
+	 * @param elasticity 
+	 * @return
+	 */
+	public GameObject setElasticity(float elasticity) {
+		this.elasticity = elasticity;
+		return this;
+	}
+
+	/**
+	 * Set the physic friction parameter for this `GameObject`.
+	 * 
+	 * @param friction 
+	 * @return
+	 */
+	public GameObject setFriction(float friction) {
+		this.friction = friction;
 		return this;
 	}
 
