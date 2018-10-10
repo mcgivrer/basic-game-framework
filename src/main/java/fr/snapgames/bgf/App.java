@@ -567,8 +567,6 @@ public class App extends JPanel implements KeyListener {
 		final int fWidth = (int) (App.WIDTH * App.SCALE) + addedWidth;
 		final int fHeight = (int) (App.HEIGHT * App.SCALE) + addedHeight;
 
-		Dimension dim = new Dimension(fWidth, fHeight);
-
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(app);
 		frame.setLayout(new BorderLayout());
