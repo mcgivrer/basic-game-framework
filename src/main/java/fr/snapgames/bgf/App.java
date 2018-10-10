@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
@@ -50,7 +51,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 */
 	public static int WIDTH = 320;
 	public static int HEIGHT = 240;
-	public static int SCALE = 2;
+	public static float SCALE = 2;
 
 	/**
 	 * title of the application;
@@ -101,6 +102,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * List of object to be rendered.
 	 */
 	private List<GameObject> renderingList = new ArrayList<GameObject>();
+	
+	
+	private Font scoreFont;
 
 	/**
 	 * Craet a new App with <code>title</code> as main title.
@@ -112,7 +116,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 		this.title = title;
 		this.addKeyListener(this);
 
-		this.thread = new Thread(this);
+		//this.thread = new Thread(this);
 
 	}
 
@@ -134,22 +138,27 @@ public class App extends JPanel implements Runnable, KeyListener {
 		viewport = new Rectangle(WIDTH, HEIGHT);
 
 		dbgFont = g.getFont().deriveFont(9.0f);
+		scoreFont = g.getFont().deriveFont(16.0f);
 		this.addKeyListener(this);
 
-		GameObject player = GameObject.builder("player")
-				.setSize(24, 24)
-				.setPosition(0, 0)
-				.setColor(Color.GREEN)
-				.setVelocity(0.2f, 0.2f);
+		UIText text = (UIText)UIText.builder("score")
+				.setFont(scoreFont)
+				.setText("00000")
+				.setThickness(1)
+				.setPosition(12, 24)
+				.setLayer(10);
+		add(text);
+		
+		
+		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.2f, 0.2f).setPriority(0).setLayer(2);
 
 		add(player);
 
 		for (int i = 0; i < 10; i++) {
-			GameObject enemy = GameObject.builder("enemy_" + i)
-					.setSize(16, 16)
-					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
-					.setColor(Color.RED)
-					.setVelocity(0.1f, -0.12f);
+			GameObject enemy = GameObject.builder("enemy_" + i).setSize(16, 16)
+					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT)).setColor(Color.RED)
+					.setVelocity(0.1f, -0.12f).setPriority(i).setLayer(1);
 
 			add(enemy);
 		}
@@ -273,14 +282,16 @@ public class App extends JPanel implements Runnable, KeyListener {
 
 	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
 		g.setFont(dbgFont);
-		g.setColor(new Color(0.1f,0.1f,0.1f,0.80f));
-		g.fillRect(o.x+o.width+2, o.y, 80, 60);
+		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
+		g.fillRect(o.x + o.width + 2, o.y, 80, 60);
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect(o.x+o.width+2, o.y, 80, 60);
+		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+12);
-		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + 24);
-		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + 36);
+		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y + (12*1));
+		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y + (12*2));
+		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12*3));
+		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12*4));
+		g.drawString(String.format("L&P:%d,%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12*5));
 	}
 
 	/**
@@ -295,9 +306,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 		// int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
 		int dbgStringHeight = g.getFontMetrics().getHeight();
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - 32, WIDTH, 32);
+		g.fillRect(0, HEIGHT - 48, WIDTH, 48);
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - 32 + dbgStringHeight);
+		g.drawString(debugString,8, HEIGHT - 48 + dbgStringHeight);
 	}
 
 	/**
@@ -305,7 +316,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 */
 	private void drawToScreen() {
 		Graphics g2 = this.getGraphics();
-		g2.drawImage(buffer, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
+		g2.drawImage(buffer, 0, 0, (int)(WIDTH * SCALE), (int)(HEIGHT * SCALE), null);
 		g2.dispose();
 	}
 
@@ -328,6 +339,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyPressed(KeyEvent e) {
 		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = true;
@@ -339,6 +351,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyReleased(KeyEvent e) {
 		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = false;
@@ -358,16 +371,16 @@ public class App extends JPanel implements Runnable, KeyListener {
 			this.pause = !pause;
 			logger.fine(String.format("Pause reuqest %b", this.pause));
 		}
-		
+
 		/**
 		 * Write a screenshot to User home folder.
 		 */
-		if(keys[KeyEvent.VK_S]) {
-			pause=true;
+		if (keys[KeyEvent.VK_S]) {
+			pause = true;
 			screenshot(buffer);
-			pause=false;
+			pause = false;
 		}
-		
+
 	}
 
 	/**
@@ -375,6 +388,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 * 
 	 * @param e
 	 */
+	@Override
 	public void keyTyped(KeyEvent e) {
 		keyQueue.add(e);
 	}
@@ -457,7 +471,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 						break;
 					case "s":
 					case "scale":
-						SCALE = Integer.parseInt(argSplit[1]);
+						SCALE = Float.parseFloat(argSplit[1]);
 						break;
 					}
 				}
@@ -473,11 +487,19 @@ public class App extends JPanel implements Runnable, KeyListener {
 	public static void main(String[] args) {
 
 		App app = new App("MyApp");
-
 		app.parseArgs(args);
-		Dimension dim = new Dimension(App.WIDTH * App.SCALE, App.HEIGHT * App.SCALE);
-
+		
 		JFrame frame = new JFrame(app.getTitle());
+		frame.addKeyListener(app);
+
+		Insets insets = frame.getInsets();
+		int addedWidth = insets.left + insets.right;
+		int addedHeight = insets.top + insets.bottom;
+
+		final int fWidth = (int)(App.WIDTH*App.SCALE) + addedWidth;
+		final int fHeight = (int)(App.HEIGHT*App.SCALE) + addedHeight;
+
+		Dimension dim = new Dimension(fWidth, fHeight);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(app);
@@ -487,8 +509,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 		frame.setPreferredSize(dim);
 		frame.setMaximumSize(dim);
 		frame.setMinimumSize(dim);
+		
 		frame.setResizable(false);
-		frame.addKeyListener(app);
+		
 		frame.pack();
 
 		frame.setVisible(true);
