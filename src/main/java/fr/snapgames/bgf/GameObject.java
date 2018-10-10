@@ -107,7 +107,7 @@ public class GameObject {
 	 */
 	public GameObject(String name, int x, int y, BufferedImage image) {
 		this(name);
-		setPosition(x, y);
+		setPosition(x, y); 
 	}
 
 	/**
@@ -207,6 +207,16 @@ public class GameObject {
 		return this;
 	}
 
+	public GameObject setElasticity(float elasticity) {
+		this.elasticity = elasticity;
+		return this;
+	}
+
+	public GameObject setFriction(float friction) {
+		this.friction = friction;
+		return this;
+	}
+
 	/**
 	 * Builder pattern for the GameObject.
 	 * 
@@ -216,5 +226,6 @@ public class GameObject {
 	public static GameObject builder(String name) {
 		return new GameObject(name);
 	}
+
 
 }
