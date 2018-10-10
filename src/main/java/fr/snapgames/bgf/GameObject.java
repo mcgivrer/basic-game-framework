@@ -148,6 +148,13 @@ public class GameObject {
 		return this;
 	}
 
+	/**
+	 * Set the velocity for this `GameObject`.
+	 * 
+	 * @param dx
+	 * @param dy
+	 * @return
+	 */
 	public GameObject setVelocity(float dx, float dy) {
 		this.dx = dx;
 		this.dy = dy;
@@ -181,7 +188,7 @@ public class GameObject {
 	}
 
 	/**
-	 * Set rendering color for this object.
+	 * Set the drawing color for this `GameObject`.
 	 * 
 	 * @param color
 	 * @return
@@ -192,7 +199,7 @@ public class GameObject {
 	}
 
 	/**
-	 * Set the rendering layer for this object.
+	 * Set the rendering layer for this `GameObject`.
 	 * 
 	 * @param layer
 	 * @return
@@ -202,16 +209,34 @@ public class GameObject {
 		return this;
 	}
 
+	/**
+	 * Set the rendering priority in the pipe for this `GameObject`.
+	 * 
+	 * @param priority
+	 * @return
+	 */
 	public GameObject setPriority(int priority) {
 		this.priority = priority;
 		return this;
 	}
 
+	/**
+	 * Set the physic elasticity parameter for this `GameObject`.
+	 * 
+	 * @param elasticity 
+	 * @return
+	 */
 	public GameObject setElasticity(float elasticity) {
 		this.elasticity = elasticity;
 		return this;
 	}
 
+	/**
+	 * Set the physic friction parameter for this `GameObject`.
+	 * 
+	 * @param friction 
+	 * @return
+	 */
 	public GameObject setFriction(float friction) {
 		this.friction = friction;
 		return this;
@@ -226,6 +251,5 @@ public class GameObject {
 	public static GameObject builder(String name) {
 		return new GameObject(name);
 	}
-
 
 }

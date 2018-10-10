@@ -332,11 +332,11 @@ public class App extends JPanel implements KeyListener {
 		g.setColor(Color.DARK_GRAY);
 		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
-		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
-		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
-		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
-		g.drawString(String.format("L&P:%d,%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
+		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y+(12*1));
+		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+(12*2));
+		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12*3));
+		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12*4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12*5));
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private void drawToScreen() {
 		Graphics g2 = this.getGraphics();
-		g2.drawImage(buffer, 0, 0, (int) (WIDTH * SCALE), (int) (HEIGHT * SCALE), null);
+		g2.drawImage(buffer, 0, 0, (int)(WIDTH * SCALE), (int)(HEIGHT * SCALE), null);
 		g2.dispose();
 	}
 
@@ -553,6 +553,10 @@ public class App extends JPanel implements KeyListener {
 
 		App app = new App("MyApp");
 		app.parseArgs(args);
+
+    Dimension dim = new Dimension(
+				(int)(App.WIDTH * App.SCALE), 
+				(int)(App.HEIGHT * App.SCALE));
 
 		JFrame frame = new JFrame(app.getTitle());
 		// fix a platform linked issue about window sizing.
