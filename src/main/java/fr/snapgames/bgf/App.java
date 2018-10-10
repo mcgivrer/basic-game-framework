@@ -50,7 +50,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 */
 	public static int WIDTH = 320;
 	public static int HEIGHT = 240;
-	public static int SCALE = 2;
+	public static float SCALE = 2;
 
 	/**
 	 * title of the application;
@@ -140,7 +140,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 				.setSize(24, 24)
 				.setPosition(0, 0)
 				.setColor(Color.GREEN)
-				.setVelocity(0.2f, 0.2f);
+				.setVelocity(0.2f, 0.2f)
+				.setLayer(2)
+				.setPriority(1);
 
 		add(player);
 
@@ -148,8 +150,10 @@ public class App extends JPanel implements Runnable, KeyListener {
 			GameObject enemy = GameObject.builder("enemy_" + i)
 					.setSize(16, 16)
 					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
-					.setColor(Color.RED)
-					.setVelocity(0.1f, -0.12f);
+					.setColor(new Color((float)Math.random(),(float)Math.random(),(float)Math.random()))
+					.setVelocity(0.1f, -0.12f)
+					.setLayer(1)
+					.setPriority(i);
 
 			add(enemy);
 		}
@@ -278,9 +282,11 @@ public class App extends JPanel implements Runnable, KeyListener {
 		g.setColor(Color.DARK_GRAY);
 		g.drawRect(o.x+o.width+2, o.y, 80, 60);
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+12);
-		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + 24);
-		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + 36);
+		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y+(12*1));
+		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+(12*2));
+		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12*3));
+		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12*4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12*5));
 	}
 
 	/**
@@ -305,7 +311,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	 */
 	private void drawToScreen() {
 		Graphics g2 = this.getGraphics();
-		g2.drawImage(buffer, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
+		g2.drawImage(buffer, 0, 0, (int)(WIDTH * SCALE), (int)(HEIGHT * SCALE), null);
 		g2.dispose();
 	}
 
@@ -457,7 +463,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 						break;
 					case "s":
 					case "scale":
-						SCALE = Integer.parseInt(argSplit[1]);
+						SCALE = Float.parseFloat(argSplit[1]);
 						break;
 					}
 				}
@@ -475,7 +481,9 @@ public class App extends JPanel implements Runnable, KeyListener {
 		App app = new App("MyApp");
 
 		app.parseArgs(args);
-		Dimension dim = new Dimension(App.WIDTH * App.SCALE, App.HEIGHT * App.SCALE);
+		Dimension dim = new Dimension(
+				(int)(App.WIDTH * App.SCALE), 
+				(int)(App.HEIGHT * App.SCALE));
 
 		JFrame frame = new JFrame(app.getTitle());
 

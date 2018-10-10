@@ -62,8 +62,10 @@ import java.awt.image.BufferedImage;
  * object to the rendering pipeline.
  * </ul>
  * <p>
- * And some useful {@link GameObject#builder(String)} and accessors to create easily new <code>GameObject</code>, like
- * {@link GameObject#setPosition(int, int)} or {@link GameObject#setVelocity(float, float)}.
+ * And some useful {@link GameObject#builder(String)} and accessors to create
+ * easily new <code>GameObject</code>, like
+ * {@link GameObject#setPosition(int, int)} or
+ * {@link GameObject#setVelocity(float, float)}.
  * </p>
  * 
  */
@@ -146,6 +148,13 @@ public class GameObject {
 		return this;
 	}
 
+	/**
+	 * Set the velocity for this `GameObject`.
+	 * 
+	 * @param dx
+	 * @param dy
+	 * @return
+	 */
 	public GameObject setVelocity(float dx, float dy) {
 		this.dx = dx;
 		this.dy = dy;
@@ -178,8 +187,36 @@ public class GameObject {
 		return this;
 	}
 
+	/**
+	 * Set the Drawin color for this `GameObject`.
+	 * 
+	 * @param color
+	 * @return
+	 */
 	public GameObject setColor(Color color) {
 		this.color = color;
+		return this;
+	}
+
+	/**
+	 * Set the rendering layer for this `GameObject`.
+	 * 
+	 * @param layer
+	 * @return
+	 */
+	public GameObject setLayer(int layer) {
+		this.layer = layer;
+		return this;
+	}
+
+	/**
+	 * Set the rendering priority in the pipe for this `GameObject`.
+	 * 
+	 * @param priority
+	 * @return
+	 */
+	public GameObject setPriority(int priority) {
+		this.priority = priority;
 		return this;
 	}
 
@@ -192,4 +229,5 @@ public class GameObject {
 	public static GameObject builder(String name) {
 		return new GameObject(name);
 	}
+
 }
