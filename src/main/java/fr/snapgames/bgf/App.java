@@ -17,9 +17,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.ResourceBundle;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
@@ -28,135 +28,17 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
- * a Simple App.
- *
+ * a Simple Application as a Basic Game framework.
+ * 
+ * @author Frédéric Delorme.
+ * @year 2018
+ * @see https://github.com/snapgames/basic-game-framwork/wiki
  */
 public class App extends JPanel implements Runnable, KeyListener {
 
-	private static final Logger logger = Logger.getLogger(App.class.getCanonicalName());
-
-	/**
-	 * Internal object amanged by the {@link App}.
-	 */
-	public class GameObject {
-
-		public int id;
-		public String name;
-
-		public int layer = 0;
-		public int priority = 0;
-
-		public int x = 0, y = 0, width = 16, height = 16;
-
-		public float dx = 0, dy = 0;
-		public float friction = 0.13f;
-		public float elasticity = 0.98f;
-
-		public BufferedImage image;
-		public Color color;
-
-		public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
-
-		/**
-		 * Create a new Gobject.
-		 * 
-		 * @param name
-		 */
-		public GameObject(String name) {
-			this.name = name;
-		}
-
-		/**
-		 * Create a new GObject with parameters !
-		 * 
-		 * @param name
-		 * @param x
-		 * @param y
-		 * @param image
-		 */
-		public GameObject(String name, int x, int y, BufferedImage image) {
-			this(name);
-			setPosition(x, y);
-		}
-
-		/**
-		 * compute object mechanism.
-		 * 
-		 * @param dt
-		 */
-		public void update(long dt) {
-			setPosition((int) (x + (dx * dt)), (int) (y + (dy * dt)));
-		}
-
-		/**
-		 * Draw object to buffer.
-		 * 
-		 * @param g
-		 */
-		public void render(Graphics2D g) {
-			if (image != null) {
-				g.drawImage(image, x, y, null);
-			} else {
-				g.setColor(color);
-				g.fillRect(x, y, width, height);
-			}
-		}
-
-		/**
-		 * Set Position.
-		 * 
-		 * @param x
-		 * @param y
-		 * @return
-		 */
-		public GameObject setPosition(int x, int y) {
-			this.x = x;
-			this.y = y;
-			boundingBox.x = x;
-			boundingBox.x = y;
-			return this;
-		}
-
-		public GameObject setVelocity(float dx, float dy) {
-			this.dx = dx;
-			this.dy = dy;
-			return this;
-		}
-
-		/**
-		 * Set size.
-		 * 
-		 * @param width
-		 * @param height
-		 * @return
-		 */
-		public GameObject setSize(int width, int height) {
-			this.width = width;
-			this.height = height;
-			boundingBox.width = width;
-			boundingBox.height = height;
-			return this;
-		}
-
-		/**
-		 * Set image
-		 * 
-		 * @param image
-		 * @return
-		 */
-		public GameObject setImage(BufferedImage image) {
-			this.image = image;
-			return this;
-		}
-
-		public GameObject setColor(Color color) {
-			this.color = color;
-			return this;
-		}
-
-	}
-
 	private static final long serialVersionUID = 2924281870738631982L;
+
+	private static final Logger logger = Logger.getLogger(App.class.getCanonicalName());
 
 	/**
 	 * default path to store image captures.
@@ -214,7 +96,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	/**
 	 * GameObject list managed by the game.
 	 */
-	private Map<String, GameObject> objects = new ConcurrentHashMap<String, App.GameObject>(50);
+	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>(50);
 	/**
 	 * List of object to be rendered.
 	 */
@@ -228,7 +110,10 @@ public class App extends JPanel implements Runnable, KeyListener {
 	public App(String title) {
 		super();
 		this.title = title;
+		this.addKeyListener(this);
+
 		this.thread = new Thread(this);
+
 	}
 
 	/**
@@ -251,15 +136,20 @@ public class App extends JPanel implements Runnable, KeyListener {
 		dbgFont = g.getFont().deriveFont(9.0f);
 		this.addKeyListener(this);
 
-		GameObject player = new GameObject("player");
-		player.setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.2f, 0.2f);
+		GameObject player = GameObject.builder("player")
+				.setSize(24, 24)
+				.setPosition(0, 0)
+				.setColor(Color.GREEN)
+				.setVelocity(0.2f, 0.2f);
 
 		add(player);
 
 		for (int i = 0; i < 10; i++) {
-			GameObject enemy = new GameObject("enemy_" + i);
-			enemy.setSize(16, 16).setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
-					.setColor(Color.RED).setVelocity(0.1f, -0.12f);
+			GameObject enemy = GameObject.builder("enemy_" + i)
+					.setSize(16, 16)
+					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
+					.setColor(Color.RED)
+					.setVelocity(0.1f, -0.12f);
 
 			add(enemy);
 		}
@@ -364,7 +254,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 		for (GameObject o : renderingList) {
 			o.render(g);
 			if (debug > 0) {
-				renderDebugInfo(g, o);
+				renderObjectDebugInfo(g, o);
 			}
 		}
 
@@ -381,14 +271,16 @@ public class App extends JPanel implements Runnable, KeyListener {
 		drawDebugInformation(g);
 	}
 
-	private void renderDebugInfo(Graphics2D g, GameObject o) {
+	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
 		g.setFont(dbgFont);
+		g.setColor(new Color(0.1f,0.1f,0.1f,0.80f));
+		g.fillRect(o.x+o.width+2, o.y, 80, 60);
+		g.setColor(Color.DARK_GRAY);
+		g.drawRect(o.x+o.width+2, o.y, 80, 60);
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y);
-		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + 12);
-		g.drawString(String.format("vel:%03f,%03f", o.dx, o.dy), o.x + o.width + 4, o.y + 24);
-		g.drawString(String.format("L:%d,%d", o.layer, o.priority), o.x + o.width + 4, o.y + 36);
-
+		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+12);
+		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + 24);
+		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + 36);
 	}
 
 	/**
@@ -466,6 +358,16 @@ public class App extends JPanel implements Runnable, KeyListener {
 			this.pause = !pause;
 			logger.fine(String.format("Pause reuqest %b", this.pause));
 		}
+		
+		/**
+		 * Write a screenshot to User home folder.
+		 */
+		if(keys[KeyEvent.VK_S]) {
+			pause=true;
+			screenshot(buffer);
+			pause=false;
+		}
+		
 	}
 
 	/**
@@ -488,7 +390,7 @@ public class App extends JPanel implements Runnable, KeyListener {
 	}
 
 	/**
-	 * get the last event from keyevent queue.
+	 * get the last event from the KeyEvent queue.
 	 * 
 	 * @return KeyEvent
 	 */
@@ -586,7 +488,6 @@ public class App extends JPanel implements Runnable, KeyListener {
 		frame.setMaximumSize(dim);
 		frame.setMinimumSize(dim);
 		frame.setResizable(false);
-
 		frame.addKeyListener(app);
 		frame.pack();
 
