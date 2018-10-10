@@ -1,4 +1,4 @@
-package com.ge.healthcare.dose.services;
+package fr.snapgames.bgf.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

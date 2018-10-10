@@ -1,0 +1,10 @@
+
+# SnapGames 2018
+# Basic Game Framework
+#
+language: java
+jdk:
+  - oraclejdk8
+
+#before_install:
+#  - Command to execute before install

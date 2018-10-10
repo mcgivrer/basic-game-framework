@@ -7,7 +7,18 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "com.ge.healthcare.dose.services.App",
+            "mainClass": "fr.snapgames.bgf.test.App",
+            "args": "",
+            "projectName": "basic-game-framework"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - App",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "fr.snapgames.bgf.test.App",
             "args": "",
             "projectName": "docker-sample-service"
         }
