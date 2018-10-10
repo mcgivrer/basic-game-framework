@@ -14,7 +14,6 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +77,7 @@ public class App extends JPanel implements KeyListener {
 	private long FPS = 60;
 	private long timeFrame = (long) (1000 / FPS);
 	private long realFPS = 0;
-	
+
 	private int score = 0;
 
 	/**
@@ -102,9 +101,8 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private List<GameObject> renderingList = new CopyOnWriteArrayList<GameObject>();
 
-	
 	private UIText scoreUI;
-	
+
 	private Font scoreFont;
 
 	/**
@@ -159,9 +157,15 @@ public class App extends JPanel implements KeyListener {
 	private void createGameObjects(String baseName, int nbEnemies) {
 		pauseRendering = true;
 		for (int i = 0; i < 10; i++) {
-			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
-					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT)).setColor(randomColor())
-					.setVelocity(0.1f, -0.12f).setPriority(i).setLayer(1).setElasticity(0.98f).setFriction(0.98f);
+			GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
+					.setSize(16, 16)
+					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
+					.setColor(randomColor())
+					.setVelocity((float) (Math.random() * 0.2f)-0.1f, (float) (Math.random() * 0.2f)-0.1f)
+					.setPriority(i)
+					.setLayer(1)
+					.setElasticity(0.98f)
+					.setFriction(0.98f);
 			add(enemy);
 		}
 		pauseRendering = false;
@@ -182,13 +186,17 @@ public class App extends JPanel implements KeyListener {
 	 * @param nameFilter
 	 * @param i
 	 */
-	private void removeGameObjects(String nameFilter, int i) {
+	private void removeGameObjects(String nameFilter, int nbToRemove) {
 		List<GameObject> toBeRemoved = new ArrayList<>();
 		pauseRendering = true;
 		for (Entry<String, GameObject> o : objects.entrySet()) {
 			if (o.getValue().name.contains(nameFilter)) {
 				toBeRemoved.add(o.getValue());
+				nbToRemove--;
 				objects.remove(o.getKey());
+				if(nbToRemove==0) {
+					break;
+				}
 			}
 		}
 		renderingList.removeAll(toBeRemoved);
@@ -247,7 +255,7 @@ public class App extends JPanel implements KeyListener {
 			constrains(entry.getValue());
 		}
 		score++;
-		scoreUI.setText(String.format("%05d",score));
+		scoreUI.setText(String.format("%05d", score));
 	}
 
 	/**
@@ -475,13 +483,13 @@ public class App extends JPanel implements KeyListener {
 	public void add(GameObject go) {
 		objects.put(go.name, go);
 		renderingList.add(go);
-		pauseRendering=true;
+		pauseRendering = true;
 		renderingList.sort(new Comparator<GameObject>() {
 			public int compare(GameObject o1, GameObject o2) {
 				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
 			}
 		});
-		pauseRendering=false;
+		pauseRendering = false;
 	}
 
 	/**
