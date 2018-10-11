@@ -7,20 +7,14 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "fr.snapgames.bgf.test.App",
-            "args": "",
+            "mainClass": "fr.snapgames.bgf.App",
+            "args": [
+                "d=2",
+                "w=320",
+                "h=200",
+                "s=2.5"
+            ],
             "projectName": "basic-game-framework"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - App",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "stopOnEntry": false,
-            "mainClass": "fr.snapgames.bgf.test.App",
-            "args": "",
-            "projectName": "docker-sample-service"
         }
     ]
 }
