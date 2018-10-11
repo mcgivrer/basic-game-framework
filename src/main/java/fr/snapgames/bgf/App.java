@@ -349,11 +349,11 @@ public class App extends JPanel implements KeyListener {
 		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
 				(debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
 		// int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
-		int dbgStringHeight = g.getFontMetrics().getHeight();
+		int dbgStringHeight = g.getFontMetrics().getHeight()+4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - 48, WIDTH, 48);
+		g.fillRect(0, HEIGHT - dbgStringHeight, WIDTH, dbgStringHeight);
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 8, HEIGHT - 48 + dbgStringHeight);
+		g.drawString(debugString, 4, HEIGHT-(dbgStringHeight/2)+2);
 	}
 
 	/**
@@ -427,7 +427,12 @@ public class App extends JPanel implements KeyListener {
 		case KeyEvent.VK_DOWN:
 			removeGameObjects("enemy_", 10);
 			break;
+		case KeyEvent.VK_DELETE:
+			removeGameObjects("enemy_", objects.size());
+			break;
+
 		/**
+		 * 
 		 * Write a screenshot to User home folder.
 		 */
 		case KeyEvent.VK_S:
@@ -554,10 +559,6 @@ public class App extends JPanel implements KeyListener {
 		App app = new App("MyApp");
 		app.parseArgs(args);
 
-    Dimension dim = new Dimension(
-				(int)(App.WIDTH * App.SCALE), 
-				(int)(App.HEIGHT * App.SCALE));
-
 		JFrame frame = new JFrame(app.getTitle());
 		// fix a platform linked issue about window sizing.
 		Insets insets = frame.getInsets();
@@ -567,6 +568,7 @@ public class App extends JPanel implements KeyListener {
 		final int fWidth = (int) (App.WIDTH * App.SCALE) + addedWidth;
 		final int fHeight = (int) (App.HEIGHT * App.SCALE) + addedHeight;
 
+		Dimension dim = new Dimension(fWidth,fHeight);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(app);
 		frame.setLayout(new BorderLayout());
