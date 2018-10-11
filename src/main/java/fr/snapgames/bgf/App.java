@@ -95,7 +95,7 @@ public class App extends JPanel implements KeyListener {
 	/**
 	 * GameObject list managed by the game.
 	 */
-	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>(2000);
+	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>();
 	/**
 	 * List of object to be rendered.
 	 */
