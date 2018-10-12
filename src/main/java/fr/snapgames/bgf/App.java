@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,6 +41,18 @@ public class App extends JPanel implements KeyListener {
 	private static final long serialVersionUID = 2924281870738631982L;
 
 	private static final Logger logger = Logger.getLogger(App.class.getCanonicalName());
+
+	/**
+	 * This an enum listing all possibe input actions
+	 */
+	private enum KeyBinding {
+		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FN1, FN2, FN3, SCREENSHOT, RESET;
+	}
+
+	/**
+	 * Map for keybinding.
+	 */
+	private Map<KeyBinding, Integer> keyBinding = new HashMap<>();
 
 	/**
 	 * default path to store image captures.
@@ -74,7 +87,7 @@ public class App extends JPanel implements KeyListener {
 	private Graphics2D g;
 	private Rectangle viewport;
 
-	private long FPS = 60;
+	private static long FPS = 60;
 	private long timeFrame = (long) (1000 / FPS);
 	private long realFPS = 0;
 
@@ -99,7 +112,7 @@ public class App extends JPanel implements KeyListener {
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameObject> renderingList = new CopyOnWriteArrayList<GameObject>();
+	private List<GameObject> renderingList = new ArrayList<GameObject>();
 
 	private UIText scoreUI;
 
@@ -114,6 +127,26 @@ public class App extends JPanel implements KeyListener {
 		super();
 		this.title = title;
 		this.addKeyListener(this);
+		prepareKeyBinding();
+	}
+
+	private void prepareKeyBinding() {
+		keyBinding.clear();
+		keyBinding.put(KeyBinding.UP, KeyEvent.VK_UP);
+		keyBinding.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
+		keyBinding.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
+		keyBinding.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
+
+		keyBinding.put(KeyBinding.FIRE1, KeyEvent.VK_PAGE_UP);
+		keyBinding.put(KeyBinding.FIRE2, KeyEvent.VK_PAGE_DOWN);
+		keyBinding.put(KeyBinding.FIRE3, KeyEvent.VK_SPACE);
+
+		keyBinding.put(KeyBinding.SCREENSHOT, KeyEvent.VK_S);
+		keyBinding.put(KeyBinding.PAUSE, KeyEvent.VK_P);
+		keyBinding.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
+		keyBinding.put(KeyBinding.DEBUG, KeyEvent.VK_D);
+		keyBinding.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
+
 	}
 
 	/**
@@ -131,14 +164,14 @@ public class App extends JPanel implements KeyListener {
 	public void initialize() {
 		buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		g = (Graphics2D) buffer.getGraphics();
-		viewport = new Rectangle(WIDTH, HEIGHT);
+		viewport = new Rectangle(buffer.getWidth(), buffer.getHeight());
 
 		dbgFont = g.getFont().deriveFont(9.0f);
 		scoreFont = g.getFont().deriveFont(16.0f);
 		this.addKeyListener(this);
 
 		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f);
+				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
 		add(scoreUI);
 
 		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
@@ -157,15 +190,10 @@ public class App extends JPanel implements KeyListener {
 	private void createGameObjects(String baseName, int nbEnemies) {
 		pauseRendering = true;
 		for (int i = 0; i < 10; i++) {
-			GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
-					.setSize(16, 16)
-					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT))
-					.setColor(randomColor())
-					.setVelocity((float) (Math.random() * 0.2f)-0.1f, (float) (Math.random() * 0.2f)-0.1f)
-					.setPriority(i)
-					.setLayer(1)
-					.setElasticity(0.98f)
-					.setFriction(0.98f);
+			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
+					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT)).setColor(randomColor())
+					.setVelocity((float) (Math.random() * 0.2f) - 0.1f, (float) (Math.random() * 0.2f) - 0.1f)
+					.setPriority(i).setLayer(1).setElasticity(0.98f).setFriction(0.98f);
 			add(enemy);
 		}
 		pauseRendering = false;
@@ -181,7 +209,9 @@ public class App extends JPanel implements KeyListener {
 	}
 
 	/**
-	 * Remove GameObject from App where name contains with nameFilter
+	 * Remove {@link GameObject} from the {@link App} where name contains with
+	 * nameFilter if nbToRemove equals -1, all corresponding
+	 * <code>nameFilter</code>ed object will be removed.
 	 * 
 	 * @param nameFilter
 	 * @param i
@@ -192,15 +222,17 @@ public class App extends JPanel implements KeyListener {
 		for (Entry<String, GameObject> o : objects.entrySet()) {
 			if (o.getValue().name.contains(nameFilter)) {
 				toBeRemoved.add(o.getValue());
-				nbToRemove--;
 				objects.remove(o.getKey());
-				if(nbToRemove==0) {
+				if (nbToRemove == -1)
+					nbToRemove--;
+				if (nbToRemove == 0) {
 					break;
 				}
 			}
 		}
 		renderingList.removeAll(toBeRemoved);
 		pauseRendering = false;
+
 	}
 
 	/**
@@ -217,6 +249,7 @@ public class App extends JPanel implements KeyListener {
 		while (!exit) {
 			current = System.currentTimeMillis();
 			if (!pause) {
+				input();
 				update(elapsed);
 			}
 			if (!pauseRendering) {
@@ -245,6 +278,20 @@ public class App extends JPanel implements KeyListener {
 	}
 
 	/**
+	 * <p>
+	 * Where the is an opportunity to manage async user input:
+	 * </p>
+	 * <ul>
+	 * <li>player movement (all directional keys (up, down, left, right) but also
+	 * joypads or joystick (e.g. jinput)</li>
+	 * <li>mulitple firing keys</li>
+	 * </ul>
+	 */
+	private void input() {
+
+	}
+
+	/**
 	 * Update the game mechanism.
 	 * 
 	 * @param elapsed
@@ -264,20 +311,17 @@ public class App extends JPanel implements KeyListener {
 	 * @param o
 	 */
 	private void constrains(GameObject o) {
-		if (!this.viewport.contains(o.boundingBox)) {
-			if (o.x + o.width > viewport.width || o.x < 0) {
-				o.dx = -o.dx * o.friction * o.elasticity;
-			}
-			if (o.y + o.height > viewport.height || o.y < 0) {
-				o.dy = -o.dy * o.friction * o.elasticity;
-			}
-			if (Math.abs(o.dx) < 0.01f) {
-				o.dx = 0.0f;
-			}
-			if (Math.abs(o.dy) < 0.01f) {
-				o.dy = 0.0f;
-			}
-
+		if (o.x + o.width > viewport.width || o.x < 0) {
+			o.dx = -o.dx * o.friction * o.elasticity;
+		}
+		if (o.y + o.height > viewport.height || o.y < 0) {
+			o.dy = -o.dy * o.friction * o.elasticity;
+		}
+		if (Math.abs(o.dx) < 0.01f) {
+			o.dx = 0.0f;
+		}
+		if (Math.abs(o.dy) < 0.01f) {
+			o.dy = 0.0f;
 		}
 	}
 
@@ -298,7 +342,7 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private void render(Graphics2D g) {
 
-		// prepare pipeline antialiasing.
+		// prepare pipeline anti-aliasing.
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -325,18 +369,28 @@ public class App extends JPanel implements KeyListener {
 		}
 	}
 
+	/**
+	 * Render debug information for the object <code>o</code> to the Graphics2D
+	 * <code>g</code>.
+	 * 
+	 * @param g the Graphics2D to render things.
+	 * @param o the object to be debugged.
+	 */
 	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
 		g.setFont(dbgFont);
+		
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
 		g.fillRect(o.x + o.width + 2, o.y, 80, 60);
+		
 		g.setColor(Color.DARK_GRAY);
 		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
+		
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("name:%s", o.name), o.x + o.width + 4, o.y+(12*1));
-		g.drawString(String.format("pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y+(12*2));
-		g.drawString(String.format("size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12*3));
-		g.drawString(String.format("vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12*4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12*5));
+		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
+		g.drawString(String.format("Pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
+		g.drawString(String.format("Size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
 	}
 
 	/**
@@ -348,25 +402,24 @@ public class App extends JPanel implements KeyListener {
 		g.setFont(dbgFont);
 		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
 				(debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
-		// int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
-		int dbgStringHeight = g.getFontMetrics().getHeight()+4;
+		int dbgStringHeight = g.getFontMetrics().getHeight() + 4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - dbgStringHeight, WIDTH, dbgStringHeight);
+		g.fillRect(0, HEIGHT - 32, WIDTH, 32);
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT-(dbgStringHeight/2)+2);
+		g.drawString(debugString, 4, HEIGHT - 24);
 	}
 
 	/**
-	 * Draw graphic Buffer to screen.
+	 * Draw graphic Buffer to screen with the appropriate scaling.
 	 */
 	private void drawToScreen() {
 		Graphics g2 = this.getGraphics();
-		g2.drawImage(buffer, 0, 0, (int)(WIDTH * SCALE), (int)(HEIGHT * SCALE), null);
+		g2.drawImage(buffer, 0, 0, (int) (WIDTH * SCALE), (int) (HEIGHT * SCALE), null);
 		g2.dispose();
 	}
 
 	/**
-	 * Retrieve the label from messages.properties file correspondong to
+	 * Retrieve the label from messages.properties file corresponding to
 	 * <code>key</code> value.
 	 * 
 	 * @param key the key of the label from messages.properties.
@@ -402,40 +455,53 @@ public class App extends JPanel implements KeyListener {
 		keys[e.getKeyCode()] = false;
 		logger.fine(e.getKeyCode() + " has been released");
 
-		switch (e.getKeyCode()) {
+		for (KeyBinding keyBind : keyBinding.keySet()) {
+			if (e.getKeyCode() == keyBinding.get(keyBind)) {
+				action(keyBind);
+			}
+		}
+	}
+
+	private void action(KeyBinding keyBind) {
+		switch (keyBind) {
 		/**
 		 * process the exit request.
 		 */
-		case KeyEvent.VK_ESCAPE:
+		case QUIT:
 			this.exit = true;
 			logger.fine("Request exiting");
 			break;
 		/**
 		 * process the pause request.
 		 */
-		case KeyEvent.VK_PAUSE:
-		case KeyEvent.VK_P:
+		case PAUSE:
 			this.pause = !pause;
 			logger.fine(String.format("Pause reuqest %b", this.pause));
 			break;
 		/**
 		 * Manage Enemies set.
 		 */
-		case KeyEvent.VK_UP:
+		case UP:
 			createGameObjects("enemy_", 10);
 			break;
-		case KeyEvent.VK_DOWN:
+		case DOWN:
 			removeGameObjects("enemy_", 10);
 			break;
-		case KeyEvent.VK_DELETE:
+		case DELETE:
 			removeGameObjects("enemy_", objects.size());
 			break;
 
 		/**
+		 * remove all enemies
+		 */
+		case RESET:
+			removeGameObjects("enemy_", 0);
+			break;
+		/**
 		 * 
 		 * Write a screenshot to User home folder.
 		 */
-		case KeyEvent.VK_S:
+		case SCREENSHOT:
 			pause = true;
 			screenshot(buffer);
 			pause = false;
@@ -444,11 +510,12 @@ public class App extends JPanel implements KeyListener {
 		/**
 		 * Manage Debug level.
 		 */
-		case KeyEvent.VK_D:
+		case DEBUG:
 			debug = (debug < 5 ? debug + 1 : 0);
 			break;
+		default:
+			break;
 		}
-
 	}
 
 	/**
@@ -535,18 +602,29 @@ public class App extends JPanel implements KeyListener {
 					case "height":
 						HEIGHT = Integer.parseInt(argSplit[1]);
 						break;
-					case "d":
-					case "debug":
-						debug = Integer.parseInt(argSplit[1]);
-						break;
 					case "s":
 					case "scale":
 						SCALE = Float.parseFloat(argSplit[1]);
+						break;
+					case "d":
+					case "debug":
+						debug = (Integer.parseInt(argSplit[1]) < 5 && Integer.parseInt(argSplit[1]) >= 0
+								? Integer.parseInt(argSplit[1])
+								: 0);
+						break;
+					case "f":
+					case "fps":
+						setFPS(Integer.parseInt(argSplit[1]));
 						break;
 					}
 				}
 			}
 		}
+	}
+
+	private void setFPS(long fps) {
+		FPS = fps;
+		timeFrame = (long) (1000 / FPS);
 	}
 
 	/**
@@ -560,6 +638,7 @@ public class App extends JPanel implements KeyListener {
 		app.parseArgs(args);
 
 		JFrame frame = new JFrame(app.getTitle());
+
 		// fix a platform linked issue about window sizing.
 		Insets insets = frame.getInsets();
 		int addedWidth = insets.left + insets.right;
@@ -568,7 +647,8 @@ public class App extends JPanel implements KeyListener {
 		final int fWidth = (int) (App.WIDTH * App.SCALE) + addedWidth;
 		final int fHeight = (int) (App.HEIGHT * App.SCALE) + addedHeight;
 
-		Dimension dim = new Dimension(fWidth,fHeight);
+		Dimension dim = new Dimension(fWidth, fHeight);
+
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(app);
 		frame.setLayout(new BorderLayout());
