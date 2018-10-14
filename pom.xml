@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>fr.snapgames.app</groupId>
   <artifactId>basic-game-framework</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Basic Game Framework</name>
@@ -38,12 +39,12 @@
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/snapgames/basic-game-framework/issues</url>
+    <url>https://github.com/snapgames/dss/issues</url>
   </issueManagement>
 
   <ciManagement>
     <system>Travis CI</system>
-    <url>https://travis-ci.org/snapgames/basic-game-framework</url>
+    <url>https://travis-ci.org/snapgames/dss</url>
     <notifiers>
       <notifier>
         <type>mail</type>
@@ -59,10 +60,9 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:git:git@github.com:snapgames/basic-game-framework.git</connection>
-    <developerConnection>scm:git:git@github.com:snapgames/basic-game-framework.git</developerConnection>
-    <url>scm:git:https://github.com/snapgames/basic-game-framework</url>
-    <tag>basic-game-framework-0.0.1</tag>
+    <connection>scm:git:git@github.com:snapgames/dss.git</connection>
+    <developerConnection>scm:git:git@github.com:snapgames/dss.git</developerConnection>
+    <url>scm:git:https://github.com/snapgames/dss</url>
   </scm>
 
   <properties>
