@@ -244,6 +244,22 @@ public class App extends JPanel implements KeyListener {
 		System.exit(0);
 	}
 
+
+	private void input(){
+		if (keys[KeyEvent.VK_UP]) {
+
+		}
+		if (keys[KeyEvent.VK_DOWN]) {
+
+		}
+		if (keys[KeyEvent.VK_LEFT]) {
+
+		}
+		if (keys[KeyEvent.VK_RIGHT]) {
+
+		}
+	}
+
 	/**
 	 * Update the game mechanism.
 	 * 
@@ -351,9 +367,9 @@ public class App extends JPanel implements KeyListener {
 		// int dbgStringWidth = g.getFontMetrics().stringWidth(debugString);
 		int dbgStringHeight = g.getFontMetrics().getHeight()+4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - dbgStringHeight, WIDTH, dbgStringHeight);
+		g.fillRect(0, HEIGHT - (dbgStringHeight+8), WIDTH, (dbgStringHeight+8));
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT-(dbgStringHeight/2)+2);
+		g.drawString(debugString, 4, HEIGHT-dbgStringHeight+2);
 	}
 
 	/**
@@ -421,10 +437,10 @@ public class App extends JPanel implements KeyListener {
 		/**
 		 * Manage Enemies set.
 		 */
-		case KeyEvent.VK_UP:
+		case KeyEvent.VK_PAGE_UP:
 			createGameObjects("enemy_", 10);
 			break;
-		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_PAGE_DOWN:
 			removeGameObjects("enemy_", 10);
 			break;
 		case KeyEvent.VK_DELETE:
