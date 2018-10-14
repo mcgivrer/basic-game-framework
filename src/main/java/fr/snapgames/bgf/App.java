@@ -42,11 +42,6 @@ public class App extends JPanel implements KeyListener {
 	private static final Logger logger = Logger.getLogger(App.class.getCanonicalName());
 
 	/**
-	 * default path to store image captures.
-	 */
-	private static String path = System.getProperty("user.home");
-
-	/**
 	 * Game display size and scale.
 	 */
 	public static int WIDTH = 320;
@@ -101,11 +96,16 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private List<GameObject> renderingList = new CopyOnWriteArrayList<GameObject>();
 
-  private GameObject player; 
+	private GameObject player; 
 
 	private UIText scoreUI;
 
 	private Font scoreFont;
+
+	/**
+	 * default path to store image captures.
+	 */
+	private static String path = System.getProperty("user.home");
 
 	/**
 	 * Create a new Application with <code>title</code> as main title.
@@ -470,8 +470,10 @@ public class App extends JPanel implements KeyListener {
 		case KeyEvent.VK_D:
 			debug = (debug < 5 ? debug + 1 : 0);
 			break;
-		}
 
+		default:
+			break;
+		}
 	}
 
 	/**
