@@ -133,10 +133,10 @@
           <mainClass>${project.mainClass}</mainClass>
           <arguments>
             <!-- to be soon interpreted by a CLI impl. -->
-            <argument>d=1</argument>
+            <argument>d=2</argument>
             <argument>w=320</argument>
             <argument>h=200</argument>
-            <argument>s=2</argument>
+            <argument>s=2.5</argument>
           </arguments>
         </configuration>
       </plugin>

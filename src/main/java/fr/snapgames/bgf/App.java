@@ -75,7 +75,7 @@ public class App extends JPanel implements KeyListener {
 	private Rectangle viewport;
 
 	private long FPS = 60;
-	private long timeFrame = (long) (1000 / FPS);
+	private long timeFrame = (1000 / FPS);
 	private long realFPS = 0;
 
 	private int score = 0;
@@ -100,6 +100,8 @@ public class App extends JPanel implements KeyListener {
 	 * List of object to be rendered.
 	 */
 	private List<GameObject> renderingList = new CopyOnWriteArrayList<GameObject>();
+
+  private GameObject player; 
 
 	private UIText scoreUI;
 
@@ -141,8 +143,8 @@ public class App extends JPanel implements KeyListener {
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f);
 		add(scoreUI);
 
-		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
-				.setVelocity(0.2f, 0.2f).setLayer(2).setPriority(0).setElasticity(0.98f).setFriction(0.98f);
+		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.0f, 0.0f).setLayer(2).setPriority(0).setElasticity(0.98f).setFriction(0.98f);
 		add(player);
 
 		createGameObjects("enemy_", 10);
@@ -217,6 +219,7 @@ public class App extends JPanel implements KeyListener {
 		while (!exit) {
 			current = System.currentTimeMillis();
 			if (!pause) {
+				input();
 				update(elapsed);
 			}
 			if (!pauseRendering) {
@@ -246,17 +249,20 @@ public class App extends JPanel implements KeyListener {
 
 
 	private void input(){
-		if (keys[KeyEvent.VK_UP]) {
+		player.dy *= player.friction;
+		player.dx *= player.friction;
 
-		}
-		if (keys[KeyEvent.VK_DOWN]) {
-
-		}
 		if (keys[KeyEvent.VK_LEFT]) {
-
+			player.dx = -0.1f;
 		}
 		if (keys[KeyEvent.VK_RIGHT]) {
-
+			player.dx = 0.1f;
+		}
+		if (keys[KeyEvent.VK_UP]) {
+            player.dy=-0.1f;
+		}
+		if (keys[KeyEvent.VK_DOWN]) {
+            player.dy=0.1f;
 		}
 	}
 
@@ -423,6 +429,7 @@ public class App extends JPanel implements KeyListener {
 		 * process the exit request.
 		 */
 		case KeyEvent.VK_ESCAPE:
+		case KeyEvent.VK_Q:
 			this.exit = true;
 			logger.fine("Request exiting");
 			break;
