@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>fr.snapgames.app</groupId>
   <artifactId>basic-game-framework</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Basic Game Framework</name>
@@ -62,7 +63,6 @@
     <connection>scm:git:git@github.com:snapgames/dss.git</connection>
     <developerConnection>scm:git:git@github.com:snapgames/dss.git</developerConnection>
     <url>scm:git:https://github.com/snapgames/dss</url>
-    <tag>basic-game-framework-0.0.1</tag>
   </scm>
 
   <properties>
