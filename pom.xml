@@ -39,12 +39,12 @@
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/snapgames/dss/issues</url>
+    <url>https://github.com/snapgames/basic-game-framework/issues</url>
   </issueManagement>
 
   <ciManagement>
     <system>Travis CI</system>
-    <url>https://travis-ci.org/snapgames/dss</url>
+    <url>https://travis-ci.org/snapgames/basic-game-framework</url>
     <notifiers>
       <notifier>
         <type>mail</type>
@@ -60,9 +60,9 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:git:git@github.com:snapgames/dss.git</connection>
-    <developerConnection>scm:git:git@github.com:snapgames/dss.git</developerConnection>
-    <url>scm:git:https://github.com/snapgames/dss</url>
+    <connection>scm:git:git@github.com:snapgames/basic-game-framework.git</connection>
+    <developerConnection>scm:git:git@github.com:snapgames/basic-game-framework.git</developerConnection>
+    <url>scm:git:https://github.com/snapgames/basic-game-framework</url>
   </scm>
 
   <properties>
@@ -133,10 +133,10 @@
           <mainClass>${project.mainClass}</mainClass>
           <arguments>
             <!-- to be soon interpreted by a CLI impl. -->
-            <argument>d=1</argument>
+            <argument>d=2</argument>
             <argument>w=320</argument>
             <argument>h=200</argument>
-            <argument>s=2</argument>
+            <argument>s=2.5</argument>
           </arguments>
         </configuration>
       </plugin>

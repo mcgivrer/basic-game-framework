@@ -23,7 +23,6 @@ import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -87,8 +86,8 @@ public class App extends JPanel implements KeyListener {
 	private Graphics2D g;
 	private Rectangle viewport;
 
-	private static long FPS = 60;
-	private long timeFrame = (long) (1000 / FPS);
+	private long FPS = 60;
+	private long timeFrame = (1000 / FPS);
 	private long realFPS = 0;
 
 	private int score = 0;
@@ -113,6 +112,8 @@ public class App extends JPanel implements KeyListener {
 	 * List of object to be rendered.
 	 */
 	private List<GameObject> renderingList = new ArrayList<GameObject>();
+
+	private GameObject player; 
 
 	private UIText scoreUI;
 
@@ -174,8 +175,8 @@ public class App extends JPanel implements KeyListener {
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
 		add(scoreUI);
 
-		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
-				.setVelocity(0.2f, 0.2f).setLayer(2).setPriority(0).setElasticity(0.98f).setFriction(0.98f);
+		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.0f, 0.0f).setLayer(2).setPriority(0).setElasticity(0.98f).setFriction(0.98f);
 		add(player);
 
 		createGameObjects("enemy_", 10);
@@ -287,9 +288,24 @@ public class App extends JPanel implements KeyListener {
 	 * <li>mulitple firing keys</li>
 	 * </ul>
 	 */
-	private void input() {
+	private void input(){
+		player.dy *= player.friction;
+		player.dx *= player.friction;
 
+		if (keys[KeyEvent.VK_LEFT]) {
+			player.dx = -0.1f;
+		}
+		if (keys[KeyEvent.VK_RIGHT]) {
+			player.dx = 0.1f;
+		}
+		if (keys[KeyEvent.VK_UP]) {
+            player.dy=-0.1f;
+		}
+		if (keys[KeyEvent.VK_DOWN]) {
+            player.dy=0.1f;
+		}
 	}
+
 
 	/**
 	 * Update the game mechanism.
@@ -404,9 +420,9 @@ public class App extends JPanel implements KeyListener {
 				(debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
 		int dbgStringHeight = g.getFontMetrics().getHeight() + 4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - 32, WIDTH, 32);
+		g.fillRect(0, HEIGHT - (dbgStringHeight+8), WIDTH, (dbgStringHeight+8));
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - 24);
+		g.drawString(debugString, 4, HEIGHT-dbgStringHeight+2);
 	}
 
 	/**
@@ -487,10 +503,6 @@ public class App extends JPanel implements KeyListener {
 		case DOWN:
 			removeGameObjects("enemy_", 10);
 			break;
-		case DELETE:
-			removeGameObjects("enemy_", objects.size());
-			break;
-
 		/**
 		 * remove all enemies
 		 */
@@ -513,6 +525,7 @@ public class App extends JPanel implements KeyListener {
 		case DEBUG:
 			debug = (debug < 5 ? debug + 1 : 0);
 			break;
+
 		default:
 			break;
 		}
