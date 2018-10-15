@@ -42,10 +42,11 @@ public class App extends JPanel implements KeyListener {
 	private static final Logger logger = Logger.getLogger(App.class.getCanonicalName());
 
 	/**
-	 * This an enum listing all possibe input actions
+	 * This an enum listing all possible input actions
 	 */
 	private enum KeyBinding {
-		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FN1, FN2, FN3, SCREENSHOT, RESET;
+		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FN1, FN2, FN3, SCREENSHOT, RESET,
+		FULLSCREEN;
 	}
 
 	/**
@@ -76,6 +77,8 @@ public class App extends JPanel implements KeyListener {
 	private boolean exit = false;
 	private boolean pause = false;
 	private boolean pauseRendering = false;
+
+	private boolean fullScreen = false;
 	private int debug = 0;
 	private Font dbgFont;
 
@@ -85,6 +88,8 @@ public class App extends JPanel implements KeyListener {
 	private BufferedImage buffer;
 	private Graphics2D g;
 	private Rectangle viewport;
+
+	private Rectangle backupRectangle = new Rectangle();
 
 	private long FPS = 60;
 	private long timeFrame = (1000 / FPS);
@@ -113,11 +118,13 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private List<GameObject> renderingList = new ArrayList<GameObject>();
 
-	private GameObject player; 
+	private GameObject player;
 
 	private UIText scoreUI;
 
 	private Font scoreFont;
+
+	private JFrame frame;
 
 	/**
 	 * Create a new Application with <code>title</code> as main title.
@@ -147,6 +154,7 @@ public class App extends JPanel implements KeyListener {
 		keyBinding.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
 		keyBinding.put(KeyBinding.DEBUG, KeyEvent.VK_D);
 		keyBinding.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
+		keyBinding.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
 
 	}
 
@@ -288,24 +296,25 @@ public class App extends JPanel implements KeyListener {
 	 * <li>mulitple firing keys</li>
 	 * </ul>
 	 */
-	private void input(){
-		player.dy *= player.friction;
-		player.dx *= player.friction;
+	private void input() {
+		GameObject goPlayer = objects.get("player");
+
+		goPlayer.dy *= goPlayer.friction;
+		goPlayer.dx *= goPlayer.friction;
 
 		if (keys[KeyEvent.VK_LEFT]) {
-			player.dx = -0.1f;
+			goPlayer.dx = -0.1f;
 		}
 		if (keys[KeyEvent.VK_RIGHT]) {
-			player.dx = 0.1f;
+			goPlayer.dx = 0.1f;
 		}
 		if (keys[KeyEvent.VK_UP]) {
-            player.dy=-0.1f;
+			goPlayer.dy = -0.1f;
 		}
 		if (keys[KeyEvent.VK_DOWN]) {
-            player.dy=0.1f;
+			goPlayer.dy = 0.1f;
 		}
 	}
-
 
 	/**
 	 * Update the game mechanism.
@@ -394,13 +403,13 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
 		g.setFont(dbgFont);
-		
+
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
 		g.fillRect(o.x + o.width + 2, o.y, 80, 60);
-		
+
 		g.setColor(Color.DARK_GRAY);
 		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
-		
+
 		g.setColor(Color.GREEN);
 		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
 		g.drawString(String.format("Pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
@@ -420,9 +429,9 @@ public class App extends JPanel implements KeyListener {
 				(debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
 		int dbgStringHeight = g.getFontMetrics().getHeight() + 4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - (dbgStringHeight+8), WIDTH, (dbgStringHeight+8));
+		g.fillRect(0, HEIGHT - (dbgStringHeight + 8), WIDTH, (dbgStringHeight + 8));
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT-dbgStringHeight+2);
+		g.drawString(debugString, 4, HEIGHT - dbgStringHeight + 2);
 	}
 
 	/**
@@ -523,12 +532,41 @@ public class App extends JPanel implements KeyListener {
 		 * Manage Debug level.
 		 */
 		case DEBUG:
+
 			debug = (debug < 5 ? debug + 1 : 0);
 			break;
+
+		/**
+		 * Switch between window and fullscreen mode.
+		 */
+		case FULLSCREEN:
+
+			fullScreen = !fullScreen;
+			switchFullScreen(fullScreen);
 
 		default:
 			break;
 		}
+	}
+
+	private void switchFullScreen(boolean state) {
+		fullScreen=state;
+		//if(g.getDeviceConfiguration().getDevice().isFullScreenSupported()){
+			if(!fullScreen){
+				backupRectangle=frame.getBounds();
+				frame.setVisible(false);
+				frame.setAlwaysOnTop(true);
+				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+				frame.setUndecorated(true);
+				frame.setVisible(true);
+			}else{
+				frame.setVisible(false);
+				frame.setUndecorated(false);
+				frame.setAlwaysOnTop(false);
+				this.setFrameSize(backupRectangle);
+				frame.setVisible(true);
+			}
+		//}
 	}
 
 	/**
@@ -558,6 +596,21 @@ public class App extends JPanel implements KeyListener {
 	 */
 	public KeyEvent getKey() {
 		return keyQueue.poll();
+	}
+
+	/**
+	 * Set frame for this app.
+	 * 
+	 * @param frame
+	 */
+	private void setFrame(JFrame frame) {
+		this.frame = frame;
+		this.backupRectangle=this.frame.getBounds();
+	}
+
+	private void setFrameSize(Rectangle rect){
+		this.frame.setSize(rect.getSize());
+		this.frame.setLocation(rect.getLocation());
 	}
 
 	/**
@@ -629,6 +682,13 @@ public class App extends JPanel implements KeyListener {
 					case "fps":
 						setFPS(Integer.parseInt(argSplit[1]));
 						break;
+
+					case "k":
+						fullScreen = (argSplit[1].toLowerCase().equals("on") ? true : false);
+						switchFullScreen(fullScreen);
+						break;
+					default:
+						break;
 					}
 				}
 			}
@@ -649,7 +709,6 @@ public class App extends JPanel implements KeyListener {
 
 		App app = new App("MyApp");
 		app.parseArgs(args);
-
 		JFrame frame = new JFrame(app.getTitle());
 
 		// fix a platform linked issue about window sizing.
@@ -680,6 +739,8 @@ public class App extends JPanel implements KeyListener {
 		frame.pack();
 
 		frame.setVisible(true);
+
+		app.setFrame(frame);
 
 		app.run();
 	}
