@@ -24,6 +24,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -384,8 +385,9 @@ public class App extends JPanel implements KeyListener {
 			String pauseLabel = getLabel("app.label.pause");
 			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
+			g.setColor(Color.WHITE);
 			g.drawString(pauseLabel, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
-					(HEIGHT - g.getFontMetrics().getHeight()) / 2);
+					(HEIGHT + g.getFontMetrics().getHeight()) / 2);
 		}
 
 		// render debug information
@@ -698,6 +700,11 @@ public class App extends JPanel implements KeyListener {
 	private void setFPS(long fps) {
 		FPS = fps;
 		timeFrame = (long) (1000 / FPS);
+	}
+
+	public List<GameObject> getObjects(){
+		// List<Value> values = map.values().stream().collect(Collectors.toList());
+		return objects.values().stream().collect(Collectors.toList());
 	}
 
 	/**
