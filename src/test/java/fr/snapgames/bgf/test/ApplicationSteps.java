@@ -14,7 +14,7 @@ import fr.snapgames.bgf.App;
 import fr.snapgames.bgf.GameObject;
 
 /**
- * @author 212391884
+ * @author Fréédéric Delorme
  *
  */
 public class ApplicationSteps {
