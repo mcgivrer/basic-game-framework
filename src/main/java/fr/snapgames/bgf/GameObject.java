@@ -252,4 +252,15 @@ public class GameObject {
 		return new GameObject(name);
 	}
 
+	@Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder()
+		.append("GameObject{")
+		.append("name='").append(name).append("'")
+		.append(",layer=").append(layer)
+		.append(",priority=").append(priority)
+		.append("}");
+		return builder.toString();
+	}
+
 }
