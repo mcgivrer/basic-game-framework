@@ -4,7 +4,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import fr.snapgames.bgf.App;
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Unit test for simple App.
@@ -35,8 +34,7 @@ public class AppTest
      */
     public void testApp()
     {
-        App app = new App("My title");
-        assertTrue(app.getTitle().equals("My title"));
-        
+        App app = new App("My title", new String[]{});
+        assertTrue(app.getTitle().equals("My title"));        
     }
 }
