@@ -52,7 +52,7 @@ public class Window {
         this.app = app;
 
         try {
-            icon = ImageIO.read(new File(this.getClass().getResource("/").getPath() + iconpath));
+            icon = ImageIO.read(this.getClass().getResourceAsStream("/" + iconpath));
         } catch (IOException e) {
             logger.error("unableto read icon file {}", iconpath);
         }
