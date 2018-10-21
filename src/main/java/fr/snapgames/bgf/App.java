@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * a Simple Application as a Basic Game framework.
@@ -42,7 +42,7 @@ public class App extends JPanel implements KeyListener {
 
 	private static final long serialVersionUID = 2924281870738631982L;
 
-	private static final Logger logger = LoggerFactory.getLogger(App.class.getCanonicalName());
+	private static final Logger logger = LogManager.getLogger(App.class.getCanonicalName());
 
 	/**
 	 * This an enum listing all possible input actions

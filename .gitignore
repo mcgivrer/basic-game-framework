@@ -3,4 +3,7 @@
 /target
 .classpath
 .project
+.factorypath
+*.log
+logs/
 

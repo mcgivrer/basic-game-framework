@@ -13,12 +13,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Window {
 
-    private static final Logger logger = LoggerFactory.getLogger(Window.class);
+    private static final Logger logger = LogManager.getLogger(Window.class);
 
     BufferedImage icon;
 
