@@ -65,7 +65,7 @@ You can also push some keys to change visual content :
 
 ## Some screenshot
 
-![a small screenshot](./docs/images/screenshot-001.png "a Sample screenshot of the display")
+![a small screenshot](docs/images/screenshot-001.png "a Sample screenshot of the display")
 
 *figure 1 - a Sample screenshot of the current demo*
 
