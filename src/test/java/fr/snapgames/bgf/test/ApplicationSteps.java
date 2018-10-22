@@ -14,6 +14,8 @@ import fr.snapgames.bgf.App;
 import fr.snapgames.bgf.GameObject;
 
 /**
+ * Here are all the application's steps to perform the Cucumber tests.
+ * 
  * @author Fréédéric Delorme
  *
  */
