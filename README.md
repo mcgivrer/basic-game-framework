@@ -38,7 +38,7 @@ On the command line, you can add some options:
 Sample command line :
 
 ```bash
- $> java -jar basic-game-framework-0.0.1-SNAPSHOT.jar d=2 s=2 w=320 h=240
+ $> java -jar basic-game-framework-0.0.1-SNAPSHOT-shaded.jar d=2 s=2 w=320 h=240
 ```
 
 > This will start the demo with debug level (d) set to `2` and in a `320x240` (w x h) pixel widow scaled (s) by `2`.
