@@ -76,4 +76,4 @@ You can also push some keys to change visual content :
 
 > That's all folks !
 
-Fred D.
+Fred from SnapGames.
