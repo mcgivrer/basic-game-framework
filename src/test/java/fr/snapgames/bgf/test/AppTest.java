@@ -34,8 +34,7 @@ public class AppTest
      */
     public void testApp()
     {
-        App app = new App("My title");
-        assertTrue(app.getTitle().equals("My title"));
-        
+        App app = new App("My title", new String[]{});
+        assertTrue(app.getTitle().equals("My title"));        
     }
 }

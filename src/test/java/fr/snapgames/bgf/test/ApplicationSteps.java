@@ -27,8 +27,8 @@ public class ApplicationSteps {
 
 	@Given("^An application$")
 	public void an_Application() {
-		application = new App("mytests");
-		application.run();
+		application = new App("mytests", new String[]{});
+		application.initialize();
 	}
 
 	@When("^getting the object list$")

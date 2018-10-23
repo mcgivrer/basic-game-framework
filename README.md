@@ -22,5 +22,58 @@ Run the app with :
  $> mvn exec:java
 ```
 
+## Some options
 
-Fred.
+On the command line, you can add some options:
+
+| Attribute      | Name             | Description                          |
+|----------------|------------------|--------------------------------------|
+| `d/debug`      | debug mode       | set the level of visual debug (0->5) |
+| `s/scale`      | pixel scale      | set the piwel scale (1->4)           |
+| `w/width`      | window width     | set the window Width                 |
+| `h/height`     | window height    | set the window Height                |
+| `f/fps`        | rendered fps     | set the frame per second rate (30-60)|
+| `k/fullscreen` | full screen mode | set window to fullscreen mode        |
+
+Sample command line :
+
+```bash
+ $> java -jar basic-game-framework-0.0.1-SNAPSHOT-shaded.jar d=2 s=2 w=320 h=240
+```
+
+> This will start the demo with debug level (d) set to `2` and in a `320x240` (w x h) pixel widow scaled (s) by `2`.
+
+
+During execution, you can activate some options :
+
+| key   | Name             | Description                               |
+|-------|------------------|-------------------------------------------|
+| `D`   | debug mode       | switch level of visual debug (0->5)       |
+| `F11` | full screen mode | switch between window and fullscreen mode |
+| `F3`  | save screen      | save a screenshot of the current display  |
+
+## This particular demo options
+
+You can also push some keys to change visual content :
+
+| key       | Description                          |
+|-----------|--------------------------------------|
+| `UP`      | Move big green square up             |
+| `DOWN`    | Move big green square down           |
+| `LEFT`    | Move big green square left           |
+| `RIGHT`   | Move big green square right          |
+| `PAGEUP`  | Add 10 enemies on the playground     |
+| `PAGEDOWN`| Remove 10 enemies on the playground  |
+| `DELETE`  | Remove all enemies on the playground |
+
+## Some screenshot
+
+![a small screenshot](https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-001.png "a Sample screenshot of the display")
+
+*figure 1 - a Sample screenshot of the current demo*
+
+## To be continued ...
+
+> That's all folks !
+
+Fred from SnapGames.
