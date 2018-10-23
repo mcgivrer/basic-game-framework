@@ -19,18 +19,18 @@ public class Window {
 
     private static final Logger logger = LoggerFactory.getLogger(Window.class);
 
-    BufferedImage icon;
+    private BufferedImage icon;
 
-    JFrame frame;
-    Dimension back;
+    private JFrame frame;
+    private Dimension back;
 
-    App app;
+    private App app;
 
-    String iconpath = "res/app-icon.png";
+    private String iconpath = "res/app-icon.png";
 
     private float backScale;
 
-    static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+    private static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
 
     /**
      * Create a window for the App <code>app</code>.
@@ -53,7 +53,7 @@ public class Window {
         try {
             icon = ImageIO.read(this.getClass().getResourceAsStream("/" + iconpath));
         } catch (IOException e) {
-            logger.error("unableto read icon file {}", iconpath);
+            logger.error("unable to read icon file {}", iconpath);
         }
 
         initialize(true,false);
