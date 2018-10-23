@@ -464,7 +464,7 @@ public class App extends JPanel implements KeyListener {
 	 */
 	public String getLabel(String key) {
 		assert (key != null);
-		assert (!key.equals(""));
+		assert (!"".equals(key));
 		assert (msg != null);
 		return msg.getString(key);
 	}
@@ -544,7 +544,6 @@ public class App extends JPanel implements KeyListener {
 		 * Manage Debug level.
 		 */
 		case DEBUG:
-
 			debug = (debug < 5 ? debug + 1 : 0);
 			break;
 
@@ -552,10 +551,10 @@ public class App extends JPanel implements KeyListener {
 		 * Switch between window and fullscreen mode.
 		 */
 		case FULLSCREEN:
-
 			fullScreen = !fullScreen;
 			win.switchFullScreen(fullScreen);
-
+			break;
+				
 		default:
 			break;
 		}
