@@ -68,8 +68,6 @@ You can also push some keys to change visual content :
 
 ## Some screenshot
 
-https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-001.png
-
 ![a small screenshot](https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-001.png "a Sample screenshot of the display")
 
 *figure 1 - a Sample screenshot of the current demo*
