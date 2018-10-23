@@ -650,7 +650,7 @@ public class App extends JPanel implements KeyListener {
 		int scindex=0;
 		app.suspendRendering(true);
 		try {
-			java.io.File out = new java.io.File(path + File.separator + "screenshot-" + System.nanoTime() +"-"+(scindex++)+ ".png");
+			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() +"-"+(scindex++)+ ".png");
 			javax.imageio.ImageIO.write(image.getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG", out);
 		} catch (Exception e) {
 			System.err.println("Unable to write screenshot to " + path);
