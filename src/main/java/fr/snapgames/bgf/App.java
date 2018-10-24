@@ -263,7 +263,8 @@ public class App extends JPanel implements KeyListener {
 		long current = System.currentTimeMillis();
 		long previous = current;
 
-		long cumulation = 0, frames = 0;
+		long cumulation = 0; 
+		long frames = 0;
 		initialize();
 
 		while (!exit) {

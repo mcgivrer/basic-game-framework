@@ -21,9 +21,8 @@ import fr.snapgames.bgf.GameObject;
  */
 public class ApplicationSteps {
 
-	App application;
-	Collection<GameObject> objects;
-	String title;
+	private App application;
+	private Collection<GameObject> objects;
 
 	@Given("^An application$")
 	public void an_Application() {
