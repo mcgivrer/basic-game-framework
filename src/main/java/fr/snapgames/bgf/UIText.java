@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
  */
 public class UIText extends GameObject {
 
-	String text = "";
+	private String text = "";
 	private Font font;
 	private int thickness;
 
