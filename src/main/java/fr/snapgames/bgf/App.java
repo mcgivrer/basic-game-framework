@@ -109,7 +109,6 @@ public class App extends JPanel implements KeyListener {
 	 * Key processing arrays.
 	 */
 	private boolean[] keys = new boolean[65536];
-	private boolean[] prevKeys = new boolean[65536];
 	private Queue<KeyEvent> keyQueue = new ConcurrentLinkedQueue<KeyEvent>();
 
 	/**
@@ -205,7 +204,7 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private void createGameObjects(String baseName, int nbEnemies) {
 		pauseRendering = true;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < nbEnemies; i++) {
 			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
 					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT)).setColor(randomColor())
 					.setVelocity((float) (Math.random() * 0.2f) - 0.1f, (float) (Math.random() * 0.2f) - 0.1f)
@@ -477,7 +476,6 @@ public class App extends JPanel implements KeyListener {
 	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
-		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = true;
 		logger.debug(e.getKeyCode() + " has been pressed");
 	}
@@ -489,7 +487,6 @@ public class App extends JPanel implements KeyListener {
 	 */
 	@Override
 	public void keyReleased(KeyEvent e) {
-		prevKeys[e.getKeyCode()] = keys[e.getKeyCode()];
 		keys[e.getKeyCode()] = false;
 		logger.debug(e.getKeyCode() + " has been released");
 

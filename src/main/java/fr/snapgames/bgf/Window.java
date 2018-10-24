@@ -47,7 +47,7 @@ public class Window {
      * @param app
      * @param title
      */
-    public Window(App app, String title) {
+    private Window(App app, String title) {
         this.app = app;
 
         try {
