@@ -9,7 +9,9 @@
 
   <name>Basic Game Framework</name>
   <url>https://github.com/snapgames/basic-game-framework/</url>
-  <description>This small application is a basic engine to develop a game on the JDK only.</description>
+  <description>This small application is a basic engine to develop a game on the JDK8.
+  It will help you by adding some code coverage and some Behavior driven development good practices.
+  The magic will be seen in the test/resources/features/app.feature file.</description>
   <inceptionYear>2018</inceptionYear>
 
   <prerequisites>
@@ -83,7 +85,26 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- tests things -->
+    <dependency>
+      <groupId>info.cukes</groupId>
+      <artifactId>cucumber-weld</artifactId>
+      <version>1.2.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>info.cukes</groupId>
+      <artifactId>cucumber-junit</artifactId>
+      <version>1.2.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>info.cukes</groupId>
+      <artifactId>cucumber-java8</artifactId>
+      <version>1.2.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -91,23 +112,38 @@
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
     <plugins>
-       <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-          </configuration>
-        </plugin>
-      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
       <!-- Compute coverage -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.3-SNAPSHOT</version>
+        <version>0.8.2</version>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
-      
+
       <!-- Sources -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -255,6 +291,41 @@
           </arguments>
         </configuration>
       </plugin>
+      <!-- Surefire reporting configuratio -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
+        <configuration>
+          <testFailureIgnore>true</testFailureIgnore>
+          <includes>
+            <exclude>**/*BDDTest.java</exclude>
+          </includes>
+        </configuration>
+      </plugin>
+      <!-- Cucumber reporting -->
+      <plugin>
+        <groupId>net.masterthought</groupId>
+        <artifactId>maven-cucumber-reporting</artifactId>
+        <version>2.0.0</version>
+        <executions>
+          <execution>
+            <id>execution</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <projectName>cucumber-jvm-example</projectName>
+              <outputDirectory>${project.build.directory}/site/cucumber-reports</outputDirectory>
+              <cucumberOutput>${project.build.directory}/cucumber.json</cucumberOutput>
+              <skippedFails>true</skippedFails>
+              <enableFlashCharts>false</enableFlashCharts>
+              <buildNumber>4</buildNumber>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -268,6 +339,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.2</version>
         <reportSets>
           <reportSet>
             <reports>
