@@ -9,7 +9,9 @@
 
   <name>Basic Game Framework</name>
   <url>https://github.com/snapgames/basic-game-framework/</url>
-  <description>This small application is a basic engine to develop a game on the JDK only.</description>
+  <description>This small application is a basic engine to develop a game on the JDK8.
+  It will help you by adding some code coverage and some Behavior driven development good practices.
+  The magic will be seen in the test/resources/features/app.feature file.</description>
   <inceptionYear>2018</inceptionYear>
 
   <prerequisites>
