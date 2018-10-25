@@ -9,6 +9,11 @@ jdk:
 #sudo: false
 script: mvn clean test install
 
+# Improve build speed
+cache:
+  directories:
+  - $HOME/.m2
+
 # Define X11 env. for test execution
 before_script:
   - "export DISPLAY=:99.0"
