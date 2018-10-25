@@ -120,13 +120,7 @@ public class App extends JPanel implements KeyListener {
 	 */
 	private List<GameObject> renderingList = new CopyOnWriteArrayList<>();
 
-	private GameObject player;
-
 	private UIText scoreUI;
-
-	private Font scoreFont;
-
-	private JFrame frame;
 
 	/**
 	 * Create a new Application with <code>title</code> as main title.
@@ -161,14 +155,14 @@ public class App extends JPanel implements KeyListener {
 		viewport = new Rectangle(buffer.getWidth(), buffer.getHeight());
 
 		dbgFont = g.getFont().deriveFont(9.0f);
-		scoreFont = g.getFont().deriveFont(16.0f);
+		Font scoreFont = g.getFont().deriveFont(16.0f);
 		this.addKeyListener(this);
 
 		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
 		add(scoreUI);
 
-		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
 				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
 		add(player);
 
@@ -603,9 +597,8 @@ public class App extends JPanel implements KeyListener {
 	 * 
 	 * @param frame
 	 */
-	public void setFrame(JFrame frame) {
-		this.frame = frame;
-		this.backupRectangle = this.frame.getBounds();
+	public void setBoundAs(JFrame frame) {
+		this.backupRectangle = frame.getBounds();
 	}
 
 	public void setSize(Dimension rect) {
