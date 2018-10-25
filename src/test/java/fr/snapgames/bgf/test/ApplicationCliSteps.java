@@ -16,9 +16,9 @@ import fr.snapgames.bgf.App;
  */
 public class ApplicationCliSteps implements En {
 
-	static private App application;
-	static private String[] args;
-	static private String title;
+	private App application;
+	private String[] args;
+	private String title;
 
 	public ApplicationCliSteps() {
 
