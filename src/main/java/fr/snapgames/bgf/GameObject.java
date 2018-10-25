@@ -98,19 +98,6 @@ public class GameObject {
 	}
 
 	/**
-	 * Create a new GObject with parameters !
-	 * 
-	 * @param name
-	 * @param x
-	 * @param y
-	 * @param image
-	 */
-	public GameObject(String name, int x, int y, BufferedImage image) {
-		this(name);
-		setPosition(x, y); 
-	}
-
-	/**
 	 * compute object mechanism.
 	 * 
 	 * @param dt
