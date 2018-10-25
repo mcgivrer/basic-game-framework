@@ -16,9 +16,9 @@ import fr.snapgames.bgf.Window;
  *
  */
 public class ApplicationCliFullScreenSteps implements En {
-	static private App application;
-	static private Window window;
-	static private String[] args;
+	private App application;
+	private Window window;
+	private String[] args;
 
 	private boolean fullScreenMode;
 
