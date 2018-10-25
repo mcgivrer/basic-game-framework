@@ -137,9 +137,43 @@ public class App extends JPanel implements KeyListener {
 		super();
 		this.title = title;
 		parseArgs(args);
+	}
+
+	/**
+	 * Return the title for this app.
+	 * 
+	 * @return
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * Initialize rendering pipeline and other stuff.
+	 */
+	public void initialize() {
 		this.addKeyListener(this);
 		win = new Window(this);
 		prepareKeyBinding();
+
+		buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		g = (Graphics2D) buffer.getGraphics();
+		viewport = new Rectangle(buffer.getWidth(), buffer.getHeight());
+
+		dbgFont = g.getFont().deriveFont(9.0f);
+		scoreFont = g.getFont().deriveFont(16.0f);
+		this.addKeyListener(this);
+
+		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
+				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
+		add(scoreUI);
+
+		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
+		add(player);
+
+		createGameObjects("enemy_", 10);
+
 	}
 
 	/**
@@ -162,39 +196,6 @@ public class App extends JPanel implements KeyListener {
 		keyBinding.put(KeyBinding.DEBUG, KeyEvent.VK_D);
 		keyBinding.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
 		keyBinding.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
-	}
-
-	/**
-	 * Return the title for this app.
-	 * 
-	 * @return
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * Initialize rendering pipeline and other stuff.
-	 */
-	public void initialize() {
-		buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-		g = (Graphics2D) buffer.getGraphics();
-		viewport = new Rectangle(buffer.getWidth(), buffer.getHeight());
-
-		dbgFont = g.getFont().deriveFont(9.0f);
-		scoreFont = g.getFont().deriveFont(16.0f);
-		this.addKeyListener(this);
-
-		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
-		add(scoreUI);
-
-		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
-				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
-		add(player);
-
-		createGameObjects("enemy_", 10);
-
 	}
 
 	/**
@@ -263,7 +264,7 @@ public class App extends JPanel implements KeyListener {
 		long current = System.currentTimeMillis();
 		long previous = current;
 
-		long cumulation = 0; 
+		long cumulation = 0;
 		long frames = 0;
 		initialize();
 
@@ -535,7 +536,7 @@ public class App extends JPanel implements KeyListener {
 		 */
 		case SCREENSHOT:
 			pause = true;
-			screenshot(this,buffer);
+			screenshot(this, buffer);
 			pause = false;
 			break;
 
@@ -553,7 +554,7 @@ public class App extends JPanel implements KeyListener {
 			fullScreen = !fullScreen;
 			win.switchFullScreen(fullScreen);
 			break;
-				
+
 		default:
 			break;
 		}
@@ -617,13 +618,14 @@ public class App extends JPanel implements KeyListener {
 		renderingList.add(go);
 		sortRenderingList();
 		pauseRendering = false;
-		logger.debug("Add object %s",go);
+		logger.debug("Add object %s", go);
 	}
 
 	private void sortRenderingList() {
 		renderingList.sort(new Comparator<GameObject>() {
 			public int compare(GameObject o1, GameObject o2) {
-				//System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1)));
+				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
+				// -1 : (o1.priority < o2.priority ? -1 : 1)));
 				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
 			}
 		});
@@ -637,7 +639,7 @@ public class App extends JPanel implements KeyListener {
 	public void remove(GameObject go) {
 		objects.remove(go.name);
 		renderingList.remove(go);
-		logger.debug("Object %s removed",go);
+		logger.debug("Object %s removed", go);
 	}
 
 	/**
@@ -645,11 +647,11 @@ public class App extends JPanel implements KeyListener {
 	 * 
 	 * @param image image to be saved to disk.
 	 */
-	public static void screenshot(App app,BufferedImage image) {
-		int scindex=0;
+	public static void screenshot(App app, BufferedImage image) {
+		int scindex = 0;
 		app.suspendRendering(true);
 		try {
-			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() +"-"+(scindex++)+ ".png");
+			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
 			javax.imageio.ImageIO.write(image.getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG", out);
 		} catch (Exception e) {
 			System.err.println("Unable to write screenshot to " + path);
@@ -681,12 +683,11 @@ public class App extends JPanel implements KeyListener {
 								? Integer.parseInt(argSplit[1])
 								: 0);
 						break;
-					case "f":
 					case "fps":
 						setFPS(Integer.parseInt(argSplit[1]));
 						break;
 
-					case "k":
+					case "f":
 					case "fullscreen":
 						fullScreen = (argSplit[1].toLowerCase().equals("on") ? true : false);
 						if (win != null) {
@@ -706,7 +707,7 @@ public class App extends JPanel implements KeyListener {
 		timeFrame = (long) (1000 / FPS);
 	}
 
-	public List<GameObject> getObjects(){
+	public List<GameObject> getObjects() {
 		// List<Value> values = map.values().stream().collect(Collectors.toList());
 		return objects.values().stream().collect(Collectors.toList());
 	}
@@ -731,6 +732,7 @@ public class App extends JPanel implements KeyListener {
 
 	/**
 	 * Set Pause mode.
+	 * 
 	 * @param b
 	 */
 	public void setPause(boolean b) {
@@ -739,10 +741,11 @@ public class App extends JPanel implements KeyListener {
 
 	/**
 	 * Set rendering pause mode.
+	 * 
 	 * @param b
 	 */
 	public void suspendRendering(boolean b) {
-		this.pauseRendering=b;
+		this.pauseRendering = b;
 	}
 
 	/**
@@ -755,5 +758,49 @@ public class App extends JPanel implements KeyListener {
 		app.run();
 	}
 
+	/**
+	 * Return the Window created for this App.
+	 * 
+	 * @return the Window instance.
+	 */
+	public Window getWindow() {
+		return win;
+	}
 
+	/**
+	 * return the internal rendering buffer.
+	 * 
+	 * @return the internal BufferedImage where graphics are rendered.
+	 */
+	public BufferedImage getRenderingBuffer() {
+		return buffer;
+	}
+
+	/**
+	 * return the debug mode.
+	 * <ul>
+	 * <li>0 debug is off</li>
+	 * <li>1 debug display pipeline rendering information</li>
+	 * <li>2 debug show all main attributes for managed GameObject's</li>
+	 * </ul>
+	 * 
+	 * @return
+	 */
+	public int getDebugMode() {
+		return debug;
+	}
+
+	/**
+	 * return the pixel rendering Scale.
+	 * 
+	 * @return
+	 */
+	public float getScale() {
+
+		return SCALE;
+	}
+
+	public void setArgs(String[] args) {
+		this.parseArgs(args);
+	}
 }

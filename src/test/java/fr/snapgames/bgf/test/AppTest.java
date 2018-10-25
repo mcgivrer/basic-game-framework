@@ -1,40 +1,38 @@
 package fr.snapgames.bgf.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.FixMethodOrder;
+
 import fr.snapgames.bgf.App;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+@FixMethodOrder
+public class AppTest{
 
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
+    @Test
+    public void testAppTitle()
     {
         App app = new App("My title", new String[]{});
-        assertTrue(app.getTitle().equals("My title"));        
+        assertTrue(app.getTitle().equals("My title"));
+    }
+
+    @Test
+    public void testAppWindowSize(){
+        App app = new App("My title", new String[]{"w=320","h=240"});
+        app.initialize();
+        assertNotNull("The Window object is null !", app.getWindow());
+        assertEquals("the window width is not set to the requested value", app.getRenderingBuffer().getWidth(),320);
+        assertEquals("the window height is not set to the requested value", app.getRenderingBuffer().getHeight(),240);
     }
 }

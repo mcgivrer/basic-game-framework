@@ -23,6 +23,7 @@ public class Window {
 
     private JFrame frame;
     private Dimension back;
+    private boolean fullScreenMode;
 
     private App app;
 
@@ -98,6 +99,7 @@ public class Window {
      * @param fullScreen
      */
     public void switchFullScreen(boolean fullScreen) {
+    	this.fullScreenMode = fullScreen;
         frame.setVisible(false);
         if (fullScreen) {
             back = frame.getSize();
@@ -147,4 +149,21 @@ public class Window {
     public Rectangle getDimension() {
         return frame.getBounds();
     }
+
+	/**
+	 * @return the fullScreenMode
+	 */
+	public boolean isFullScreenMode() {
+		return fullScreenMode;
+	}
+
+	/**
+	 * @param fullScreenMode the fullScreenMode to set
+	 */
+	public void setFullScreenMode(boolean fullScreenMode) {
+		this.fullScreenMode = fullScreenMode;
+	}
+    
+    
+    
 }
