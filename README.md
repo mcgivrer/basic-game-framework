@@ -32,8 +32,8 @@ On the command line, you can add some options:
 | `s/scale`      | pixel scale      | set the piwel scale (1->4)           |
 | `w/width`      | window width     | set the window Width                 |
 | `h/height`     | window height    | set the window Height                |
-| `f/fps`        | rendered fps     | set the frame per second rate (30-60)|
-| `k/fullscreen` | full screen mode | set window to fullscreen mode        |
+| `fps`        | rendered fps     | set the frame per second rate (30-60)|
+| `f/fullscreen` | full screen mode | set window to fullscreen mode        |
 
 Sample command line :
 
