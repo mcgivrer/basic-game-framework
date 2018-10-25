@@ -58,7 +58,7 @@ public class App extends JPanel implements KeyListener {
 	/**
 	 * default path to store image captures.
 	 */
-	private static String path = System.getProperty("user.home");
+	private static String path = System.getProperty("user.home")+File.separator+"screenshots";
 
 	/**
 	 * Game display size and scale.
@@ -396,9 +396,18 @@ public class App extends JPanel implements KeyListener {
 			String pauseLabel = getLabel("app.label.pause");
 			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
+			g.setColor(Color.GRAY);
+			g.drawRect(-2, HEIGHT / 2, WIDTH+4, 32);
+
 			g.setColor(Color.WHITE);
-			g.drawString(pauseLabel, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
-					(HEIGHT + g.getFontMetrics().getHeight()) / 2);
+			g.setFont(g.getFont().deriveFont(18.0f));
+			Render.drawOutlinedString(g,
+				(WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
+				(HEIGHT + g.getFontMetrics().getHeight()+24) / 2,
+				pauseLabel,
+				2,
+				Color.WHITE, 
+				Color.BLACK);
 		}
 
 		// render debug information
