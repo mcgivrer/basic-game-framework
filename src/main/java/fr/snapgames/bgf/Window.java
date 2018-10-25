@@ -87,7 +87,7 @@ public class Window {
         frame.validate();
         frame.setVisible(true);
 
-        app.setFrame(frame);
+        app.setBoundAs(frame);
         app.suspendRendering(false);
         app.setPause(false);
 
