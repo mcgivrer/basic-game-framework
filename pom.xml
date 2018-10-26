@@ -51,7 +51,7 @@
         <sendOnSuccess>false</sendOnSuccess>
         <sendOnWarning>false</sendOnWarning>
         <configuration>
-          <address>ci@snapgames.fr</address>
+          <address>travis-ci@snapgames.fr</address>
         </configuration>
       </notifier>
     </notifiers>
@@ -63,12 +63,19 @@
     <url>scm:git:https://github.com/snapgames/basic-game-framework</url>
   </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>bintray</id>
+      <url>https://api.bintray.com/maven/snapgames/basic-game-framework/basic-game-framework</url>
+    </repository>
+  </distributionManagement>
+
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.mainClass>fr.snapgames.bgf.App</project.mainClass>
-
   </properties>
 
   <dependencies>
@@ -263,6 +270,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.3</version>
+        <configuration>
+          <useReleaseProfile>false</useReleaseProfile>
+          <releaseProfiles>release</releaseProfiles>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
       </plugin>
 
       <!-- Execution -->

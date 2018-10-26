@@ -7,16 +7,28 @@ jdk:
   - oraclejdk8
   - openjdk11
 
+services:
+- docker
+
 #sudo: false
 script: mvn clean test install
 
 # Improve build speed
 cache:
   directories:
-  - $HOME/.m2
+  - "$HOME/.m2"
+  - "$HOME/.cache"
 
 # Define X11 env. for test execution
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
+
+# Deploy operation
+deploy:
+  provider: script
+  script: "cp .m2/travis.settings.xml $HOME/.m2/settings.xml && mvn deploy"
+  skip_cleanup: true
+  on:
+    tags: true

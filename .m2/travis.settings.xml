@@ -3,6 +3,13 @@
     xmlns='http://maven.apache.org/SETTINGS/1.0.0' 
     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
 
+    <servers>
+        <server>
+            <id>bintray</id>
+            <username>${env.BINTRAY_USERNAME}</username>
+            <password>${env.BINTRAY_API_KEY}</password>
+        </server>
+    </servers>
     <profiles>
         <profile>
             <id>bintray</id>
