@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>fr.snapgames.app</groupId>
@@ -170,8 +171,26 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.0.1</version>
         <configuration>
-          <encoding>UTF-8F</encoding>
+          <encoding>utf-8</encoding>
+          <stylesheet>maven</stylesheet>
+          <overview>${project.basedir}/README.md</overview>
+          <doclet>ch.raffael.doclets.pegdown.PegdownDoclet</doclet>
+          <docletArtifact>
+            <groupId>ch.raffael.pegdown-doclet</groupId>
+            <artifactId>pegdown-doclet</artifactId>
+            <version>1.3</version>
+          </docletArtifact>
+          <useStandardDocletOptions>true</useStandardDocletOptions>
         </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Build the minimalist JAR without dependencies (Normal Edition) -->
@@ -300,11 +319,12 @@
           </arguments>
         </configuration>
       </plugin>
-      <!-- Surefire reporting configuratio -->
+      <!-- Surefire reporting configuration -->
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19.1</version>
+        <version>2.22.1</version>
         <configuration>
           <testFailureIgnore>true</testFailureIgnore>
           <includes>
@@ -325,7 +345,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <projectName>cucumber-jvm-example</projectName>
+              <projectName>${project.name}</projectName>
               <outputDirectory>${project.build.directory}/site/cucumber-reports</outputDirectory>
               <cucumberOutput>${project.build.directory}/cucumber.json</cucumberOutput>
               <skippedFails>true</skippedFails>
@@ -334,6 +354,12 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.7.1</version>
       </plugin>
     </plugins>
   </build>
@@ -354,6 +380,23 @@
             <reports>
               <!-- select non-aggregate reports -->
               <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <!-- Generate the Release Notes for this version -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
+        <version>2.12.1</version>
+        <configuration>
+          <includeOpenIssues>false</includeOpenIssues>
+          <columnNames>Id,Created,Type,Summary,Reporter,Assignee,Fix Version</columnNames>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>github-report</report>
             </reports>
           </reportSet>
         </reportSets>
