@@ -3,22 +3,17 @@ package fr.snapgames.bgf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
@@ -47,13 +42,6 @@ public class App extends JPanel {
 	private static String path = System.getProperty("user.home") + File.separator + "screenshots";
 
 	/**
-	 * Game display size and scale.
-	 */
-	public static int WIDTH = 320;
-	public static int HEIGHT = 240;
-	public static float SCALE = 2;
-
-	/**
 	 * title of the application;
 	 */
 	private String title = "NoName";
@@ -67,14 +55,6 @@ public class App extends JPanel {
 
 	private boolean fullScreen = false;
 	private int debug = 0;
-	private Font dbgFont;
-
-	/**
-	 * Rendering pipeline
-	 */
-	private BufferedImage buffer;
-	private Graphics2D g;
-	private Rectangle viewport;
 
 	public Rectangle backupRectangle = new Rectangle();
 
@@ -88,6 +68,8 @@ public class App extends JPanel {
 
 	private InputListener inputListener;
 
+	private Render render;
+
 	/**
 	 * Translated Messages
 	 */
@@ -97,10 +79,6 @@ public class App extends JPanel {
 	 * GameObject list managed by the game.
 	 */
 	private Map<String, GameObject> objects = new ConcurrentHashMap<String, GameObject>();
-	/**
-	 * List of object to be rendered.
-	 */
-	private List<GameObject> renderingList = new CopyOnWriteArrayList<>();
 
 	private UIText scoreUI;
 
@@ -112,6 +90,7 @@ public class App extends JPanel {
 	public App(String title, String[] args) {
 		super();
 		this.title = title;
+		render=new Render(this,new Rectangle(320,240));
 		parseArgs(args);
 		inputListener = new InputListener(this);
 	}
@@ -130,22 +109,26 @@ public class App extends JPanel {
 	 */
 	public void initialize() {
 		this.addKeyListener(inputListener);
-		win = new Window(this);
 		prepareKeyBinding();
 
-		buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-		g = (Graphics2D) buffer.getGraphics();
-		viewport = new Rectangle(buffer.getWidth(), buffer.getHeight());
+		//render = new Render(this, new Rectangle(WIDTH, HEIGHT));
+		win = new Window(this);
 
-		dbgFont = g.getFont().deriveFont(9.0f);
-		Font scoreFont = g.getFont().deriveFont(16.0f);
+		Font scoreFont = render.getGraphics().getFont().deriveFont(16.0f);
 
 		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
 		add(scoreUI);
 
-		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
-				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
+		GameObject player = GameObject.builder("player")
+			.setSize(24, 24)
+			.setPosition(0, 0)
+			.setColor(Color.GREEN)
+			.setVelocity(0.0f, 0.0f)
+			.setLayer(10)
+			.setPriority(100)
+			.setElasticity(0.98f)
+			.setFriction(0.98f);
 		add(player);
 
 		createGameObjects("enemy_", 10);
@@ -162,9 +145,10 @@ public class App extends JPanel {
 		myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
 		myKB.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
 
-		myKB.put(KeyBinding.FIRE1, KeyEvent.VK_PAGE_UP);
-		myKB.put(KeyBinding.FIRE2, KeyEvent.VK_PAGE_DOWN);
-		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_SPACE);
+		myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD2);
+		myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD5);
+		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_NUMPAD3);
+		myKB.put(KeyBinding.FIRE4, KeyEvent.VK_NUMPAD6);
 
 		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
 		myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
@@ -182,11 +166,17 @@ public class App extends JPanel {
 	 */
 	private void createGameObjects(String baseName, int nbEnemies) {
 		pauseRendering = true;
+		Rectangle vp = render.getViewport();
 		for (int i = 0; i < nbEnemies; i++) {
-			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
-					.setPosition((int) (Math.random() * WIDTH), (int) (Math.random() * HEIGHT)).setColor(randomColor())
-					.setVelocity((float) (Math.random() * 0.2f) - 0.1f, (float) (Math.random() * 0.2f) - 0.1f)
-					.setPriority(i).setLayer(1).setElasticity(0.98f).setFriction(0.98f);
+			GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
+				.setSize(16, 16)
+				.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
+				.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
+				.setColor(randomColor())
+				.setPriority(i)
+				.setLayer(1)
+				.setElasticity(1.0f)
+				.setFriction(1.0f);
 			add(enemy);
 		}
 		pauseRendering = false;
@@ -226,11 +216,9 @@ public class App extends JPanel {
 		objects.entrySet().removeAll(collect.entrySet());
 
 		// re-fulfill the rendering buffer.
-		renderingList.clear();
-		renderingList.addAll(objects.values());
-		sortRenderingList();
+		render.clearRenderingList();
+		render.addAllObjects(objects.values());
 		pauseRendering = false;
-
 	}
 
 	/**
@@ -252,9 +240,9 @@ public class App extends JPanel {
 				update(elapsed);
 			}
 			if (!pauseRendering) {
-				clearRenderBuffer(g);
-				renderToBuffer(g);
-				drawBufferToScreen();
+				render.clearRenderBuffer();
+				render.renderToBuffer();
+				render.drawBufferToScreen();
 			}
 			elapsed = System.currentTimeMillis() - previous;
 			cumulation += elapsed;
@@ -326,116 +314,21 @@ public class App extends JPanel {
 	 * @param o
 	 */
 	private void constrains(GameObject o) {
-		if (o.x + o.width > viewport.width || o.x < 0) {
+		if ((int)(o.x + o.width) > render.getViewport().width || o.x < 0.0f) {
 			o.dx = -o.dx * o.friction * o.elasticity;
 		}
-		if (o.y + o.height > viewport.height || o.y < 0) {
+		if ((int)(o.y + o.height) > render.getViewport().height || o.y < 0.0f) {
 			o.dy = -o.dy * o.friction * o.elasticity;
 		}
-		if (Math.abs(o.dx) < 0.01f) {
-			o.dx = 0.0f;
-		}
-		if (Math.abs(o.dy) < 0.01f) {
-			o.dy = 0.0f;
-		}
-	}
-
-	/**
-	 * clear the graphic buffer.
-	 * 
-	 * @param g
-	 */
-	private void clearRenderBuffer(Graphics2D g) {
-		g.setColor(Color.BLUE);
-		g.fillRect(0, 0, WIDTH, HEIGHT);
-	}
-
-	/**
-	 * Render the game screen.
-	 * 
-	 * @param g
-	 */
-	private void renderToBuffer(Graphics2D g) {
-
-		// prepare pipeline anti-aliasing.
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-		// render anything game ?
-		for (GameObject o : renderingList) {
-			o.render(g);
-			if (debug >= 2) {
-				renderObjectDebugInfo(g, o);
+		// speed threshold constraints
+		if(o.friction>0.0f || o.elasticity>0.0f){
+			if (Math.abs(o.dx) < 0.005f) {
+				o.dx = 0.0f;
 			}
+			if (Math.abs(o.dy) < 0.005f) {
+				o.dy = 0.0f;
+			}	
 		}
-
-		// render pause status
-		if (pause) {
-			String pauseLabel = getLabel("app.label.pause");
-			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
-			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
-			g.setColor(Color.GRAY);
-			g.drawRect(-2, HEIGHT / 2, WIDTH + 4, 32);
-
-			g.setColor(Color.WHITE);
-			g.setFont(g.getFont().deriveFont(18.0f));
-			Render.drawOutlinedString(g, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
-					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
-		}
-
-		// render debug information
-		if (debug > 0) {
-			drawDebugInformation(g);
-		}
-	}
-
-	/**
-	 * Render debug information for the object <code>o</code> to the Graphics2D
-	 * <code>g</code>.
-	 * 
-	 * @param g the Graphics2D to render things.
-	 * @param o the object to be debugged.
-	 */
-	private void renderObjectDebugInfo(Graphics2D g, GameObject o) {
-		g.setFont(dbgFont);
-
-		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect(o.x + o.width + 2, o.y, 80, 60);
-
-		g.setColor(Color.DARK_GRAY);
-		g.drawRect(o.x + o.width + 2, o.y, 80, 60);
-
-		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
-		g.drawString(String.format("Pos:%03d,%03d", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
-		g.drawString(String.format("Size:%03d,%03d", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
-		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
-	}
-
-	/**
-	 * Draw debug information.
-	 * 
-	 * @param g
-	 */
-	private void drawDebugInformation(Graphics2D g) {
-		g.setFont(dbgFont);
-		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
-				(debug == 0 ? "off" : "" + debug), realFPS, objects.size(), renderingList.size());
-		int dbgStringHeight = g.getFontMetrics().getHeight() + 8;
-		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - (dbgStringHeight + 8), WIDTH, (dbgStringHeight));
-		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - dbgStringHeight);
-	}
-
-	/**
-	 * Draw graphic Buffer to screen with the appropriate scaling.
-	 */
-	private void drawBufferToScreen() {
-		Graphics g2 = this.getGraphics();
-		g2.drawImage(buffer, 0, 0, (int) (WIDTH * SCALE), (int) (HEIGHT * SCALE), null);
-		g2.dispose();
 	}
 
 	/**
@@ -465,7 +358,8 @@ public class App extends JPanel {
 		 * process the pause request.
 		 */
 		case PAUSE:
-			this.pause = !pause;
+			switchPause();
+
 			logger.debug(String.format("Pause reuqest %b", this.pause));
 			break;
 		/**
@@ -477,6 +371,13 @@ public class App extends JPanel {
 		case FIRE2:
 			removeGameObjects("enemy_", 10);
 			break;
+		case FIRE3:
+			createGameObjects("enemy_", 100);
+			break;
+		case FIRE4:
+			removeGameObjects("enemy_", 100);
+			break;
+			
 		/**
 		 * remove all enemies
 		 */
@@ -489,7 +390,7 @@ public class App extends JPanel {
 		 */
 		case SCREENSHOT:
 			pause = true;
-			screenshot(this, buffer);
+			screenshot(this, render.getBuffer());
 			pause = false;
 			break;
 
@@ -497,7 +398,7 @@ public class App extends JPanel {
 		 * Manage Debug level.
 		 */
 		case DEBUG:
-			debug = (debug < 5 ? debug + 1 : 0);
+			switchDebugMode();
 			break;
 
 		/**
@@ -514,6 +415,21 @@ public class App extends JPanel {
 	}
 
 	/**
+	 * swtch debug mode.
+	 */
+	private void switchDebugMode() {
+		debug = (debug < 5 ? debug + 1 : 0);
+		render.setDebugMode(debug);
+	}
+
+	/**
+	 * switch pause mode.
+	 */
+	private void switchPause() {
+		pause = !pause;
+	}
+
+	/**
 	 * Set frame for this app.
 	 * 
 	 * @param frame
@@ -525,7 +441,7 @@ public class App extends JPanel {
 	public void setSize(Dimension rect) {
 		float wScale = (float) rect.width / WIDTH;
 		float hScale = (float) rect.height / HEIGHT;
-		SCALE = (hScale > wScale ? hScale : wScale);
+		render.setScale((hScale > wScale ? hScale : wScale));
 		super.setSize(rect);
 
 	}
@@ -536,22 +452,11 @@ public class App extends JPanel {
 	 * @param go
 	 */
 	public void add(GameObject go) {
-		pauseRendering = true;
+		suspendRendering(true);
 		objects.put(go.name, go);
-		renderingList.add(go);
-		sortRenderingList();
-		pauseRendering = false;
+		render.addObject(go);
+		suspendRendering(false);
 		logger.debug("Add object %s", go);
-	}
-
-	private void sortRenderingList() {
-		renderingList.sort(new Comparator<GameObject>() {
-			public int compare(GameObject o1, GameObject o2) {
-				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
-				// -1 : (o1.priority < o2.priority ? -1 : 1)));
-				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
-			}
-		});
 	}
 
 	/**
@@ -561,7 +466,7 @@ public class App extends JPanel {
 	 */
 	public void remove(GameObject go) {
 		objects.remove(go.name);
-		renderingList.remove(go);
+		render.removeObject(go);
 		logger.debug("Object %s removed", go);
 	}
 
@@ -583,6 +488,10 @@ public class App extends JPanel {
 	}
 
 	private void parseArgs(String[] args) {
+		int areaWidth=320,areaHeight=240;
+		float renderPixelScale=2.0f;
+		int debugMode = 0;
+		boolean fullScreenFlag = false;
 		if (args.length > 0) {
 			for (String arg : args) {
 				if (arg.contains("=")) {
@@ -590,21 +499,27 @@ public class App extends JPanel {
 					switch (argSplit[0].toLowerCase()) {
 					case "w":
 					case "width":
-						WIDTH = Integer.parseInt(argSplit[1]);
+						areaWidth= Integer.parseInt(argSplit[1]);
+						logger.debug("Width set to {}",areaWidth);
 						break;
 					case "h":
 					case "height":
-						HEIGHT = Integer.parseInt(argSplit[1]);
+						areaHeight = Integer.parseInt(argSplit[1]);
+						logger.debug("Height set to {}",areaHeight);
 						break;
 					case "s":
 					case "scale":
-						SCALE = Float.parseFloat(argSplit[1]);
+						renderPixelScale = Float.parseFloat(argSplit[1]);
+						logger.debug("pixel Scale set to {}",renderPixelScale);
+
 						break;
 					case "d":
 					case "debug":
-						debug = (Integer.parseInt(argSplit[1]) < 5 && Integer.parseInt(argSplit[1]) >= 0
+						debugMode = (Integer.parseInt(argSplit[1]) < 5 && Integer.parseInt(argSplit[1]) >= 0
 								? Integer.parseInt(argSplit[1])
 								: 0);
+								logger.debug("debug mode set to {}",debugMode);
+
 						break;
 					case "fps":
 						setFPS(Integer.parseInt(argSplit[1]));
@@ -612,16 +527,20 @@ public class App extends JPanel {
 
 					case "f":
 					case "fullscreen":
-						fullScreen = (argSplit[1].toLowerCase().equals("on") ? true : false);
-						if (win != null) {
-							win.switchFullScreen(fullScreen);
-						}
+						fullScreenFlag = (argSplit[1].toLowerCase().equals("on") ? true : false);
 						break;
 					default:
 						break;
 					}
 				}
 			}
+		}
+
+		// dispatch values to components
+		render.initialize(areaWidth, areaHeight, renderPixelScale);
+		render.setDebugMode(debugMode);
+		if (win != null) {
+			win.switchFullScreen(fullScreenFlag);
 		}
 	}
 
@@ -635,23 +554,6 @@ public class App extends JPanel {
 		return objects.values().stream().collect(Collectors.toList());
 	}
 
-	/**
-	 * return the scaled width for the game.
-	 * 
-	 * @return
-	 */
-	public int getDisplayWidth() {
-		return (int) (WIDTH * SCALE);
-	}
-
-	/**
-	 * return the scaled height for the game.
-	 * 
-	 * @return
-	 */
-	public int getDisplayHeight() {
-		return (int) (HEIGHT * SCALE);
-	}
 
 	/**
 	 * Set Pause mode.
@@ -672,31 +574,12 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * App execution EntryPoint.
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		App app = new App("MyApp", args);
-		app.run();
-	}
-
-	/**
 	 * Return the Window created for this App.
 	 * 
 	 * @return the Window instance.
 	 */
 	public Window getWindow() {
 		return win;
-	}
-
-	/**
-	 * return the internal rendering buffer.
-	 * 
-	 * @return the internal BufferedImage where graphics are rendered.
-	 */
-	public BufferedImage getRenderingBuffer() {
-		return buffer;
 	}
 
 	/**
@@ -713,16 +596,6 @@ public class App extends JPanel {
 		return debug;
 	}
 
-	/**
-	 * return the pixel rendering Scale.
-	 * 
-	 * @return
-	 */
-	public float getScale() {
-
-		return SCALE;
-	}
-
 	public void setArgs(String[] args) {
 		this.parseArgs(args);
 	}
@@ -730,4 +603,23 @@ public class App extends JPanel {
 	public KeyListener getInputListener() {
 		return inputListener;
 	}
+
+	public long getRealFPS() {
+		return realFPS;
+	}
+
+	public Render getRender() {
+		return render;
+	}
+
+	/**
+	 * App execution EntryPoint.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		App app = new App("MyApp", args);
+		app.run();
+	}
+
 }

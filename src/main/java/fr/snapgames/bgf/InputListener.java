@@ -23,7 +23,7 @@ public class InputListener implements KeyListener {
 	 * This an enum listing all possible input actions
 	 */
 	public enum KeyBinding {
-		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FN1, FN2, FN3, SCREENSHOT, RESET,
+		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FIRE4, FN1, FN2, FN3, SCREENSHOT, RESET,
 		FULLSCREEN;
 	}
 

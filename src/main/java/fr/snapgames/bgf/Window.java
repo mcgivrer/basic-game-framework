@@ -31,7 +31,7 @@ public class Window {
 
     private float backScale;
 
-    private static GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+    private static GraphicsDevice device;
 
     /**
      * Create a window for the App <code>app</code>.
@@ -56,7 +56,7 @@ public class Window {
         } catch (IOException e) {
             logger.error("unable to read icon file {}", iconpath);
         }
-
+        device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         initialize(true,false);
     }
 
@@ -103,7 +103,7 @@ public class Window {
         frame.setVisible(false);
         if (fullScreen) {
             back = frame.getSize();
-            backScale = App.SCALE;
+            backScale = app.getRender().getScale();
             frame.dispose();
             initialize(false,false);
             device.setFullScreenWindow(frame);
@@ -114,7 +114,7 @@ public class Window {
             app.setSize(back);
             initialize(true,false);
             device.setFullScreenWindow(null);
-            App.SCALE = backScale;
+            app.getRender().setScale(backScale);
         }
 
         frame.setVisible(true);
@@ -131,8 +131,8 @@ public class Window {
         int addedWidth = insets.left + insets.right;
         int addedHeight = insets.top + insets.bottom;
 
-        final int fWidth = app.getDisplayWidth() + addedWidth;
-        final int fHeight = app.getDisplayHeight() + addedHeight;
+        final int fWidth = app.getRender().getDisplayWidth() + addedWidth;
+        final int fHeight = app.getRender().getDisplayHeight() + addedHeight;
 
         Dimension dim = new Dimension(fWidth, fHeight);
         frame.setSize(dim);

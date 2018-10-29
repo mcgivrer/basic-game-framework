@@ -72,7 +72,7 @@ public class ApplicationSteps {
 
 	@When("^getting the buffer$")
 	public void gettingTheWindowndBuffer() {
-		buffer = application.getRenderingBuffer();
+		buffer = application.getRender().getBuffer();
 	}
 
 	@Then("^the buffer is not null and has size \\((\\d+)x(\\d+)\\)$")
@@ -109,7 +109,7 @@ public class ApplicationSteps {
 
 	@When("^getting scale value$")
 	public void gettingScaleValue() {
-		scale = application.getScale();
+		scale = application.getRender().getScale();
 	}
 
 	@Then("the scale value is (\\d+\\.\\d+)$")
