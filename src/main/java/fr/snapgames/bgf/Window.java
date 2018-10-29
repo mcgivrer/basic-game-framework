@@ -82,7 +82,7 @@ public class Window {
         setSize(app);
         frame.setResizable(resizable);
         frame.setIconImage(icon);
-        frame.addKeyListener(app);
+        frame.addKeyListener(app.getInputListener());
         frame.pack();
         frame.validate();
         frame.setVisible(true);

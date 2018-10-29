@@ -16,10 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -29,6 +27,8 @@ import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.snapgames.bgf.InputListener.KeyBinding;
+
 /**
  * a Simple Application as a Basic Game framework.
  * 
@@ -36,29 +36,15 @@ import org.slf4j.LoggerFactory;
  * @year 2018
  * @see https://github.com/snapgames/basic-game-framework/wiki
  */
-public class App extends JPanel implements KeyListener {
+public class App extends JPanel {
 
 	private static final long serialVersionUID = 2924281870738631982L;
 
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getCanonicalName());
-
-	/**
-	 * This an enum listing all possible input actions
-	 */
-	private enum KeyBinding {
-		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FN1, FN2, FN3, SCREENSHOT, RESET,
-		FULLSCREEN;
-	}
-
-	/**
-	 * Map for keybinding.
-	 */
-	private Map<KeyBinding, Integer> keyBinding = new HashMap<>();
-
 	/**
 	 * default path to store image captures.
 	 */
-	private static String path = System.getProperty("user.home")+File.separator+"screenshots";
+	private static String path = System.getProperty("user.home") + File.separator + "screenshots";
 
 	/**
 	 * Game display size and scale.
@@ -100,16 +86,12 @@ public class App extends JPanel implements KeyListener {
 
 	private int score = 0;
 
+	private InputListener inputListener;
+
 	/**
 	 * Translated Messages
 	 */
 	private ResourceBundle msg = ResourceBundle.getBundle("messages");
-
-	/**
-	 * Key processing arrays.
-	 */
-	private boolean[] keys = new boolean[65536];
-	private Queue<KeyEvent> keyQueue = new ConcurrentLinkedQueue<KeyEvent>();
 
 	/**
 	 * GameObject list managed by the game.
@@ -131,6 +113,7 @@ public class App extends JPanel implements KeyListener {
 		super();
 		this.title = title;
 		parseArgs(args);
+		inputListener = new InputListener(this);
 	}
 
 	/**
@@ -146,7 +129,7 @@ public class App extends JPanel implements KeyListener {
 	 * Initialize rendering pipeline and other stuff.
 	 */
 	public void initialize() {
-		this.addKeyListener(this);
+		this.addKeyListener(inputListener);
 		win = new Window(this);
 		prepareKeyBinding();
 
@@ -156,7 +139,6 @@ public class App extends JPanel implements KeyListener {
 
 		dbgFont = g.getFont().deriveFont(9.0f);
 		Font scoreFont = g.getFont().deriveFont(16.0f);
-		this.addKeyListener(this);
 
 		scoreUI = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
@@ -174,22 +156,23 @@ public class App extends JPanel implements KeyListener {
 	 * Bind all keys for the game.
 	 */
 	private void prepareKeyBinding() {
-		keyBinding.clear();
-		keyBinding.put(KeyBinding.UP, KeyEvent.VK_UP);
-		keyBinding.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
-		keyBinding.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
-		keyBinding.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
+		Map<KeyBinding, Integer> myKB = new HashMap<>();
+		myKB.put(KeyBinding.UP, KeyEvent.VK_UP);
+		myKB.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
+		myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
+		myKB.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
 
-		keyBinding.put(KeyBinding.FIRE1, KeyEvent.VK_PAGE_UP);
-		keyBinding.put(KeyBinding.FIRE2, KeyEvent.VK_PAGE_DOWN);
-		keyBinding.put(KeyBinding.FIRE3, KeyEvent.VK_SPACE);
+		myKB.put(KeyBinding.FIRE1, KeyEvent.VK_PAGE_UP);
+		myKB.put(KeyBinding.FIRE2, KeyEvent.VK_PAGE_DOWN);
+		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_SPACE);
 
-		keyBinding.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
-		keyBinding.put(KeyBinding.PAUSE, KeyEvent.VK_P);
-		keyBinding.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
-		keyBinding.put(KeyBinding.DEBUG, KeyEvent.VK_D);
-		keyBinding.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
-		keyBinding.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
+		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
+		myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
+		myKB.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
+		myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
+		myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
+		myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
+		inputListener.prepareKeyBinding(myKB);
 	}
 
 	/**
@@ -309,16 +292,16 @@ public class App extends JPanel implements KeyListener {
 		goPlayer.dy *= goPlayer.friction;
 		goPlayer.dx *= goPlayer.friction;
 
-		if (keys[KeyEvent.VK_LEFT]) {
+		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
 			goPlayer.dx = -0.1f;
 		}
-		if (keys[KeyEvent.VK_RIGHT]) {
+		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
 			goPlayer.dx = 0.1f;
 		}
-		if (keys[KeyEvent.VK_UP]) {
+		if (inputListener.getKey(KeyEvent.VK_UP)) {
 			goPlayer.dy = -0.1f;
 		}
-		if (keys[KeyEvent.VK_DOWN]) {
+		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
 			goPlayer.dy = 0.1f;
 		}
 	}
@@ -392,17 +375,12 @@ public class App extends JPanel implements KeyListener {
 			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
 			g.setColor(Color.GRAY);
-			g.drawRect(-2, HEIGHT / 2, WIDTH+4, 32);
+			g.drawRect(-2, HEIGHT / 2, WIDTH + 4, 32);
 
 			g.setColor(Color.WHITE);
 			g.setFont(g.getFont().deriveFont(18.0f));
-			Render.drawOutlinedString(g,
-				(WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
-				(HEIGHT + g.getFontMetrics().getHeight()+24) / 2,
-				pauseLabel,
-				2,
-				Color.WHITE, 
-				Color.BLACK);
+			Render.drawOutlinedString(g, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
+					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
 		}
 
 		// render debug information
@@ -474,35 +452,7 @@ public class App extends JPanel implements KeyListener {
 		return msg.getString(key);
 	}
 
-	/**
-	 * Process key pressed event.
-	 * 
-	 * @param e
-	 */
-	@Override
-	public void keyPressed(KeyEvent e) {
-		keys[e.getKeyCode()] = true;
-		logger.debug(e.getKeyCode() + " has been pressed");
-	}
-
-	/**
-	 * process the key released event.
-	 * 
-	 * @param e
-	 */
-	@Override
-	public void keyReleased(KeyEvent e) {
-		keys[e.getKeyCode()] = false;
-		logger.debug(e.getKeyCode() + " has been released");
-
-		for (KeyBinding keyBind : keyBinding.keySet()) {
-			if (e.getKeyCode() == keyBinding.get(keyBind)) {
-				action(keyBind);
-			}
-		}
-	}
-
-	private void action(KeyBinding keyBind) {
+	public void action(KeyBinding keyBind) {
 		switch (keyBind) {
 		/**
 		 * process the exit request.
@@ -561,35 +511,6 @@ public class App extends JPanel implements KeyListener {
 		default:
 			break;
 		}
-	}
-
-	/**
-	 * process the key typed event.
-	 * 
-	 * @param e
-	 */
-	@Override
-	public void keyTyped(KeyEvent e) {
-		keyQueue.add(e);
-	}
-
-	/**
-	 * retrieve status of a specific key.
-	 * 
-	 * @param keyCode
-	 * @return
-	 */
-	public boolean getKey(int keyCode) {
-		return keys[keyCode];
-	}
-
-	/**
-	 * get the last event from the KeyEvent queue.
-	 * 
-	 * @return KeyEvent
-	 */
-	public KeyEvent getKey() {
-		return keyQueue.poll();
 	}
 
 	/**
@@ -804,5 +725,9 @@ public class App extends JPanel implements KeyListener {
 
 	public void setArgs(String[] args) {
 		this.parseArgs(args);
+	}
+
+	public KeyListener getInputListener() {
+		return inputListener;
 	}
 }
