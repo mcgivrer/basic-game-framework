@@ -5,7 +5,9 @@
  * 
  * basic-game-framework
  * 
- * @year 2018
+ * @since 2018
+ * @version %I%
+ * 
  */
 package fr.snapgames.bgf;
 
@@ -23,6 +25,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
+ * The Render class is the rendering processor for all GameObject to an internal
+ * buffer. In a second step, this rendered buffer will be later copy to window
+ * frame.
  * 
  * @author Frédéric Delorme
  *
@@ -57,7 +62,8 @@ public class Render {
 	/**
 	 * Initialize the renderer with a viewport size.
 	 * 
-	 * @param viewPort
+	 * @param app      the parent App
+	 * @param viewPort the requested viewPort.
 	 */
 	public Render(App app, Rectangle viewPort) {
 		this.app = app;
@@ -68,12 +74,8 @@ public class Render {
 		dbgFont = g.getFont().deriveFont(9.0f);
 	}
 
-
-
 	/**
 	 * clear the graphic buffer.
-	 * 
-	 * @param g
 	 */
 	public void clearRenderBuffer() {
 		g.setColor(Color.BLUE);
@@ -82,8 +84,6 @@ public class Render {
 
 	/**
 	 * Render the game screen.
-	 * 
-	 * @param g
 	 */
 	public void renderToBuffer() {
 
@@ -109,14 +109,8 @@ public class Render {
 
 			g.setColor(Color.WHITE);
 			g.setFont(g.getFont().deriveFont(18.0f));
-			Render.drawOutlinedString(
-				g,
-				(WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
-				(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, 
-				pauseLabel, 
-				2, 
-				Color.WHITE, 
-				Color.BLACK);
+			Render.drawOutlinedString(g, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
+					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
 		}
 
 		// render debug information
@@ -136,10 +130,10 @@ public class Render {
 		g.setFont(dbgFont);
 
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect((int)(o.x + o.width + 2), (int)o.y, 80, 60);
+		g.fillRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect((int)(o.x + o.width + 2), (int)o.y, 80, 60);
+		g.drawRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
 
 		g.setColor(Color.GREEN);
 		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
@@ -153,7 +147,7 @@ public class Render {
 	/**
 	 * Draw debug information.
 	 * 
-	 * @param g
+	 * @param g the Graphics2D to render things.
 	 */
 	public void drawDebugInformation(Graphics2D g) {
 		g.setFont(dbgFont);
@@ -187,7 +181,8 @@ public class Render {
 	 * @param foreground the foreground color.
 	 * @param shadow     the shadow color.
 	 */
-	public static void drawOutlinedString(Graphics2D g, int x, int y, String text, int thickness, Color foreground, Color shadow) {
+	public static void drawOutlinedString(Graphics2D g, int x, int y, String text, int thickness, Color foreground,
+			Color shadow) {
 		g.setColor(shadow);
 		for (int i = -thickness; i <= thickness; i++) {
 			g.drawString(text, x + i, y);
@@ -217,17 +212,19 @@ public class Render {
 
 	/**
 	 * Add All objects to the rendering pipe.
-	 * @param l
+	 * 
+	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
-	public void addAllObjects(Collection<GameObject> l){
+	public void addAllObjects(Collection<GameObject> l) {
 		renderingList.addAll(l);
 	}
 
 	/**
 	 * Remove an object from the rendering list.
-	 * @param go
+	 * 
+	 * @param go remove an object from the rendering pipeline.
 	 */
-	public void removeObject(GameObject go){
+	public void removeObject(GameObject go) {
 		renderingList.remove(go);
 	}
 
@@ -240,64 +237,85 @@ public class Render {
 
 	/**
 	 * Return Graphics2D object for this render.
+	 * 
 	 * @return
 	 */
-	public Graphics2D getGraphics(){
+	public Graphics2D getGraphics() {
 		return (Graphics2D) buffer.getGraphics();
 	}
 
 	/**
 	 * get Rendering viewport.
+	 * 
 	 * @return
 	 */
-	public Rectangle getViewport(){
+	public Rectangle getViewport() {
 		return viewport;
 	}
 
 	/**
 	 * get the internal buffer
+	 * 
 	 * @return
 	 */
-	public BufferedImage getBuffer(){
+	public BufferedImage getBuffer() {
 		return buffer;
 	}
 
 	/**
 	 * get the Bounds of this render.
+	 * 
 	 * @return
 	 */
-	public Dimension getBounds(){
+	public Dimension getBounds() {
 		return dimension;
 	}
 
-	public void setDebugMode(int debug){
+	/**
+	 * Set the debug mode
+	 * 
+	 * @param the new debug mode to switch to.
+	 */
+	public void setDebugMode(int debug) {
 		this.debug = debug;
 	}
 
+	/**
+	 * Set the Pixel Scale
+	 * 
+	 * @param scale new pixel scale to set.
+	 */
 	public void setScale(float scale) {
 		this.SCALE = scale;
 	}
 
-	public float getScale(){
+	/**
+	 * return the pixel scale.
+	 * 
+	 * @return value of the current pixel scale.
+	 */
+	public float getScale() {
 		return SCALE;
 	}
 
 	/**
 	 * Initialize the rendereing pipe and the Rendering area.
-	 * @param w
-	 * @param h
-	 * @param s
+	 * 
+	 * @param w the new Width of the buffer for the rendering pipeline
+	 * @param h the new Height of the buffer for the rendering pipeline
+	 * @param s the new pixel scale of the buffer for the rendering pipeline
 	 */
 	public void initialize(int w, int h, float s) {
-		this.dimension=new Dimension(w,h);
-		this.viewport = new Rectangle(0,0,w,h);
+		this.dimension = new Dimension(w, h);
+		this.SCALE = s;
+		this.viewport = new Rectangle(0, 0, w, h);
 		this.buffer = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		this.g = (Graphics2D) this.buffer.getGraphics();
 		clearRenderBuffer();
 		clearRenderingList();
 	}
 
-		/**
+	/**
 	 * return the scaled width for the game.
 	 * 
 	 * @return
