@@ -299,7 +299,7 @@ public class Render {
 	}
 
 	/**
-	 * Initialize the rendereing pipe and the Rendering area.
+	 * Initialize the rendering pipe and the Rendering area.
 	 * 
 	 * @param w the new Width of the buffer for the rendering pipeline
 	 * @param h the new Height of the buffer for the rendering pipeline
@@ -331,6 +331,15 @@ public class Render {
 	 */
 	public int getDisplayHeight() {
 		return (int) (HEIGHT * SCALE);
+	}
+
+	/**
+	 * return the rendering list of objects.
+	 * 
+	 * @return a list of GameObject.
+	 */
+	public List<GameObject> getRenderingList() {
+		return renderingList;
 	}
 
 }
