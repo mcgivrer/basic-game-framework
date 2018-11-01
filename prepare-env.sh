@@ -1,3 +1,8 @@
+#!/bin/bash
+# setup full build environment
+# copyright 2018
+# Frédéric Delorme
+#-----
 # update environment
 apt-get update 
 # install minimum platform

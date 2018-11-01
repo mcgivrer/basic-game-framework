@@ -94,9 +94,9 @@ public class Window {
     }
 
     /**
-     * Switch fullscreen.
+     * Switch between full screen and windowed mode.
      * 
-     * @param fullScreen
+     * @param fullScreen the fullscreen flag state.
      */
     public void switchFullScreen(boolean fullScreen) {
     	this.fullScreenMode = fullScreen;
@@ -123,7 +123,7 @@ public class Window {
     /**
      * Set Window Size according the {@link App} object.
      * 
-     * @param app
+     * @param app the apret app to align size with.
      */
     public void setSize(App app) {
         // fix a platform linked issue about window sizing.

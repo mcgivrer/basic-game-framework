@@ -139,7 +139,7 @@ public class GameObject {
 	 * @param g
 	 */
 	public void renderDebugInfo(Graphics2D g) {
-
+		// can be overrriden in another ojbect extending this class.
 	}
 
 	/**

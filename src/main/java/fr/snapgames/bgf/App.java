@@ -90,7 +90,7 @@ public class App extends JPanel {
 	public App(String title, String[] args) {
 		super();
 		this.title = title;
-		render=new Render(this,new Rectangle(320,240));
+		render = new Render(this, new Rectangle(320, 240));
 		parseArgs(args);
 		inputListener = new InputListener(this);
 	}
@@ -111,7 +111,7 @@ public class App extends JPanel {
 		this.addKeyListener(inputListener);
 		prepareKeyBinding();
 
-		//render = new Render(this, new Rectangle(WIDTH, HEIGHT));
+		// render = new Render(this, new Rectangle(WIDTH, HEIGHT));
 		win = new Window(this);
 
 		Font scoreFont = render.getGraphics().getFont().deriveFont(16.0f);
@@ -120,15 +120,8 @@ public class App extends JPanel {
 				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
 		add(scoreUI);
 
-		GameObject player = GameObject.builder("player")
-			.setSize(24, 24)
-			.setPosition(0, 0)
-			.setColor(Color.GREEN)
-			.setVelocity(0.0f, 0.0f)
-			.setLayer(10)
-			.setPriority(100)
-			.setElasticity(0.98f)
-			.setFriction(0.98f);
+		GameObject player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
+				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
 		add(player);
 
 		createGameObjects("enemy_", 10);
@@ -168,15 +161,10 @@ public class App extends JPanel {
 		pauseRendering = true;
 		Rectangle vp = render.getViewport();
 		for (int i = 0; i < nbEnemies; i++) {
-			GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
-				.setSize(16, 16)
-				.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
-				.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-				.setColor(randomColor())
-				.setPriority(i)
-				.setLayer(1)
-				.setElasticity(1.0f)
-				.setFriction(1.0f);
+			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
+					.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
+					.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
+					.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f);
 			add(enemy);
 		}
 		pauseRendering = false;
@@ -314,20 +302,20 @@ public class App extends JPanel {
 	 * @param o
 	 */
 	private void constrains(GameObject o) {
-		if ((int)(o.x + o.width) > render.getViewport().width || o.x < 0.0f) {
+		if ((int) (o.x + o.width) > render.getViewport().width || o.x < 0.0f) {
 			o.dx = -o.dx * o.friction * o.elasticity;
 		}
-		if ((int)(o.y + o.height) > render.getViewport().height || o.y < 0.0f) {
+		if ((int) (o.y + o.height) > render.getViewport().height || o.y < 0.0f) {
 			o.dy = -o.dy * o.friction * o.elasticity;
 		}
 		// speed threshold constraints
-		if(o.friction>0.0f || o.elasticity>0.0f){
+		if (o.friction > 0.0f || o.elasticity > 0.0f) {
 			if (Math.abs(o.dx) < 0.005f) {
 				o.dx = 0.0f;
 			}
 			if (Math.abs(o.dy) < 0.005f) {
 				o.dy = 0.0f;
-			}	
+			}
 		}
 	}
 
@@ -377,7 +365,7 @@ public class App extends JPanel {
 		case FIRE4:
 			removeGameObjects("enemy_", 100);
 			break;
-			
+
 		/**
 		 * remove all enemies
 		 */
@@ -487,9 +475,15 @@ public class App extends JPanel {
 		app.suspendRendering(false);
 	}
 
+	/**
+	 * Parse arguments from the command line and set corresponding values.
+	 * 
+	 * @param args array of parameters from command line.
+	 */
 	private void parseArgs(String[] args) {
-		int areaWidth=320,areaHeight=240;
-		float renderPixelScale=2.0f;
+		int areaWidth = 320;
+		int areaHeight = 240;
+		float renderPixelScale = 2.0f;
 		int debugMode = 0;
 		boolean fullScreenFlag = false;
 		if (args.length > 0) {
@@ -499,18 +493,18 @@ public class App extends JPanel {
 					switch (argSplit[0].toLowerCase()) {
 					case "w":
 					case "width":
-						areaWidth= Integer.parseInt(argSplit[1]);
-						logger.debug("Width set to {}",areaWidth);
+						areaWidth = Integer.parseInt(argSplit[1]);
+						logger.debug("Width set to {}", areaWidth);
 						break;
 					case "h":
 					case "height":
 						areaHeight = Integer.parseInt(argSplit[1]);
-						logger.debug("Height set to {}",areaHeight);
+						logger.debug("Height set to {}", areaHeight);
 						break;
 					case "s":
 					case "scale":
 						renderPixelScale = Float.parseFloat(argSplit[1]);
-						logger.debug("pixel Scale set to {}",renderPixelScale);
+						logger.debug("pixel Scale set to {}", renderPixelScale);
 
 						break;
 					case "d":
@@ -518,7 +512,7 @@ public class App extends JPanel {
 						debugMode = (Integer.parseInt(argSplit[1]) < 5 && Integer.parseInt(argSplit[1]) >= 0
 								? Integer.parseInt(argSplit[1])
 								: 0);
-								logger.debug("debug mode set to {}",debugMode);
+						logger.debug("debug mode set to {}", debugMode);
 
 						break;
 					case "fps":
@@ -544,21 +538,30 @@ public class App extends JPanel {
 		}
 	}
 
+	/**
+	 * set hte Frame Per Seconds.
+	 * 
+	 * @param fps the value of the frame per second.
+	 */
 	private void setFPS(long fps) {
 		FPS = fps;
 		timeFrame = (long) (1000 / FPS);
 	}
 
+	/**
+	 * return the list of objects for this game..
+	 * 
+	 * @return a list of GameObject.
+	 */
 	public List<GameObject> getObjects() {
 		// List<Value> values = map.values().stream().collect(Collectors.toList());
 		return objects.values().stream().collect(Collectors.toList());
 	}
 
-
 	/**
 	 * Set Pause mode.
 	 * 
-	 * @param b
+	 * @param b a flag to set the App in pause mode (true).
 	 */
 	public void setPause(boolean b) {
 		this.pause = b;
@@ -567,7 +570,7 @@ public class App extends JPanel {
 	/**
 	 * Set rendering pause mode.
 	 * 
-	 * @param b
+	 * @param b boolean to freeze the rendering pipeline (true)
 	 */
 	public void suspendRendering(boolean b) {
 		this.pauseRendering = b;
@@ -596,18 +599,38 @@ public class App extends JPanel {
 		return debug;
 	}
 
+	/**
+	 * set args list to be parsed.
+	 * 
+	 * @param args the list of parameters to be parsed.
+	 */
 	public void setArgs(String[] args) {
 		this.parseArgs(args);
 	}
 
+	/**
+	 * return the InputListener.
+	 * 
+	 * @return an InputListener attached to this App.
+	 */
 	public KeyListener getInputListener() {
 		return inputListener;
 	}
 
+	/**
+	 * return the real Frame per second rendered.
+	 * 
+	 * @return the number of frames rendered per seconds.
+	 */
 	public long getRealFPS() {
 		return realFPS;
 	}
 
+	/**
+	 * Return the Render instance for this App.
+	 * 
+	 * @return a Render instance.
+	 */
 	public Render getRender() {
 		return render;
 	}
@@ -615,10 +638,10 @@ public class App extends JPanel {
 	/**
 	 * App execution EntryPoint.
 	 * 
-	 * @param args
+	 * @param args the command line arguments passed to the main method.
 	 */
 	public static void main(String[] args) {
-		App app = new App("MyApp", args);
+		App app = new App("BGF", args);
 		app.run();
 	}
 
