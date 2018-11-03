@@ -6,7 +6,22 @@ This main class implements `Runnable` and `KeyListener` interface to provide a t
 
 This implements a `GameLoop` pattern with a maintained frame rate mechanism, providing `initialization`, `update` and `render`'ing features.
 
-the App interface is :
+```java
+void run(){
+  initialize();
+  while(!exit){
+    input();
+    update();
+    render();
+    drawToBuffer();
+  }
+  dispose();
+}
+```
+
+
+
+the App class will provide the following structure :
 
 ```Java
 class App{
@@ -29,11 +44,6 @@ class App{
   +initialize()
   +update(long dt)
   +render(graphics2D g)
-
-  // Key event processing
-  +keyPressed(KeyEvent e)
-  +keyReleased(KeyEvent e)
-  +keyTyped(KeyEvent e)
 
   //entry Point
   +main(args:String[])
