@@ -1,13 +1,8 @@
 /**
  * SnapGames
  * 
- * Game Development Java
- * 
- * basic-game-framework
- * 
  * @since 2018
- * @version %I%
- * 
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
 package fr.snapgames.bgf;
 

@@ -1,3 +1,9 @@
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
 package fr.snapgames.bgf;
 
 import java.awt.Color;
@@ -28,7 +34,7 @@ import fr.snapgames.bgf.InputListener.KeyBinding;
  * a Simple Application as a Basic Game framework.
  * 
  * @author Frédéric Delorme.
- * @year 2018
+ * @since 2018
  * @see https://github.com/snapgames/basic-game-framework/wiki
  */
 public class App extends JPanel {
