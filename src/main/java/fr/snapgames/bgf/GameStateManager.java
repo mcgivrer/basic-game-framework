@@ -157,8 +157,13 @@ public class GameStateManager {
 		currentState = null;
 	}
 
-	public void action(KeyBinding keyBind) {
-		currentState.action(keyBind);
+	/**
+	 * Manage action for the current State.
+	 * 
+	 * @param keyBinding
+	 */
+	public void action(KeyBinding keyBinding) {
+		currentState.action(keyBinding);
 	}
 
 }
