@@ -75,7 +75,18 @@ You can also push some keys to change visual content :
 
 ### Some screenshot
 
+- *A full debug display mode for this capture*
+
 ![a small screenshot](https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-001.png "a Sample screenshot of the display")
+
+- *462 small objects displayed at 100 FPS*
+
+![a small screenshot](https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-002.png "a Sample screenshot of the display")
+
+- Mode pause activated.
+
+![a small screenshot](https://raw.githubusercontent.com/SnapGames/basic-game-framework/develop/docs/images/screenshot-003.png "a Sample screenshot of the display")
+
 
 > That's all folks !
 

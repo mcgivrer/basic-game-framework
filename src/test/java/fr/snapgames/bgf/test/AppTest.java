@@ -32,7 +32,7 @@ public class AppTest{
         App app = new App("My title", new String[]{"w=320","h=240"});
         app.initialize();
         assertNotNull("The Window object is null !", app.getWindow());
-        assertEquals("the window width is not set to the requested value", app.getRenderingBuffer().getWidth(),320);
-        assertEquals("the window height is not set to the requested value", app.getRenderingBuffer().getHeight(),240);
+        assertEquals("the window width is not set to the requested value", app.getRender().getBuffer().getWidth(),320);
+        assertEquals("the window height is not set to the requested value", app.getRender().getBuffer().getHeight(),240);
     }
 }

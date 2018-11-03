@@ -11,8 +11,8 @@
             "args": [
                 "d=2",
                 "w=320",
-                "h=200",
-                "s=2.5"
+                "h=240",
+                "s=2.0"
             ],
             "projectName": "basic-game-framework"
         },

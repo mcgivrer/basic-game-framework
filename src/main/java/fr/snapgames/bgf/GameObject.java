@@ -77,7 +77,7 @@ public class GameObject {
 	public int layer = 0;
 	public int priority = 0;
 
-	public int x = 0, y = 0, width = 16, height = 16;
+	public float x = 0, y = 0, width = 16, height = 16;
 
 	public float dx = 0, dy = 0;
 	public float friction = 0.13f;
@@ -107,7 +107,7 @@ public class GameObject {
 	 */
 	public GameObject(String name, int x, int y, BufferedImage image) {
 		this(name);
-		setPosition(x, y); 
+		setPosition(x, y);
 	}
 
 	/**
@@ -126,11 +126,20 @@ public class GameObject {
 	 */
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(image, x, y, null);
+			g.drawImage(image, (int)x, (int)y, null);
 		} else {
 			g.setColor(color);
-			g.fillRect(x, y, width, height);
+			g.fillRect((int)x, (int)y, (int)width, (int)height);
 		}
+	}
+
+	/**
+	 * Rendering some debug information.
+	 * 
+	 * @param g
+	 */
+	public void renderDebugInfo(Graphics2D g) {
+		// can be overrriden in another ojbect extending this class.
 	}
 
 	/**
@@ -140,11 +149,11 @@ public class GameObject {
 	 * @param y
 	 * @return
 	 */
-	public GameObject setPosition(int x, int y) {
+	public GameObject setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
-		boundingBox.x = x;
-		boundingBox.x = y;
+		boundingBox.x = (int)x;
+		boundingBox.x = (int)y;
 		return this;
 	}
 
@@ -223,7 +232,7 @@ public class GameObject {
 	/**
 	 * Set the physic elasticity parameter for this `GameObject`.
 	 * 
-	 * @param elasticity 
+	 * @param elasticity
 	 * @return
 	 */
 	public GameObject setElasticity(float elasticity) {
@@ -234,7 +243,7 @@ public class GameObject {
 	/**
 	 * Set the physic friction parameter for this `GameObject`.
 	 * 
-	 * @param friction 
+	 * @param friction
 	 * @return
 	 */
 	public GameObject setFriction(float friction) {
@@ -253,13 +262,9 @@ public class GameObject {
 	}
 
 	@Override
-	public String toString(){
-		StringBuilder builder = new StringBuilder()
-		.append("GameObject{")
-		.append("name='").append(name).append("'")
-		.append(",layer=").append(layer)
-		.append(",priority=").append(priority)
-		.append("}");
+	public String toString() {
+		StringBuilder builder = new StringBuilder().append("GameObject{").append("name='").append(name).append("'")
+				.append(",layer=").append(layer).append(",priority=").append(priority).append("}");
 		return builder.toString();
 	}
 
