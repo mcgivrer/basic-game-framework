@@ -64,7 +64,11 @@ import java.awt.image.BufferedImage;
  * easily new <code>GameObject</code>, like
  * {@link GameObject#setPosition(int, int)} or
  * {@link GameObject#setVelocity(float, float)}.
+ * 
  * </p>
+ * 
+ * @author Frédéric Delorme
+ * @since 2018
  * 
  */
 public class GameObject {
@@ -124,10 +128,10 @@ public class GameObject {
 	 */
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(image, (int)x, (int)y, null);
+			g.drawImage(image, (int) x, (int) y, null);
 		} else {
 			g.setColor(color);
-			g.fillRect((int)x, (int)y, (int)width, (int)height);
+			g.fillRect((int) x, (int) y, (int) width, (int) height);
 		}
 	}
 
@@ -150,8 +154,8 @@ public class GameObject {
 	public GameObject setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
-		boundingBox.x = (int)x;
-		boundingBox.x = (int)y;
+		boundingBox.x = (int) x;
+		boundingBox.x = (int) y;
 		return this;
 	}
 

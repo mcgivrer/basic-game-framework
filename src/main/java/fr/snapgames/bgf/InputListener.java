@@ -82,7 +82,7 @@ public class InputListener implements KeyListener {
 
 		for (KeyBinding keyBind : keyBinding.keySet()) {
 			if (e.getKeyCode() == keyBinding.get(keyBind)) {
-				app.action(keyBind);
+				app.gsm.action(keyBind);
 			}
 		}
 	}

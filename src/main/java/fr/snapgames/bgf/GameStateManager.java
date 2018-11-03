@@ -14,126 +14,151 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fr.snapgames.bgf.InputListener.KeyBinding;
+
 /**
  * The Game state manager is the service to switch smouthlessly between 2
  * gameplays (GameState) for the parent App.
  * 
  * @since 2018
  * @author Frédéric Delorme
+ * @see https://github.com/SnapGames/basic-game-framework/wiki/gsm
  */
 public class GameStateManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(GameStateManager.class);
+	/**
+	 * internal State instance counter.
+	 */
+	private static long uid;
 
-    /**
-     * list of declared GameState for this manager
-     */
-    Map<String, GameState> states = new ConcurrentHashMap<>();
+	/**
+	 * the parent app.
+	 */
+	private App app;
 
-    /**
-     * the currently active GameState.
-     */
-    GameState currentState;
+	/**
+	 * list of declared GameState for this manager
+	 */
+	Map<String, GameState> states;
 
-    /**
-     * Initialize the Game State Manager for the parent app.
-     * 
-     * @param app the parent App instance.
-     */
-    public void initialize(App app) {
-        if (states.size() == 0) {
-            logger.error("need to add State to the GameStateManager");
-        }
-    }
+	/**
+	 * the currently active GameState.
+	 */
+	GameState currentState;
 
-    /**
-     * Add a new state to the states list.
-     * 
-     * @param state        the instance of the state to be added to the manager
-     *                     state list.
-     * @param defaultState this flag notify the GSM this state i sthe default one.
-     */
-    public void add(GameState state, boolean defaultState) {
-        states.put(state.getName(), state);
-        if (defaultState) {
-            currentState = state;
-        }
-    }
+	public GameStateManager(App app) {
+		this.app = app;
+		states = new ConcurrentHashMap<>();
+	}
 
-    /**
-     * Switch to the <code>nameState</code> GameState instance, if exists in the
-     * <code>states</code> map.
-     * 
-     * @param app       the parent App instance.
-     * @param nameState the new state to be activated.
-     */
-    public void switchState(App app, String nameState) {
-        if(states.containsKey(nameState)){
-            if (currentState != null) {
-                currentState.dispose(app);
-            }
-            currentState = states.get(nameState);
-            currentState.initialize(app);
-        }else{
-            logger.error("Unable to activate {}, state does not exist in states list.", nameState);
-        }
-    }
+	/**
+	 * Initialize the Game State Manager for the parent app.
+	 * 
+	 * @param app the parent App instance.
+	 */
+	public void initialize(App app) {
+		if (states.size() == 0) {
+			logger.error("need to add State to the GameStateManager");
+		}
+	}
 
-    /**
-     * Load from teh states.xml file all the defined GameState for the game.
-     * <p>
-     * TODO implements the load(App) method.
-     * </p>
-     * 
-     * @param app the parent App instance.
-     */
-    public void load(App app) {
+	/**
+	 * Add a new state to the states list.
+	 * 
+	 * @param state        the instance of the state to be added to the manager
+	 *                     state list.
+	 * @param defaultState this flag notify the GSM this state is the default one.
+	 */
+	public void add(GameState state, boolean defaultState) {
+		states.put(state.getName(), state);
+		if (defaultState) {
+			currentState = state;
+			currentState.initialize(app);
+			currentState.create(app, uid++);
+			logger.debug("Set the state {} as a default one.", state.getName());
+		}
+	}
 
-    }
+	/**
+	 * Switch to the <code>nameState</code> GameState instance, if exists in the
+	 * <code>states</code> map.
+	 * 
+	 * @param app       the parent App instance.
+	 * @param nameState the new state to be activated.
+	 */
+	public void switchState(App app, String nameState) {
+		if (states.containsKey(nameState)) {
+			if (currentState != null) {
+				currentState.dispose(app);
+			}
+			currentState = states.get(nameState);
+			currentState.initialize(app);
+			logger.debug("Initialize the currentState with {}", currentState.getName());
+		} else {
+			logger.error("Unable to activate {}, state does not exist in states list.", nameState);
+		}
+	}
 
-    /**
-     * Delegate the input management to the current active state.
-     * 
-     * @param app the parent App instance.
-     * @param il  the Inupot listeener instantiated for the parent App.
-     */
-    public void input(App app, InputListener il) {
-        currentState.input(app, il);
-    }
+	/**
+	 * Load from teh states.xml file all the defined GameState for the game.
+	 * <p>
+	 * TODO implements the load(App) method.
+	 * </p>
+	 * 
+	 * @param app the parent App instance.
+	 */
+	public void load(App app) {
 
-    /**
-     * Delegate the Update action according to the dt elapsed time to the current
-     * active state.
-     * 
-     * @param app the parent App instance.
-     * @param dt  the elasped time since previous call.
-     */
-    public void update(App app, long dt) {
-        currentState.update(app, dt);
-    }
+	}
 
-    /**
-     * Delegate the rendering process to the current active state
-     * 
-     * @param app the parent App instance.
-     * @param g   the Graphics2D API to use for the rendering process.
-     */
-    public void render(App app, Graphics2D g) {
-        currentState.render(app, g);
-    }
+	/**
+	 * Delegate the input management to the current active state.
+	 * 
+	 * @param app the parent App instance.
+	 * @param il  the Inupot listeener instantiated for the parent App.
+	 */
+	public void input(App app, InputListener il) {
+		currentState.input(app, il);
+	}
 
-    /**
-     * Release all resources for the initialized states.
-     * 
-     * @param app the parent App instance.
-     */
-    public void dispose(App app) {
-        for (Entry<String, GameState> entry : states.entrySet()) {
-            entry.getValue().dispose(app);
-        }
-        states.clear();
-        states = null;
-        currentState = null;
-    }
+	/**
+	 * Delegate the Update action according to the dt elapsed time to the current
+	 * active state.
+	 * 
+	 * @param app the parent App instance.
+	 * @param dt  the elasped time since previous call.
+	 */
+	public void update(App app, long dt) {
+		currentState.update(app, dt);
+	}
+
+	/**
+	 * Delegate the rendering process to the current active state
+	 * 
+	 * @param app the parent App instance.
+	 * @param g   the Graphics2D API to use for the rendering process.
+	 */
+	public void render(App app, Graphics2D g) {
+		currentState.render(app, g);
+	}
+
+	/**
+	 * Release all resources for the initialized states.
+	 * 
+	 * @param app the parent App instance.
+	 */
+	public void dispose(App app) {
+		for (Entry<String, GameState> entry : states.entrySet()) {
+			entry.getValue().dispose(app);
+		}
+		states.clear();
+		states = null;
+		currentState = null;
+	}
+
+	public void action(KeyBinding keyBind) {
+		currentState.action(keyBind);
+	}
 
 }

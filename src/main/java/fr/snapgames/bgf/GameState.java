@@ -7,9 +7,13 @@
 package fr.snapgames.bgf;
 
 import java.awt.Graphics2D;
+import java.util.Map;
+
+import fr.snapgames.bgf.InputListener.KeyBinding;
 
 /**
  * The interface for any Game State managed by the GameStateManager.
+ * 
  * @since 2018
  * @author Frédéric Delorme
  * @see https://github.com//SnapGames/basic-game-framework/wiki
@@ -41,7 +45,7 @@ public interface GameState {
      * 
      * @param app the main application managing this state.
      */
-    void create(App app);
+    void create(App app, long uid);
 
     /**
      * release all the dependencies for this state.
@@ -59,6 +63,13 @@ public interface GameState {
     void input(App app, InputListener il);
 
     /**
+     * Process KeyBinding actions.
+     * 
+     * @param kb the keyBinding action requested.
+     */
+    void action(KeyBinding kb);
+
+    /**
      * Update this state according the elapsed time (dt).
      * 
      * @param app the main application managing this state.
@@ -73,4 +84,11 @@ public interface GameState {
      * @param g   the Graphics2D API available to render this state.
      */
     void render(App app, Graphics2D g);
+
+    /**
+     * return the list of GameObject for this state.
+     * 
+     * @return
+     */
+    Map<String, GameObject> getObjects();
 }
