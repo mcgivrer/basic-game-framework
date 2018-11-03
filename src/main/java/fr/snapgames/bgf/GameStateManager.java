@@ -172,7 +172,6 @@ public class GameStateManager {
 	 * @return the current GameState.
 	 */
 	public GameState getCurrentState() {
-		// TODO Auto-generated method stub
 		return currentState;
 	}
 
