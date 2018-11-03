@@ -40,12 +40,12 @@ public class GameStateManager {
 	/**
 	 * list of declared GameState for this manager
 	 */
-	Map<String, GameState> states;
+	private Map<String, GameState> states;
 
 	/**
 	 * the currently active GameState.
 	 */
-	GameState currentState;
+	private GameState currentState;
 
 	public GameStateManager(App app) {
 		this.app = app;
@@ -157,8 +157,23 @@ public class GameStateManager {
 		currentState = null;
 	}
 
-	public void action(KeyBinding keyBind) {
-		currentState.action(keyBind);
+	/**
+	 * Manage action for the current State.
+	 * 
+	 * @param keyBinding
+	 */
+	public void action(KeyBinding keyBinding) {
+		currentState.action(keyBinding);
+	}
+
+	/**
+	 * Return the current active state.
+	 * 
+	 * @return the current GameState.
+	 */
+	public GameState getCurrentState() {
+		// TODO Auto-generated method stub
+		return currentState;
 	}
 
 }

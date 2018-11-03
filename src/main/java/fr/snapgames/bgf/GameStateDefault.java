@@ -30,7 +30,7 @@ public class GameStateDefault {
 
 	protected App app;
 
-	Map<String, GameObject> objects = new ConcurrentHashMap<>();
+	protected Map<String, GameObject> objects = new ConcurrentHashMap<>();
 
 	/**
 	 * retrieve the name for this state.

@@ -20,10 +20,10 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 	private int score = 0;
 
-	UIText scoreUiText;
-	GameObject player;
+	private UIText scoreUiText;
+	private GameObject player;
 
-		@Override
+	@Override
 	public void initialize(App app) {
 		this.app = app;
 	}
@@ -104,7 +104,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 	@Override
 	public void dispose(App app) {
-
+		// TODO next time some release of resource will implemented here.
 	}
 
 	@Override

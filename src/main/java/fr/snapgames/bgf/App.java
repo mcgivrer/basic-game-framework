@@ -76,7 +76,10 @@ public class App extends JPanel {
 
 	private Render render;
 
-	GameStateManager gsm;
+	/**
+	 * the manager to switch GameState's.
+	 */
+	private GameStateManager gsm;
 
 	/**
 	 * Translated Messages
@@ -330,7 +333,7 @@ public class App extends JPanel {
 	 */
 	public List<GameObject> getObjects() {
 		// List<Value> values = map.values().stream().collect(Collectors.toList());
-		return gsm.currentState.getObjects().values().stream().collect(Collectors.toList());
+		return gsm.getCurrentState().getObjects().values().stream().collect(Collectors.toList());
 	}
 
 	/**
@@ -409,6 +412,15 @@ public class App extends JPanel {
 	public Render getRender() {
 		return render;
 	}
+
+	/**
+	 * return the GameState manager.
+	 * @return
+	 */
+	public GameStateManager getGSM() {
+		return gsm;
+	}
+
 
 	/**
 	 * Request to Main App to exit.
