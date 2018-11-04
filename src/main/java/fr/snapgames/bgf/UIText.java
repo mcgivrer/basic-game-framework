@@ -1,12 +1,10 @@
 /**
  * SnapGames
  * 
- * Game Development Java
- * 
- * basic-game-framework
- * 
- * @year 2018
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
+
 package fr.snapgames.bgf;
 
 import java.awt.Color;

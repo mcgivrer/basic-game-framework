@@ -1,3 +1,9 @@
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
 package fr.snapgames.bgf;
 
 import java.awt.event.KeyEvent;
@@ -76,7 +82,7 @@ public class InputListener implements KeyListener {
 
 		for (KeyBinding keyBind : keyBinding.keySet()) {
 			if (e.getKeyCode() == keyBinding.get(keyBind)) {
-				app.action(keyBind);
+				app.getGSM().action(keyBind);
 			}
 		}
 	}
