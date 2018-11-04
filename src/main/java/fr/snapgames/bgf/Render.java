@@ -14,6 +14,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -53,6 +54,11 @@ public class Render {
 	 * List of object to be rendered.
 	 */
 	private List<GameObject> renderingList = new CopyOnWriteArrayList<>();
+
+	/**
+	 * default path to store image captures.
+	 */
+	private static String path = System.getProperty("user.home") + File.separator + "screenshots";
 
 	/**
 	 * Initialize the renderer with a viewport size.
@@ -97,13 +103,16 @@ public class Render {
 		// render pause status
 		if (pause) {
 			String pauseLabel = app.getLabel("app.label.pause");
+
 			g.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 			g.fillRect(0, HEIGHT / 2, WIDTH, 32);
+
 			g.setColor(Color.GRAY);
 			g.drawRect(-2, HEIGHT / 2, WIDTH + 4, 32);
 
 			g.setColor(Color.WHITE);
 			g.setFont(g.getFont().deriveFont(18.0f));
+
 			Render.drawOutlinedString(g, (WIDTH - g.getFontMetrics().stringWidth(pauseLabel)) / 2,
 					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
 		}
@@ -335,6 +344,26 @@ public class Render {
 	 */
 	public List<GameObject> getRenderingList() {
 		return renderingList;
+	}
+
+	/**
+	 * Take a screenshot from the image to the default `user.dir`.
+	 * 
+	 * @param image image to be saved to disk.
+	 */
+	public static void screenshot(App app) {
+		int scindex = 0;
+		app.suspendRendering(true);
+		try {
+			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
+			javax.imageio.ImageIO.write(
+				app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), 
+				"PNG", 
+				out);
+		} catch (Exception e) {
+			System.err.println("Unable to write screenshot to " + path);
+		}
+		app.suspendRendering(false);
 	}
 
 }

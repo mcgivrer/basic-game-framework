@@ -6,7 +6,6 @@
  */
 package fr.snapgames.bgf;
 
-import java.awt.Graphics2D;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -139,8 +138,8 @@ public class GameStateManager {
 	 * @param app the parent App instance.
 	 * @param g   the Graphics2D API to use for the rendering process.
 	 */
-	public void render(App app, Graphics2D g) {
-		currentState.render(app, g);
+	public void render(App app, Render r) {
+		currentState.render(app, r);
 	}
 
 	/**

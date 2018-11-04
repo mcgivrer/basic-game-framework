@@ -132,6 +132,8 @@ public class GameObject {
 		} else {
 			g.setColor(color);
 			g.fillRect((int) x, (int) y, (int) width, (int) height);
+			g.setColor(Color.BLACK);
+			g.drawRect((int) x, (int) y, (int) width, (int) height);
 		}
 	}
 

@@ -38,10 +38,6 @@ public class App extends JPanel {
 	private static final long serialVersionUID = 2924281870738631982L;
 
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getCanonicalName());
-	/**
-	 * default path to store image captures.
-	 */
-	private static String path = System.getProperty("user.home") + File.separator + "screenshots";
 
 	/**
 	 * title of the application;
@@ -49,12 +45,16 @@ public class App extends JPanel {
 	private String title = "NoName";
 
 	/**
-	 * <p>Internal flags</p>
+	 * <p>
+	 * Internal flags
+	 * </p>
 	 * <ul>
 	 * <li><code>exit</code> a flag to request exit of the game.</li>
 	 * <li><code>pause</code> a flag to request pause</li>
-	 * <li><code>pauseRendering</code> a flag to request a pause of the rendering process.</li>
-	 * <li><code>fullScreen</code> a flag to request switching between full screen and window.</li>
+	 * <li><code>pauseRendering</code> a flag to request a pause of the rendering
+	 * process.</li>
+	 * <li><code>fullScreen</code> a flag to request switching between full screen
+	 * and window.</li>
 	 * </ul>
 	 */
 	private boolean exit = false;
@@ -72,8 +72,14 @@ public class App extends JPanel {
 	private long timeFrame = (1000 / FPS);
 	private long realFPS = 0;
 
+	/**
+	 * The InputListener to manage all input !
+	 */
 	private InputListener inputListener;
 
+	/**
+	 * the internal render component.
+	 */
 	private Render render;
 
 	/**
@@ -166,9 +172,7 @@ public class App extends JPanel {
 				gsm.update(this, elapsed);
 			}
 			if (!pauseRendering) {
-				render.clearRenderBuffer();
-				render.renderToBuffer();
-				render.drawBufferToScreen();
+				gsm.render(this, render);
 			}
 			elapsed = System.currentTimeMillis() - previous;
 			cumulation += elapsed;
@@ -228,29 +232,16 @@ public class App extends JPanel {
 		this.backupRectangle = frame.getBounds();
 	}
 
+	/**
+	 * Reset the size of the game display.
+	 * 
+	 * @param rect the Dimension of the new viewport to be set.
+	 */
 	public void setSize(Dimension rect) {
 		float wScale = (float) rect.width / WIDTH;
 		float hScale = (float) rect.height / HEIGHT;
 		render.setScale((hScale > wScale ? hScale : wScale));
 		super.setSize(rect);
-
-	}
-
-	/**
-	 * Take a screenshot from the image to the default `user.dir`.
-	 * 
-	 * @param image image to be saved to disk.
-	 */
-	public static void screenshot(App app, BufferedImage image) {
-		int scindex = 0;
-		app.suspendRendering(true);
-		try {
-			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(image.getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG", out);
-		} catch (Exception e) {
-			System.err.println("Unable to write screenshot to " + path);
-		}
-		app.suspendRendering(false);
 	}
 
 	/**
@@ -415,12 +406,12 @@ public class App extends JPanel {
 
 	/**
 	 * return the GameState manager.
+	 * 
 	 * @return
 	 */
 	public GameStateManager getGSM() {
 		return gsm;
 	}
-
 
 	/**
 	 * Request to Main App to exit.
@@ -431,11 +422,19 @@ public class App extends JPanel {
 		exit = true;
 	}
 
+	/**
+	 * request a full switch between windows and fullscreen mode.
+	 */
 	public void switchFullScreen() {
 		fullScreen = !fullScreen;
 		win.switchFullScreen(fullScreen);
 	}
 
+	/**
+	 * Return true if the main App is in pause mode.
+	 * 
+	 * @return true if in pause or not.
+	 */
 	public boolean isPause() {
 		return pause;
 	}

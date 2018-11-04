@@ -78,7 +78,24 @@ public class GameStateDefault {
 		logger.debug("Object %s removed", go);
 	}
 
+	/**
+	 * return all objects managed by this GameState.
+	 * 
+	 * @return a list of GameObject's.
+	 */
 	public Map<String, GameObject> getObjects() {
 		return objects;
+	}
+
+
+	/**
+	 * The game state rendering phase.
+	 * @param app
+	 * @param render
+	 */
+	public void render(App app, Render render){
+		render.clearRenderBuffer();
+		render.renderToBuffer();
+		render.drawBufferToScreen();
 	}
 }

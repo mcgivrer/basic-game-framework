@@ -1,8 +1,14 @@
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
+
 package fr.snapgames.bgf;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.Map;
@@ -163,6 +169,11 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 	}
 
+	/**
+	 * manage actions for this state.
+	 * 
+	 * @param keyBind the key bound to action.
+	 */
 	public void action(KeyBinding keyBind) {
 		switch (keyBind) {
 		/**
@@ -186,12 +197,15 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		case FIRE1:
 			createGameObjects(app, "enemy_", 10);
 			break;
+
 		case FIRE2:
 			removeGameObjects(app, "enemy_", 10);
 			break;
+
 		case FIRE3:
 			createGameObjects(app, "enemy_", 100);
 			break;
+
 		case FIRE4:
 			removeGameObjects(app, "enemy_", 100);
 			break;
@@ -208,7 +222,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		 */
 		case SCREENSHOT:
 			app.setPause(true);
-			App.screenshot(app, app.getRender().getBuffer());
+			Render.screenshot(app);
 			app.setPause(false);
 			break;
 
@@ -231,10 +245,6 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 	}
 
-	@Override
-	public void render(App app, Graphics2D g) {
-
-	}
 
 	public String getName() {
 		return "SampleGameState";

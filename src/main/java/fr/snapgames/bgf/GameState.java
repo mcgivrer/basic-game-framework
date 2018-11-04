@@ -6,7 +6,6 @@
  */
 package fr.snapgames.bgf;
 
-import java.awt.Graphics2D;
 import java.util.Map;
 
 import fr.snapgames.bgf.InputListener.KeyBinding;
@@ -81,9 +80,9 @@ public interface GameState {
      * Render this state with the Graphics2D api g.
      * 
      * @param app the main application managing this state.
-     * @param g   the Graphics2D API available to render this state.
+     * @param g   the Render to be used to render this state.
      */
-    void render(App app, Graphics2D g);
+    void render(App app, Render r);
 
     /**
      * return the list of GameObject for this state.
