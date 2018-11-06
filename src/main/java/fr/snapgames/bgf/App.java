@@ -10,8 +10,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import com.google.gson.Gson;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,8 +143,8 @@ public class App extends JPanel {
 
 		myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD2);
 		myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD5);
-		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_NUMPAD3);
-		myKB.put(KeyBinding.FIRE4, KeyEvent.VK_NUMPAD6);
+		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_PAGE_UP);
+		myKB.put(KeyBinding.FIRE4, KeyEvent.VK_PAGE_DOWN);
 
 		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
 		myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
@@ -150,7 +152,23 @@ public class App extends JPanel {
 		myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
 		myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
 		myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
+		writeKeyMapping(myKB);
 		inputListener.prepareKeyBinding(myKB);
+	}
+
+	private void writeKeyMapping(Map<KeyBinding, Integer> myKB) {
+		Gson gson = new Gson();
+		logger.info("Keymapping:" + gson.toJson(myKB));
+		try {
+			Files.write(
+				Paths.get(
+					this.getClass().getResource("/keymapping.json").toURI()),
+				gson.toJson(myKB).getBytes("utf-8"));
+				logger.debug("mapping keys:"+App.class.getClassLoader().getResource("/").getFile()+"keymapping.json");
+		} catch (Exception ioe) {
+			logger.error("Unable to write the file", ioe);
+		}
+
 	}
 
 	/**
