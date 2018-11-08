@@ -39,7 +39,7 @@ public class Window {
 
     private float backScale;
 
-    private static GraphicsDevice device;
+    private GraphicsDevice device;
 
     /**
      * Create a window for the App <code>app</code>.

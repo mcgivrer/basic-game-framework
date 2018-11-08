@@ -10,6 +10,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,8 @@ import javax.swing.JPanel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
 
 import fr.snapgames.bgf.core.audio.SoundControl;
 import fr.snapgames.bgf.core.entity.GameObject;
@@ -151,7 +155,7 @@ public class App extends JPanel {
 	 */
 	private void prepareKeyBinding() {
 		Map<KeyBinding, Integer> myKB = new HashMap<>();
-
+		// temporary set key/action mapping
 		myKB.put(KeyBinding.UP, KeyEvent.VK_UP);
 		myKB.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
 		myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
@@ -169,8 +173,9 @@ public class App extends JPanel {
 		myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
 		myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
 		myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
-		writeKeyMapping(myKB);
 		inputListener.prepareKeyBinding(myKB);
+
+		writeKeyMapping(myKB);
 	}
 
 	/**
@@ -179,13 +184,17 @@ public class App extends JPanel {
 	 * @param myKB
 	 */
 	private void writeKeyMapping(Map<KeyBinding, Integer> myKB) {
-		/*
-		 * Gson gson = new Gson(); logger.info("Keymapping:" + gson.toJson(myKB)); try {
-		 * Files.write(Paths.get(this.getClass().getResource("/keymapping.json").toURI()
-		 * ), gson.toJson(myKB).getBytes("utf-8")); logger.debug("mapping keys:" +
-		 * App.class.getClassLoader().getResource("/").getFile() + "keymapping.json"); }
-		 * catch (Exception ioe) { logger.error("Unable to write the file", ioe); }
-		 */
+
+		Gson gson = new Gson();
+		logger.info("Keymapping:" + gson.toJson(myKB));
+		try {
+			Files.write(Paths.get(this.getClass().getResource("/keymapping.json").toURI()),
+					gson.toJson(myKB).getBytes("utf-8"));
+			logger.debug("mapping keys:" + App.class.getClassLoader().getResource("/").getFile() + "keymapping.json");
+		} catch (Exception ioe) {
+			logger.error("Unable to write the file", ioe);
+		}
+
 	}
 
 	/**

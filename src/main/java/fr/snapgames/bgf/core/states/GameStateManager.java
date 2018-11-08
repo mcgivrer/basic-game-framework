@@ -111,7 +111,7 @@ public class GameStateManager {
 	 * @param app the parent App instance.
 	 */
 	public void load(App app) {
-
+		// TODO implements the loading process of states to the GameStateManager.
 	}
 
 	/**

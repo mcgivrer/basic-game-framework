@@ -38,11 +38,11 @@ public class SoundControl {
 	/**
 	 * Internal play Stack
 	 */
-	Stack<String> soundsStack = new Stack<String>();
+	private Stack<String> soundsStack = new Stack<String>();
 	/**
 	 * Internal SoundBank.
 	 */
-	Map<String, SoundClip> soundBank = new ConcurrentHashMap<String, SoundClip>();
+	private Map<String, SoundClip> soundBank = new ConcurrentHashMap<String, SoundClip>();
 
 	/**
 	 * Internal constructor.
