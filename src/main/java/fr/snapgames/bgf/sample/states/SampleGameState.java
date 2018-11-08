@@ -4,8 +4,7 @@
  * @since 2018
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
-
-package fr.snapgames.bgf;
+package fr.snapgames.bgf.sample.states;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -18,36 +17,74 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.InputListener.KeyBinding;
+import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.gfx.Render;
+import fr.snapgames.bgf.core.gfx.ui.UIText;
+import fr.snapgames.bgf.core.io.InputListener;
+import fr.snapgames.bgf.core.io.InputListener.KeyBinding;
+import fr.snapgames.bgf.core.resources.ResourceUnknownException;
+import fr.snapgames.bgf.core.states.GameState;
+import fr.snapgames.bgf.core.states.GameStateDefault;
 
 public class SampleGameState extends GameStateDefault implements GameState {
+
+	public static final String NAME = "SampleGameState";
 
 	private static final Logger logger = LoggerFactory.getLogger(SampleGameState.class);
 
 	private int score = 0;
 
+	private Font scoreFont;
 	private UIText scoreUiText;
 	private GameObject player;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.snapgames.bgf.core.states.GameStateDefault#initialize(fr.snapgames.bgf.
+	 * core.App)
+	 */
 	@Override
 	public void initialize(App app) {
 		this.app = app;
+
+		app.resManager.addResource("images/playerBall", "res/images/blue-bouncing-ball-64x64.png");
+		app.resManager.addResource("images/enemyBall", "res/images/red-bouncing-ball-64x64.png");
+		app.soundCtrl.load("sounds/boing", "res/audio/sounds/boing1.wav");
+
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.snapgames.bgf.core.states.GameState#create(fr.snapgames.bgf.core.App,
+	 * long)
+	 */
 	@Override
 	public void create(App app, long uid) {
 		this.uid = uid;
-		Font scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
+
+		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
 		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.setPosition(12, 24).setLayer(10).setElasticity(0.98f).setFriction(0.98f).setLayer(20);
+				.setPosition(12, 24).setLayer(20);
 		add(scoreUiText);
 
-		player = GameObject.builder("player").setSize(24, 24).setPosition(0, 0).setColor(Color.GREEN)
-				.setVelocity(0.0f, 0.0f).setLayer(10).setPriority(100).setElasticity(0.98f).setFriction(0.98f);
-		add(player);
+		try {
+
+			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(0.95f).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(1.2f).setFriction(0.98f);
+			add(player);
+
+		} catch (ResourceUnknownException rue) {
+			logger.error("Unable to load the resource", rue);
+		}
 
 		createGameObjects(app, "enemy_", 10);
+
 	}
 
 	/**
@@ -58,12 +95,17 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	private void createGameObjects(App app, String baseName, int nbEnemies) {
 		app.suspendRendering(true);
 		Rectangle vp = app.getRender().getViewport();
-		for (int i = 0; i < nbEnemies; i++) {
-			GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
-					.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
-					.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-					.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f);
-			add(enemy);
+		try {
+			for (int i = 0; i < nbEnemies; i++) {
+				GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
+						.setImage(app.resManager.getImage("images/enemyBall"))
+						.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
+						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
+						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f);
+				add(enemy);
+			}
+		} catch (ResourceUnknownException rue) {
+			logger.error("Unable to load the resource", rue);
 		}
 		app.suspendRendering(false);
 
@@ -117,9 +159,6 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void input(App app, InputListener inputListener) {
 		GameObject goPlayer = objects.get("player");
 
-		goPlayer.dy *= goPlayer.friction;
-		goPlayer.dx *= goPlayer.friction;
-
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
 			goPlayer.dx = -0.1f;
 		}
@@ -132,6 +171,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
 			goPlayer.dy = 0.1f;
 		}
+		goPlayer.dy *= goPlayer.friction;
+		goPlayer.dx *= goPlayer.friction;
 
 	}
 
@@ -139,11 +180,9 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void update(App app, long dt) {
 		for (Entry<String, GameObject> entry : objects.entrySet()) {
 			entry.getValue().update(dt);
-			constrains(entry.getValue());
+			constrains(app, entry.getValue());
 		}
-		score++;
-		scoreUiText.setText(String.format("%05d", score));
-
+		scoreUiText.setText(String.format("%05d", score++));
 	}
 
 	/**
@@ -151,22 +190,59 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 * 
 	 * @param o
 	 */
-	private void constrains(GameObject o) {
+	private void constrains(App app, GameObject o) {
+
+		boolean colliding = false;
+
+		// detect is there are some collision with out viewport border
+
 		if ((int) (o.x + o.width) > app.getRender().getViewport().width || o.x < 0.0f) {
 			o.dx = -o.dx * o.friction * o.elasticity;
+			colliding = true;
 		}
 		if ((int) (o.y + o.height) > app.getRender().getViewport().height || o.y < 0.0f) {
+
 			o.dy = -o.dy * o.friction * o.elasticity;
+			colliding = true;
 		}
-		// speed threshold constraints
+
+		/* speed threshold constraints
 		if (o.friction > 0.0f || o.elasticity > 0.0f) {
-			if (Math.abs(o.dx) < 0.005f) {
+			if (Math.abs(o.dx) < 0.0005f) {
 				o.dx = 0.0f;
 			}
-			if (Math.abs(o.dy) < 0.005f) {
+			if (Math.abs(o.dy) < 0.0005f) {
 				o.dy = 0.0f;
 			}
+		}*/
+		
+		// if colliding and the object is the player, play boing.
+		if (colliding && o.name.equals(player.name) && !app.soundCtrl.isPlaying("sounds/boing")) {
+
+			app.soundCtrl.play("sounds/boing");
 		}
+
+		// maximize position of the object in viewport.
+		o.x = minThresholdValue(o.x,0.0f);
+		o.x = maxThresholdValue(o.x,app.getRender().getViewport().width );
+		o.y = minThresholdValue(o.y,0.0f);
+		o.y = maxThresholdValue(o.y,app.getRender().getViewport().height );
+		
+	}
+
+	/**
+	 * compare value to a threshold. if value greater than threshold return
+	 * threshold else return value.
+	 * 
+	 * @param value
+	 * @param threshold
+	 * @return
+	 */
+	private float maxThresholdValue(float value, float threshold) {
+		return (value > threshold ? threshold : value);
+	}
+	private float minThresholdValue(float value, float threshold) {
+		return (value < threshold ? threshold : value);
 	}
 
 	/**
@@ -188,7 +264,6 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		 */
 		case PAUSE:
 			app.switchPause();
-
 			logger.debug(String.format("Pause reuqest %b", app.isPause()));
 			break;
 		/**
@@ -196,18 +271,22 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		 */
 		case FIRE1:
 			createGameObjects(app, "enemy_", 10);
+			logger.debug("Add 10 enemies");
 			break;
 
 		case FIRE2:
 			removeGameObjects(app, "enemy_", 10);
+			logger.debug("Remove 10 enemies");
 			break;
 
 		case FIRE3:
 			createGameObjects(app, "enemy_", 100);
+			logger.debug("Add 100 enemies");
 			break;
 
 		case FIRE4:
 			removeGameObjects(app, "enemy_", 100);
+			logger.debug("Remove 100 enemies");
 			break;
 
 		/**
@@ -215,6 +294,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		 */
 		case RESET:
 			removeGameObjects(app, "enemy_", -1);
+			logger.debug("Add ALL enemies");
 			break;
 		/**
 		 * 
@@ -245,9 +325,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 	}
 
-
 	public String getName() {
-		return "SampleGameState";
+		return NAME;
 	}
 
 }

@@ -5,13 +5,17 @@
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
 
-package fr.snapgames.bgf;
+package fr.snapgames.bgf.core.states;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.gfx.Render;
 
 /**
  * A Default implementation for the GameState interface providing basic
@@ -95,7 +99,7 @@ public class GameStateDefault {
 	 */
 	public void render(App app, Render render){
 		render.clearRenderBuffer();
-		render.renderToBuffer();
-		render.drawBufferToScreen();
+		render.drawToRenderBuffer();
+		render.drawRenderBufferToScreen();
 	}
 }

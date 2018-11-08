@@ -4,14 +4,12 @@
  * @since 2018
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
-package fr.snapgames.bgf;
+package fr.snapgames.bgf.core;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +19,18 @@ import java.util.stream.Collectors;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.google.gson.Gson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.InputListener.KeyBinding;
+import fr.snapgames.bgf.core.audio.SoundControl;
+import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.gfx.Render;
+import fr.snapgames.bgf.core.gfx.Window;
+import fr.snapgames.bgf.core.io.InputListener;
+import fr.snapgames.bgf.core.io.InputListener.KeyBinding;
+import fr.snapgames.bgf.core.resources.ResourceManager;
+import fr.snapgames.bgf.core.states.GameStateManager;
+import fr.snapgames.bgf.sample.states.SampleGameState;
 
 /**
  * a Simple Application as a Basic Game framework.
@@ -68,11 +72,14 @@ public class App extends JPanel {
 	 * Graphical and loop parameters
 	 */
 	private int debug = 0;
-	public Rectangle backupRectangle = new Rectangle();
-	private Window win;
+
 	private long FPS = 60;
 	private long timeFrame = (1000 / FPS);
 	private long realFPS = 0;
+
+	public Rectangle backupRectangle = new Rectangle();
+
+	private Window win;
 
 	/**
 	 * The InputListener to manage all input !
@@ -88,6 +95,10 @@ public class App extends JPanel {
 	 * the manager to switch GameState's.
 	 */
 	private GameStateManager gsm;
+
+	public ResourceManager resManager;
+
+	public SoundControl soundCtrl;
 
 	/**
 	 * Translated Messages
@@ -105,8 +116,9 @@ public class App extends JPanel {
 		render = new Render(this, new Rectangle(320, 240));
 		parseArgs(args);
 		gsm = new GameStateManager(this);
-		gsm.add(new SampleGameState(), true);
 		inputListener = new InputListener(this);
+		resManager = new ResourceManager();
+		soundCtrl = SoundControl.getInstance();
 	}
 
 	/**
@@ -127,8 +139,11 @@ public class App extends JPanel {
 
 		// render = new Render(this, new Rectangle(WIDTH, HEIGHT));
 		win = new Window(this);
+
+		// Add a sample State
+		gsm.add(new SampleGameState(), true);
 		gsm.initialize(this);
-		gsm.switchState(this, "SampleGameState");
+		gsm.switchState(this, SampleGameState.NAME);
 	}
 
 	/**
@@ -136,6 +151,7 @@ public class App extends JPanel {
 	 */
 	private void prepareKeyBinding() {
 		Map<KeyBinding, Integer> myKB = new HashMap<>();
+
 		myKB.put(KeyBinding.UP, KeyEvent.VK_UP);
 		myKB.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
 		myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
@@ -146,9 +162,10 @@ public class App extends JPanel {
 		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_PAGE_UP);
 		myKB.put(KeyBinding.FIRE4, KeyEvent.VK_PAGE_DOWN);
 
-		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
 		myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
 		myKB.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
+
+		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
 		myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
 		myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
 		myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
@@ -156,19 +173,19 @@ public class App extends JPanel {
 		inputListener.prepareKeyBinding(myKB);
 	}
 
+	/**
+	 * Write the key action/mapping
+	 * 
+	 * @param myKB
+	 */
 	private void writeKeyMapping(Map<KeyBinding, Integer> myKB) {
-		Gson gson = new Gson();
-		logger.info("Keymapping:" + gson.toJson(myKB));
-		try {
-			Files.write(
-				Paths.get(
-					this.getClass().getResource("/keymapping.json").toURI()),
-				gson.toJson(myKB).getBytes("utf-8"));
-				logger.debug("mapping keys:"+App.class.getClassLoader().getResource("/").getFile()+"keymapping.json");
-		} catch (Exception ioe) {
-			logger.error("Unable to write the file", ioe);
-		}
-
+		/*
+		 * Gson gson = new Gson(); logger.info("Keymapping:" + gson.toJson(myKB)); try {
+		 * Files.write(Paths.get(this.getClass().getResource("/keymapping.json").toURI()
+		 * ), gson.toJson(myKB).getBytes("utf-8")); logger.debug("mapping keys:" +
+		 * App.class.getClassLoader().getResource("/").getFile() + "keymapping.json"); }
+		 * catch (Exception ioe) { logger.error("Unable to write the file", ioe); }
+		 */
 	}
 
 	/**
@@ -227,7 +244,7 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * swtch debug mode.
+	 * Switch debug mode.
 	 */
 	public void switchDebugMode() {
 		debug = (debug < 5 ? debug + 1 : 0);
@@ -341,7 +358,6 @@ public class App extends JPanel {
 	 * @return a list of GameObject.
 	 */
 	public List<GameObject> getObjects() {
-		// List<Value> values = map.values().stream().collect(Collectors.toList());
 		return gsm.getCurrentState().getObjects().values().stream().collect(Collectors.toList());
 	}
 
