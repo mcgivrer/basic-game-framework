@@ -5,12 +5,14 @@
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
 
-package fr.snapgames.bgf;
+package fr.snapgames.bgf.core.entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+
+import fr.snapgames.bgf.core.App;
 
 /**
  * Internal object managed by the {@link App}.
@@ -79,9 +81,13 @@ public class GameObject {
 	public int layer = 0;
 	public int priority = 0;
 
-	public float x = 0, y = 0, width = 16, height = 16;
-
-	public float dx = 0, dy = 0;
+	public float x = 0.0f;
+	public float y = 0.0f;
+	public float width = 16.0f;
+	public float height = 16.0f;
+	public float scale = 1.0f;
+	public float dx = 0.0f;
+	public float dy = 0.0f;
 	public float friction = 0.13f;
 	public float elasticity = 0.98f;
 
@@ -91,7 +97,7 @@ public class GameObject {
 	public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
 
 	/**
-	 * Create a new Gobject.
+	 * Create a new GameObject.
 	 * 
 	 * @param name
 	 */
@@ -128,7 +134,11 @@ public class GameObject {
 	 */
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(image, (int) x, (int) y, null);
+			g.drawImage(
+				image, 
+				(int) x, (int) y, 
+				(int)(width*scale), (int)(height*scale), 
+				null);
 		} else {
 			g.setColor(color);
 			g.fillRect((int) x, (int) y, (int) width, (int) height);
@@ -270,6 +280,11 @@ public class GameObject {
 		StringBuilder builder = new StringBuilder().append("GameObject{").append("name='").append(name).append("'")
 				.append(",layer=").append(layer).append(",priority=").append(priority).append("}");
 		return builder.toString();
+	}
+
+	public GameObject setScale(float f) {
+		this.scale=f;
+		return this;
 	}
 
 }

@@ -6,7 +6,7 @@ package fr.snapgames.bgf.test;
 import static org.junit.Assert.assertEquals;
 
 import cucumber.api.java8.En;
-import fr.snapgames.bgf.App;
+import fr.snapgames.bgf.core.App;
 
 /**
  * BDD test for App command line

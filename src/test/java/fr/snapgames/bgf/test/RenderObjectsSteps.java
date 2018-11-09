@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 
 import cucumber.api.java8.En;
-import fr.snapgames.bgf.App;
-import fr.snapgames.bgf.GameObject;
-import fr.snapgames.bgf.Render;
+import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.gfx.Render;
 
 public class RenderObjectsSteps implements En {
 

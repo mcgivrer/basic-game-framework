@@ -8,8 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import cucumber.api.java8.En;
-import fr.snapgames.bgf.App;
-import fr.snapgames.bgf.Window;
+import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.gfx.Window;
 
 /**
  * @author 212391884

@@ -22,9 +22,9 @@ mkdir ~/projects/
 cd ~/projects
 git clone git@github.com:Snapgames/basic-game-framework.git
 # start X11 for tests
-#export DISPLAY=:99.0
-#sh -e /etc/init.d/xvfb start
-service x11-common start
+export DISPLAY=:99.0
+xvfb start &
+#service x11-common start
 sleep 3
 # Build project
 mvn clean install -f "~/projects/basic-game-framework/pom.xml"

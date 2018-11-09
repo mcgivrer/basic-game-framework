@@ -4,7 +4,7 @@
  * @since 2018
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
-package fr.snapgames.bgf;
+package fr.snapgames.bgf.core.gfx;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -20,6 +20,8 @@ import javax.swing.JFrame;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.snapgames.bgf.core.App;
 
 public class Window {
 
@@ -37,7 +39,7 @@ public class Window {
 
     private float backScale;
 
-    private static GraphicsDevice device;
+    private GraphicsDevice device;
 
     /**
      * Create a window for the App <code>app</code>.
