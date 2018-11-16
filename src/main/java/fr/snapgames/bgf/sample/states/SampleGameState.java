@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import fr.snapgames.bgf.core.App;
 import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.ui.UIText;
 import fr.snapgames.bgf.core.io.InputListener;
@@ -68,15 +69,28 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.setPosition(12, 24).setLayer(20);
+		scoreUiText = (UIText) UIText.builder("score")
+				.setFont(scoreFont)
+				.setText("00000")
+				.setThickness(1)
+				.setPosition(12, 24)
+				.setLayer(20);
 		add(scoreUiText);
 
 		try {
 
-			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(1.2f).setFriction(0.98f);
+			player = GameObject.builder("player")
+					.setSize(24, 24)
+					.setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(0.95f)
+					.setPosition(0, 0)
+					.setColor(Color.GREEN)
+					.setVelocity(0.0f, 0.0f)
+					.setLayer(10)
+					.setPriority(100)
+					.setElasticity(1.2f)
+					.setFriction(0.98f)
+					.setBoundingType(BoundingBoxType.CIRCLE);;
 			add(player);
 
 		} catch (ResourceUnknownException rue) {
@@ -101,7 +115,12 @@ public class SampleGameState extends GameStateDefault implements GameState {
 						.setImage(app.resManager.getImage("images/enemyBall"))
 						.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
 						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f);
+						.setColor(randomColor())
+						.setPriority(i)
+						.setLayer(1)
+						.setElasticity(1.0f)
+						.setFriction(1.0f)
+						.setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
 			}
 		} catch (ResourceUnknownException rue) {
@@ -223,10 +242,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		// maximize position of the object in viewport.
-		o.x = minThresholdValue(o.x,0.0f);
-		o.x = maxThresholdValue(o.x,app.getRender().getViewport().width );
-		o.y = minThresholdValue(o.y,0.0f);
-		o.y = maxThresholdValue(o.y,app.getRender().getViewport().height );
+		o.x = boxingValue(o.x,0.0f,app.getRender().getViewport().width );
+		o.y = boxingValue(o.y,0.0f,app.getRender().getViewport().height );
 		
 	}
 
@@ -245,6 +262,10 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		return (value < threshold ? threshold : value);
 	}
 
+	private float boxingValue(float value, float min, float max) {
+		return maxThresholdValue(minThresholdValue(value, min), max);
+	}
+	
 	/**
 	 * manage actions for this state.
 	 * 
@@ -252,6 +273,14 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 */
 	public void action(KeyBinding keyBind) {
 		switch (keyBind) {
+		case UP:
+			break;
+		case DOWN:
+			break;
+		case LEFT:
+			break;
+		case RIGHT:
+			break;
 		/**
 		 * process the exit request.
 		 */
