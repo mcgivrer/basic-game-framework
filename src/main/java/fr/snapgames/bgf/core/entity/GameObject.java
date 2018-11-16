@@ -73,10 +73,10 @@ import fr.snapgames.bgf.core.App;
  * @since 2018
  * 
  */
-public class GameObject {
+public class GameObject implements GameEntity {
 
-	public int id;
-	public String name;
+	protected int id;
+	protected String name;
 
 	public int layer = 0;
 	public int priority = 0;
@@ -118,27 +118,21 @@ public class GameObject {
 		setPosition(x, y);
 	}
 
-	/**
-	 * compute object mechanism.
-	 * 
-	 * @param dt
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#update(long)
 	 */
+	@Override
 	public void update(long dt) {
 		setPosition((int) (x + (dx * dt)), (int) (y + (dy * dt)));
 	}
 
-	/**
-	 * Draw object to buffer.
-	 * 
-	 * @param g
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#render(java.awt.Graphics2D)
 	 */
+	@Override
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(
-				image, 
-				(int) x, (int) y, 
-				(int)(width*scale), (int)(height*scale), 
-				null);
+			g.drawImage(image, (int) x, (int) y, (int) (width * scale), (int) (height * scale), null);
 		} else {
 			g.setColor(color);
 			g.fillRect((int) x, (int) y, (int) width, (int) height);
@@ -147,11 +141,10 @@ public class GameObject {
 		}
 	}
 
-	/**
-	 * Rendering some debug information.
-	 * 
-	 * @param g
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#renderDebugInfo(java.awt.Graphics2D)
 	 */
+	@Override
 	public void renderDebugInfo(Graphics2D g) {
 		// can be overrriden in another ojbect extending this class.
 	}
@@ -283,8 +276,69 @@ public class GameObject {
 	}
 
 	public GameObject setScale(float f) {
-		this.scale=f;
+		this.scale = f;
 		return this;
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getId()
+	 */
+	@Override
+	public int getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getName()
+	 */
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getBoundingBox()
+	 */
+	@Override
+	public Rectangle getBoundingBox() {
+		return boundingBox;
+	}
+
+	/**
+	 * @param boundingBox the boundingBox to set
+	 */
+	public void setBoundingBox(Rectangle boundingBox) {
+		this.boundingBox = boundingBox;
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getLayer()
+	 */
+	@Override
+	public int getLayer() {
+		return layer;
+	}
+
+	/* (non-Javadoc)
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getPriority()
+	 */
+	@Override
+	public int getPriority() {
+		return priority;
 	}
 
 }

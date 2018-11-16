@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.entity.Camera;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.ui.UIText;
@@ -73,11 +75,14 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		add(scoreUiText);
 
 		try {
-
+			// create a simple blue ball as a player
 			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
 					.setScale(0.95f).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
 					.setPriority(100).setElasticity(1.2f).setFriction(0.98f);
 			add(player);
+			// add a camera to follow the player object in a centered cam viewport.
+			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.22f);
+			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
 			logger.error("Unable to load the resource", rue);
@@ -133,7 +138,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		// parse Object map and remove matching object with filtering string.
 		// Map -> Stream -> Filter -> MAP
-		Map<String, GameObject> collect = objects.entrySet().stream()
+		Map<String, GameEntity> collect = objects.entrySet().stream()
 				// filter object on their name
 				.filter(x -> x.getKey().contains(nameFilter))
 				// add a limit if nbToRemove different of -1.
@@ -157,7 +162,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 	@Override
 	public void input(App app, InputListener inputListener) {
-		GameObject goPlayer = objects.get("player");
+		GameObject goPlayer = (GameObject) objects.get("player");
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
 			goPlayer.dx = -0.1f;
@@ -178,7 +183,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 	@Override
 	public void update(App app, long dt) {
-		for (Entry<String, GameObject> entry : objects.entrySet()) {
+		for (Entry<String, GameEntity> entry : objects.entrySet()) {
 			entry.getValue().update(dt);
 			constrains(app, entry.getValue());
 		}
@@ -190,9 +195,11 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 * 
 	 * @param o
 	 */
-	private void constrains(App app, GameObject o) {
+	private void constrains(App app, GameEntity ge) {
 
 		boolean colliding = false;
+
+		GameObject o = (GameObject) ge;
 
 		// detect is there are some collision with out viewport border
 
@@ -206,28 +213,24 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			colliding = true;
 		}
 
-		/* speed threshold constraints
-		if (o.friction > 0.0f || o.elasticity > 0.0f) {
-			if (Math.abs(o.dx) < 0.0005f) {
-				o.dx = 0.0f;
-			}
-			if (Math.abs(o.dy) < 0.0005f) {
-				o.dy = 0.0f;
-			}
-		}*/
-		
+		/*
+		 * speed threshold constraints if (o.friction > 0.0f || o.elasticity > 0.0f) {
+		 * if (Math.abs(o.dx) < 0.0005f) { o.dx = 0.0f; } if (Math.abs(o.dy) < 0.0005f)
+		 * { o.dy = 0.0f; } }
+		 */
+
 		// if colliding and the object is the player, play boing.
-		if (colliding && o.name.equals(player.name) && !app.soundCtrl.isPlaying("sounds/boing")) {
+		if (colliding && o.getName().equals(player.getName()) && !app.soundCtrl.isPlaying("sounds/boing")) {
 
 			app.soundCtrl.play("sounds/boing");
 		}
 
 		// maximize position of the object in viewport.
-		o.x = minThresholdValue(o.x,0.0f);
-		o.x = maxThresholdValue(o.x,app.getRender().getViewport().width );
-		o.y = minThresholdValue(o.y,0.0f);
-		o.y = maxThresholdValue(o.y,app.getRender().getViewport().height );
-		
+		o.x = minThresholdValue(o.x, 0.0f);
+		o.x = maxThresholdValue(o.x, app.getRender().getViewport().width);
+		o.y = minThresholdValue(o.y, 0.0f);
+		o.y = maxThresholdValue(o.y, app.getRender().getViewport().height);
+
 	}
 
 	/**
@@ -241,6 +244,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	private float maxThresholdValue(float value, float threshold) {
 		return (value > threshold ? threshold : value);
 	}
+
 	private float minThresholdValue(float value, float threshold) {
 		return (value < threshold ? threshold : value);
 	}

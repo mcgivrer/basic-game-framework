@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
 
 /**
@@ -56,7 +57,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameObject> renderingList = new CopyOnWriteArrayList<>();
+	private List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -89,19 +90,25 @@ public class Render {
 	/**
 	 * Render the game screen.
 	 */
-	public void drawToRenderBuffer() {
+	public void drawToRenderBuffer(App app) {
 
 		// prepare pipeline anti-aliasing.
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+
+		// TODO add Camera preRender operation
+		
 		// render anything game ?
-		for (GameObject o : renderingList) {
+		for (GameEntity o : renderingList) {
 			o.render(g);
 			if (debug >= 2) {
 				drawObjectDebugInfo(g, o);
 			}
 		}
+
+		// TODO add Camera postRender operation
+		
 
 		// render pause status
 		if (pause) {
@@ -120,6 +127,8 @@ public class Render {
 					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
 		}
 
+
+		
 		// render debug information
 		if (debug > 0) {
 			drawGlobalDebugInformation(g);
@@ -133,9 +142,9 @@ public class Render {
 	 * @param g the Graphics2D to render things.
 	 * @param o the object to be debugged.
 	 */
-	public void drawObjectDebugInfo(Graphics2D g, GameObject o) {
+	public void drawObjectDebugInfo(Graphics2D g, GameEntity ge) {
 		g.setFont(dbgFont);
-
+		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
 		g.fillRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
 
@@ -143,7 +152,7 @@ public class Render {
 		g.drawRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
 
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
+		g.drawString(String.format("Name:%s", o.getName()), o.x + o.width + 4, o.y + (12 * 1));
 		g.drawString(String.format("Pos:%03.2f,%03.2f", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
 		g.drawString(String.format("Size:%03.2f,%03.2f", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
 		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
@@ -208,11 +217,11 @@ public class Render {
 	 */
 	public void addObject(GameObject go) {
 		renderingList.add(go);
-		renderingList.sort(new Comparator<GameObject>() {
-			public int compare(GameObject o1, GameObject o2) {
+		renderingList.sort(new Comparator<GameEntity>() {
+			public int compare(GameEntity o1, GameEntity o2) {
 				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
 				// -1 : (o1.priority < o2.priority ? -1 : 1)));
-				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
+				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
 			}
 		});
 	}
@@ -222,7 +231,7 @@ public class Render {
 	 * 
 	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
-	public void addAllObjects(Collection<GameObject> l) {
+	public void addAllObjects(Collection<GameEntity> l) {
 		renderingList.addAll(l);
 	}
 
@@ -231,7 +240,7 @@ public class Render {
 	 * 
 	 * @param go remove an object from the rendering pipeline.
 	 */
-	public void removeObject(GameObject go) {
+	public void removeObject(GameEntity go) {
 		renderingList.remove(go);
 	}
 
@@ -345,7 +354,7 @@ public class Render {
 	 * 
 	 * @return a list of GameObject.
 	 */
-	public List<GameObject> getRenderingList() {
+	public List<GameEntity> getRenderingList() {
 		return renderingList;
 	}
 
@@ -359,10 +368,8 @@ public class Render {
 		app.suspendRendering(true);
 		try {
 			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(
-				app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), 
-				"PNG", 
-				out);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG",
+					out);
 		} catch (Exception e) {
 			System.err.println("Unable to write screenshot to " + path);
 		}

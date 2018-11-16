@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import fr.snapgames.bgf.core.audio.SoundControl;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.Window;
@@ -366,7 +367,7 @@ public class App extends JPanel {
 	 * 
 	 * @return a list of GameObject.
 	 */
-	public List<GameObject> getObjects() {
+	public List<GameEntity> getObjects() {
 		return gsm.getCurrentState().getObjects().values().stream().collect(Collectors.toList());
 	}
 
