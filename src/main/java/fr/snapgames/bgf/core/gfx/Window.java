@@ -1,4 +1,10 @@
-package fr.snapgames.bgf;
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
+package fr.snapgames.bgf.core.gfx;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,6 +20,8 @@ import javax.swing.JFrame;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fr.snapgames.bgf.core.App;
 
 public class Window {
 
@@ -31,7 +39,7 @@ public class Window {
 
     private float backScale;
 
-    private static GraphicsDevice device;
+    private GraphicsDevice device;
 
     /**
      * Create a window for the App <code>app</code>.
@@ -57,7 +65,7 @@ public class Window {
             logger.error("unable to read icon file {}", iconpath);
         }
         device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        initialize(true,false);
+        initialize(true, false);
     }
 
     /**
@@ -99,20 +107,20 @@ public class Window {
      * @param fullScreen the fullscreen flag state.
      */
     public void switchFullScreen(boolean fullScreen) {
-    	this.fullScreenMode = fullScreen;
+        this.fullScreenMode = fullScreen;
         frame.setVisible(false);
         if (fullScreen) {
             back = frame.getSize();
             backScale = app.getRender().getScale();
             frame.dispose();
-            initialize(false,false);
+            initialize(false, false);
             device.setFullScreenWindow(frame);
             app.setSize(new Dimension(device.getDisplayMode().getWidth(), device.getDisplayMode().getHeight()));
         } else {
             frame.dispose();
             frame.setSize(back);
             app.setSize(back);
-            initialize(true,false);
+            initialize(true, false);
             device.setFullScreenWindow(null);
             app.getRender().setScale(backScale);
         }
@@ -150,20 +158,18 @@ public class Window {
         return frame.getBounds();
     }
 
-	/**
-	 * @return the fullScreenMode
-	 */
-	public boolean isFullScreenMode() {
-		return fullScreenMode;
-	}
+    /**
+     * @return the fullScreenMode
+     */
+    public boolean isFullScreenMode() {
+        return fullScreenMode;
+    }
 
-	/**
-	 * @param fullScreenMode the fullScreenMode to set
-	 */
-	public void setFullScreenMode(boolean fullScreenMode) {
-		this.fullScreenMode = fullScreenMode;
-	}
-    
-    
-    
+    /**
+     * @param fullScreenMode the fullScreenMode to set
+     */
+    public void setFullScreenMode(boolean fullScreenMode) {
+        this.fullScreenMode = fullScreenMode;
+    }
+
 }

@@ -35,19 +35,27 @@ On the command line, you can add some options:
 | `fps`          | rendered fps     | set the frame per second rate (30-60) |
 | `f/fullscreen` | full screen mode | set window to fullscreen mode         |
 
-Sample command line :
+### Run the demo
+
+1. the default command line :
 
 ```bash
  $> java -jar basic-game-framework-0.0.1-SNAPSHOT-shaded.jar d=2 s=2 w=320 h=240
 ```
 
-> This will start the demo with debug level (d) set to `2` and in a `320x240` (w x h) pixel widow scaled (s) by `2`.
+2. If you are a fan of the maven build tool, you can have a try with
 
-On windows platform, you can also start the demo with :
+```bash
+$> mvn exec:java
+```
+
+3. On windows platform, you can also start the demo with
 
 ```cmd
 C:\> "Basic Game Framework.exe"
 ```
+
+> This will start the demo with debug level (d) set to `2` and in a `320x240` (w x h) pixel widow scaled (s) by `2`.
 
 ## Keymaps
 
@@ -69,8 +77,8 @@ You can also push some keys to change visual content :
 | `DOWN`     | Move big green square down           |
 | `LEFT`     | Move big green square left           |
 | `RIGHT`    | Move big green square right          |
-| `PAGEUP`   | Add 10 enemies on the playground     |
-| `PAGEDOWN` | Remove 10 enemies on the playground  |
+| `PAGEUP`   | Add 100 enemies on the playground     |
+| `PAGEDOWN` | Remove 100 enemies on the playground  |
 | `DELETE`   | Remove all enemies on the playground |
 
 ### Some screenshot

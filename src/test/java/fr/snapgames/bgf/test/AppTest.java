@@ -2,13 +2,13 @@ package fr.snapgames.bgf.test;
 
 import org.junit.Test;
 
+import fr.snapgames.bgf.core.App;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.FixMethodOrder;
-
-import fr.snapgames.bgf.App;
 
 /**
  * Unit test for simple App.

@@ -1,18 +1,19 @@
 /**
  * SnapGames
  * 
- * Game Development Java
- * 
- * basic-game-framework
- * 
- * @year 2018
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
-package fr.snapgames.bgf;
+
+package fr.snapgames.bgf.core.gfx.ui;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.gfx.Render;
 
 /**
  * 
