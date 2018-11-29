@@ -140,13 +140,15 @@ public class Render {
 	public void renderBoundingBox(Graphics2D g, GameObject o) {
 		BoundingBoxType boundingType = o.boundingType;
 		Rectangle boundingBox = o.boundingBox;
-		g.setColor(Color.BLACK);
+		g.setColor(Color.GREEN);
 		switch (boundingType) {
 		case RECTANGLE:
 			g.drawRect((int) o.x, (int) o.y, (int) boundingBox.width, boundingBox.height);
 			break;
 		case CIRCLE:
 			g.drawOval((int) o.x, (int) o.y, boundingBox.width, boundingBox.height);
+			break;
+		default:
 			break;
 		}
 

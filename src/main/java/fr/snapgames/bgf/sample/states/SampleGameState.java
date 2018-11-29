@@ -69,28 +69,16 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score")
-				.setFont(scoreFont)
-				.setText("00000")
-				.setThickness(1)
-				.setPosition(12, 24)
-				.setLayer(20);
+		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
+				.setPosition(12, 24).setLayer(20);
 		add(scoreUiText);
 
 		try {
 
-			player = GameObject.builder("player")
-					.setSize(24, 24)
-					.setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f)
-					.setPosition(0, 0)
-					.setColor(Color.GREEN)
-					.setVelocity(0.0f, 0.0f)
-					.setLayer(10)
-					.setPriority(100)
-					.setElasticity(1.2f)
-					.setFriction(0.98f)
-					.setBoundingType(BoundingBoxType.CIRCLE);;
+			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(0.95f).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
+			;
 			add(player);
 
 		} catch (ResourceUnknownException rue) {
@@ -115,11 +103,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 						.setImage(app.resManager.getImage("images/enemyBall"))
 						.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
 						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-						.setColor(randomColor())
-						.setPriority(i)
-						.setLayer(1)
-						.setElasticity(1.0f)
-						.setFriction(1.0f)
+						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f)
 						.setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
 			}
@@ -178,17 +162,24 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void input(App app, InputListener inputListener) {
 		GameObject goPlayer = objects.get("player");
 
+		float factor = 1.0f;
+		if (inputListener.getKey(KeyEvent.VK_SHIFT)) {
+			factor = 2.0f;
+		} else if (inputListener.getKey(KeyEvent.VK_CONTROL)) {
+			factor = 4.0f;
+		}
+
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.dx = -0.1f;
+			goPlayer.dx = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.dx = 0.1f;
+			goPlayer.dx = 0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.dy = -0.1f;
+			goPlayer.dy = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.dy = 0.1f;
+			goPlayer.dy = 0.1f * factor;
 		}
 		goPlayer.dy *= goPlayer.friction;
 		goPlayer.dx *= goPlayer.friction;
@@ -216,25 +207,21 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		// detect is there are some collision with out viewport border
 
 		if ((int) (o.x + o.width) > app.getRender().getViewport().width || o.x < 0.0f) {
-			o.dx = -o.dx * o.friction * o.elasticity;
+			o.dx = -o.dx * o.elasticity;
 			colliding = true;
 		}
 		if ((int) (o.y + o.height) > app.getRender().getViewport().height || o.y < 0.0f) {
 
-			o.dy = -o.dy * o.friction * o.elasticity;
+			o.dy = -o.dy * o.elasticity;
 			colliding = true;
 		}
 
-		/* speed threshold constraints
-		if (o.friction > 0.0f || o.elasticity > 0.0f) {
-			if (Math.abs(o.dx) < 0.0005f) {
-				o.dx = 0.0f;
-			}
-			if (Math.abs(o.dy) < 0.0005f) {
-				o.dy = 0.0f;
-			}
-		}*/
-		
+		/*
+		 * speed threshold constraints if (o.friction > 0.0f || o.elasticity > 0.0f) {
+		 * if (Math.abs(o.dx) < 0.0005f) { o.dx = 0.0f; } if (Math.abs(o.dy) < 0.0005f)
+		 * { o.dy = 0.0f; } }
+		 */
+
 		// if colliding and the object is the player, play boing.
 		if (colliding && o.name.equals(player.name) && !app.soundCtrl.isPlaying("sounds/boing")) {
 
@@ -242,9 +229,9 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		// maximize position of the object in viewport.
-		o.x = boxingValue(o.x,0.0f,app.getRender().getViewport().width );
-		o.y = boxingValue(o.y,0.0f,app.getRender().getViewport().height );
-		
+		o.x = boxingValue(o.x, 0.0f, app.getRender().getViewport().width);
+		o.y = boxingValue(o.y, 0.0f, app.getRender().getViewport().height);
+
 	}
 
 	/**
@@ -258,6 +245,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	private float maxThresholdValue(float value, float threshold) {
 		return (value > threshold ? threshold : value);
 	}
+
 	private float minThresholdValue(float value, float threshold) {
 		return (value < threshold ? threshold : value);
 	}
@@ -265,7 +253,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	private float boxingValue(float value, float min, float max) {
 		return maxThresholdValue(minThresholdValue(value, min), max);
 	}
-	
+
 	/**
 	 * manage actions for this state.
 	 * 
