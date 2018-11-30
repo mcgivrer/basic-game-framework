@@ -64,7 +64,7 @@ import fr.snapgames.bgf.core.App;
  * <p>
  * And some useful {@link GameObject#builder(String)} and accessors to create
  * easily new <code>GameObject</code>, like
- * {@link GameObject#setPosition(int, int)} or
+ * {@link GameObject#moveTo(int, int)} or
  * {@link GameObject#setVelocity(float, float)}.
  * 
  * </p>
@@ -75,8 +75,46 @@ import fr.snapgames.bgf.core.App;
  */
 public class GameObject implements GameEntity {
 
-	protected int id;
-	protected String name;
+	public class BoundingBox {
+		private Rectangle box;
+		private BoundingBoxType type;
+
+		BoundingBox(BoundingBoxType type) {
+			this.type = type;
+			box = new Rectangle();
+		}
+
+		public void setBox(int x, int y, int width, int height) {
+			box.x = x;
+			box.y = y;
+			box.width = width;
+			box.height = height;
+		}
+		public Rectangle getBox() {
+			return box;
+		}
+		
+		public BoundingBoxType getType() {
+			return type;
+		}
+	}
+
+	/**
+	 * Bounding Box Type for this object ?
+	 * <ul>
+	 * <li>RECTANGLE for rectangle shapes,</li>
+	 * <li>CIRCLE for ... CIRCLE shapes.</li>
+	 * </ul>
+	 * 
+	 * @author Frédéric Delorme
+	 *
+	 */
+	public enum BoundingBoxType {
+		RECTANGLE, CIRCLE
+	}
+
+	public int id;
+	public String name;
 
 	public int layer = 0;
 	public int priority = 0;
@@ -94,7 +132,9 @@ public class GameObject implements GameEntity {
 	public BufferedImage image;
 	public Color color;
 
+	public BoundingBox bBox = new BoundingBox(BoundingBoxType.RECTANGLE);
 	public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
+	public BoundingBoxType boundingType = BoundingBoxType.RECTANGLE;
 
 	/**
 	 * Create a new GameObject.
@@ -115,18 +155,22 @@ public class GameObject implements GameEntity {
 	 */
 	public GameObject(String name, int x, int y, BufferedImage image) {
 		this(name);
-		setPosition(x, y);
+		moveTo(x, y);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#update(long)
 	 */
 	@Override
 	public void update(long dt) {
-		setPosition((int) (x + (dx * dt)), (int) (y + (dy * dt)));
+		moveTo((int) (x + (dx * dt)), (int) (y + (dy * dt)));
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#render(java.awt.Graphics2D)
 	 */
 	@Override
@@ -141,12 +185,20 @@ public class GameObject implements GameEntity {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.snapgames.bgf.core.entity.GameEntity#renderDebugInfo(java.awt.Graphics2D)
+	private void computeBoundingBox(GameObject o) {
+		bBox.setBox((int) o.x, (int) o.y, (int) o.width, (int) o.height);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.snapgames.bgf.core.entity.GameEntity#renderDebugInfo(java.awt.Graphics2D)
 	 */
 	@Override
 	public void renderDebugInfo(Graphics2D g) {
-		// can be overrriden in another ojbect extending this class.
+		// maybe and child entity inheriting from Gameobject will override this method
+		// to add some useful debug information.
 	}
 
 	/**
@@ -156,11 +208,10 @@ public class GameObject implements GameEntity {
 	 * @param y
 	 * @return
 	 */
-	public GameObject setPosition(float x, float y) {
+	public GameObject moveTo(float x, float y) {
 		this.x = x;
 		this.y = y;
-		boundingBox.x = (int) x;
-		boundingBox.x = (int) y;
+		computeBoundingBox(this);
 		return this;
 	}
 
@@ -187,8 +238,7 @@ public class GameObject implements GameEntity {
 	public GameObject setSize(int width, int height) {
 		this.width = width;
 		this.height = height;
-		boundingBox.width = width;
-		boundingBox.height = height;
+		computeBoundingBox(this);
 		return this;
 	}
 
@@ -259,6 +309,16 @@ public class GameObject implements GameEntity {
 	}
 
 	/**
+	 * Define the type of Bounding Box for this GameObject.
+	 * 
+	 * @param type the bounding box type to be set for this GameObject.
+	 */
+	public GameObject setBoundingType(BoundingBoxType type) {
+		this.boundingType = type;
+		return this;
+	}
+
+	/**
 	 * Builder pattern for the GameObject.
 	 * 
 	 * @param name
@@ -280,7 +340,9 @@ public class GameObject implements GameEntity {
 		return this;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getId()
 	 */
 	@Override
@@ -295,7 +357,9 @@ public class GameObject implements GameEntity {
 		this.id = id;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getName()
 	 */
 	@Override
@@ -310,7 +374,9 @@ public class GameObject implements GameEntity {
 		this.name = name;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getBoundingBox()
 	 */
 	@Override
@@ -325,7 +391,9 @@ public class GameObject implements GameEntity {
 		this.boundingBox = boundingBox;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getLayer()
 	 */
 	@Override
@@ -333,7 +401,9 @@ public class GameObject implements GameEntity {
 		return layer;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getPriority()
 	 */
 	@Override

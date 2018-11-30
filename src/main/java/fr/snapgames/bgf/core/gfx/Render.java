@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import fr.snapgames.bgf.core.App;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 
 /**
  * The Render class is the rendering processor for all GameObject to an internal
@@ -96,19 +97,20 @@ public class Render {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-
 		// TODO add Camera preRender operation
-		
+
 		// render anything game ?
 		for (GameEntity o : renderingList) {
 			o.render(g);
 			if (debug >= 2) {
+				renderBoundingBox(g, o);
+			}
+			if (debug >= 3) {
 				drawObjectDebugInfo(g, o);
 			}
 		}
 
 		// TODO add Camera postRender operation
-		
 
 		// render pause status
 		if (pause) {
@@ -127,12 +129,35 @@ public class Render {
 					(HEIGHT + g.getFontMetrics().getHeight() + 24) / 2, pauseLabel, 2, Color.WHITE, Color.BLACK);
 		}
 
-
-		
 		// render debug information
 		if (debug > 0) {
 			drawGlobalDebugInformation(g);
 		}
+	}
+
+	/**
+	 * rendering the bounding box shape with a black color of the <code>o</code>
+	 * GameBject using the <code>g</code> API.
+	 * 
+	 * @param g the Graphics2D API to render things
+	 * @param o the GameObject to render the BoundingBox of.
+	 */
+	public void renderBoundingBox(Graphics2D g, GameEntity e) {
+		GameObject o = (GameObject) e;
+		BoundingBoxType boundingType = o.boundingType;
+		Rectangle boundingBox = o.boundingBox;
+		g.setColor(Color.GREEN);
+		switch (boundingType) {
+		case RECTANGLE:
+			g.drawRect((int) o.x, (int) o.y, (int) boundingBox.width, boundingBox.height);
+			break;
+		case CIRCLE:
+			g.drawOval((int) o.x, (int) o.y, boundingBox.width, boundingBox.height);
+			break;
+		default:
+			break;
+		}
+
 	}
 
 	/**
@@ -157,7 +182,6 @@ public class Render {
 		g.drawString(String.format("Size:%03.2f,%03.2f", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
 		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
 		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
-		o.renderDebugInfo(g);
 	}
 
 	/**

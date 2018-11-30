@@ -21,6 +21,7 @@ import fr.snapgames.bgf.core.App;
 import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.ui.UIText;
 import fr.snapgames.bgf.core.io.InputListener;
@@ -71,14 +72,15 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
 		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.setPosition(12, 24).setLayer(20);
+				.moveTo(12, 24).setLayer(20);
 		add(scoreUiText);
 
 		try {
 			// create a simple blue ball as a player
 			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f).setPosition(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(1.2f).setFriction(0.98f);
+					.setScale(0.95f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
+			;
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
 			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.22f);
@@ -104,9 +106,10 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			for (int i = 0; i < nbEnemies; i++) {
 				GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
 						.setImage(app.resManager.getImage("images/enemyBall"))
-						.setPosition((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
+						.moveTo((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
 						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f);
+						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f)
+						.setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
 			}
 		} catch (ResourceUnknownException rue) {
@@ -164,17 +167,24 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void input(App app, InputListener inputListener) {
 		GameObject goPlayer = (GameObject) objects.get("player");
 
+		float factor = 1.0f;
+		if (inputListener.getKey(KeyEvent.VK_SHIFT)) {
+			factor = 2.0f;
+		} else if (inputListener.getKey(KeyEvent.VK_CONTROL)) {
+			factor = 4.0f;
+		}
+
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.dx = -0.1f;
+			goPlayer.dx = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.dx = 0.1f;
+			goPlayer.dx = 0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.dy = -0.1f;
+			goPlayer.dy = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.dy = 0.1f;
+			goPlayer.dy = 0.1f * factor;
 		}
 		goPlayer.dy *= goPlayer.friction;
 		goPlayer.dx *= goPlayer.friction;
@@ -204,12 +214,12 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		// detect is there are some collision with out viewport border
 
 		if ((int) (o.x + o.width) > app.getRender().getViewport().width || o.x < 0.0f) {
-			o.dx = -o.dx * o.friction * o.elasticity;
+			o.dx = -o.dx * o.elasticity;
 			colliding = true;
 		}
 		if ((int) (o.y + o.height) > app.getRender().getViewport().height || o.y < 0.0f) {
 
-			o.dy = -o.dy * o.friction * o.elasticity;
+			o.dy = -o.dy * o.elasticity;
 			colliding = true;
 		}
 
@@ -225,12 +235,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			app.soundCtrl.play("sounds/boing");
 		}
 
-		// maximize position of the object in viewport.
-		o.x = minThresholdValue(o.x, 0.0f);
-		o.x = maxThresholdValue(o.x, app.getRender().getViewport().width);
-		o.y = minThresholdValue(o.y, 0.0f);
-		o.y = maxThresholdValue(o.y, app.getRender().getViewport().height);
-
+		o.x = boxingValue(o.x, 0.0f, app.getRender().getViewport().width);
+		o.y = boxingValue(o.y, 0.0f, app.getRender().getViewport().height);
 	}
 
 	/**
@@ -249,6 +255,10 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		return (value < threshold ? threshold : value);
 	}
 
+	private float boxingValue(float value, float min, float max) {
+		return maxThresholdValue(minThresholdValue(value, min), max);
+	}
+
 	/**
 	 * manage actions for this state.
 	 * 
@@ -256,6 +266,14 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 */
 	public void action(KeyBinding keyBind) {
 		switch (keyBind) {
+		case UP:
+			break;
+		case DOWN:
+			break;
+		case LEFT:
+			break;
+		case RIGHT:
+			break;
 		/**
 		 * process the exit request.
 		 */
