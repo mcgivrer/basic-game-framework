@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import fr.snapgames.bgf.core.App;
 import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 
 /**
  * The Render class is the rendering processor for all GameObject to an internal
@@ -99,6 +100,9 @@ public class Render {
 		for (GameObject o : renderingList) {
 			o.render(g);
 			if (debug >= 2) {
+				renderBoundingBox(g, o);
+			}
+			if (debug >= 3) {
 				drawObjectDebugInfo(g, o);
 			}
 		}
@@ -127,6 +131,30 @@ public class Render {
 	}
 
 	/**
+	 * rendering the bounding box shape with a black color of the <code>o</code>
+	 * GameBject using the <code>g</code> API.
+	 * 
+	 * @param g the Graphics2D API to render things
+	 * @param o the GameObject to render the BoundingBox of.
+	 */
+	public void renderBoundingBox(Graphics2D g, GameObject o) {
+		BoundingBoxType boundingType = o.boundingType;
+		Rectangle boundingBox = o.boundingBox;
+		g.setColor(Color.GREEN);
+		switch (boundingType) {
+		case RECTANGLE:
+			g.drawRect((int) o.x, (int) o.y, (int) boundingBox.width, boundingBox.height);
+			break;
+		case CIRCLE:
+			g.drawOval((int) o.x, (int) o.y, boundingBox.width, boundingBox.height);
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	/**
 	 * Render debug information for the object <code>o</code> to the Graphics2D
 	 * <code>g</code>.
 	 * 
@@ -148,7 +176,6 @@ public class Render {
 		g.drawString(String.format("Size:%03.2f,%03.2f", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
 		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
 		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
-		o.renderDebugInfo(g);
 	}
 
 	/**
@@ -359,10 +386,8 @@ public class Render {
 		app.suspendRendering(true);
 		try {
 			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(
-				app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), 
-				"PNG", 
-				out);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG",
+					out);
 		} catch (Exception e) {
 			System.err.println("Unable to write screenshot to " + path);
 		}

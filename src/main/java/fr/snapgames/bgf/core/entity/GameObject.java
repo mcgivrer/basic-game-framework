@@ -75,6 +75,20 @@ import fr.snapgames.bgf.core.App;
  */
 public class GameObject {
 
+	/**
+	 * Bounding Box Type for this object ?
+	 * <ul>
+	 * <li>RECTANGLE for rectangle shapes,</li>
+	 * <li>CIRCLE for ... CIRCLE shapes.</li>
+	 * </ul>
+	 * 
+	 * @author Frédéric Delorme
+	 *
+	 */
+	public enum BoundingBoxType {
+		RECTANGLE, CIRCLE
+	}
+
 	public int id;
 	public String name;
 
@@ -95,6 +109,7 @@ public class GameObject {
 	public Color color;
 
 	public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
+	public BoundingBoxType boundingType = BoundingBoxType.RECTANGLE;
 
 	/**
 	 * Create a new GameObject.
@@ -134,11 +149,7 @@ public class GameObject {
 	 */
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(
-				image, 
-				(int) x, (int) y, 
-				(int)(width*scale), (int)(height*scale), 
-				null);
+			g.drawImage(image, (int) x, (int) y, (int) (width * scale), (int) (height * scale), null);
 		} else {
 			g.setColor(color);
 			g.fillRect((int) x, (int) y, (int) width, (int) height);
@@ -153,7 +164,8 @@ public class GameObject {
 	 * @param g
 	 */
 	public void renderDebugInfo(Graphics2D g) {
-		// can be overrriden in another ojbect extending this class.
+		// maybe and child entity inheriting from Gameobject will override this method
+		// to add some useful debug information.
 	}
 
 	/**
@@ -266,6 +278,16 @@ public class GameObject {
 	}
 
 	/**
+	 * Define the type of Bounding Box for this GameObject.
+	 * 
+	 * @param type the bounding box type to be set for this GameObject.
+	 */
+	public GameObject setBoundingType(BoundingBoxType type) {
+		this.boundingType = type;
+		return this;
+	}
+
+	/**
 	 * Builder pattern for the GameObject.
 	 * 
 	 * @param name
@@ -283,7 +305,7 @@ public class GameObject {
 	}
 
 	public GameObject setScale(float f) {
-		this.scale=f;
+		this.scale = f;
 		return this;
 	}
 

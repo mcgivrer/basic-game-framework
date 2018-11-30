@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -19,8 +20,8 @@ import org.slf4j.LoggerFactory;
 import fr.snapgames.bgf.core.App;
 
 /**
- * The class InputListener is the main input maager for the game. Here are
- * processed all the iput events to inject those envents into the game.
+ * The class InputListener is the main input manager for the game. Here are
+ * processed all the input events to inject those events into the game.
  */
 public class InputListener implements KeyListener {
 
@@ -31,14 +32,24 @@ public class InputListener implements KeyListener {
 	 * This an enum listing all possible input actions
 	 */
 	public enum KeyBinding {
-		UP, DOWN, LEFT, RIGHT, DELETE, PAUSE, QUIT, DEBUG, FIRE1, FIRE2, FIRE3, FIRE4, FN1, FN2, FN3, SCREENSHOT, RESET,
+		// direction
+		UP, DOWN, LEFT, RIGHT,
+		// basic operation
+		DELETE, PAUSE, QUIT, DEBUG,
+		// command actions
+		FIRE1, FIRE2, FIRE3, FIRE4,
+		// functions
+		FN1, FN2, FN3,
+		// tools
+		SCREENSHOT, 
+		RESET,
 		FULLSCREEN;
 	}
 
     private App app;
 
 	/**
-	 * Map for keybinding.
+	 * Map for key binding.
 	 */
 	private Map<KeyBinding, Integer> keyBinding = new HashMap<>();
 
@@ -52,7 +63,7 @@ public class InputListener implements KeyListener {
 
 
     /**
-     * This is the main >Contructor for the InputListener, initializing its parent
+     * This is the main constructor for the InputListener, initializing its parent
      * component, the <code>app</code>.
      * 
      * @param app
@@ -82,9 +93,9 @@ public class InputListener implements KeyListener {
 		keys[e.getKeyCode()] = false;
 		logger.debug(e.getKeyCode() + " has been released");
 
-		for (KeyBinding keyBind : keyBinding.keySet()) {
-			if (e.getKeyCode() == keyBinding.get(keyBind)) {
-				app.getGSM().action(keyBind);
+		for (Entry<KeyBinding,Integer> keyBind : keyBinding.entrySet()) {
+			if (e.getKeyCode()==keyBind.getValue()) {
+				app.getGSM().action(keyBind.getKey());
 			}
 		}
 	}

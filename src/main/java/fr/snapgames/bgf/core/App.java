@@ -10,7 +10,10 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import fr.snapgames.bgf.core.audio.SoundControl;
 import fr.snapgames.bgf.core.entity.GameObject;
@@ -48,6 +52,8 @@ public class App extends JPanel {
 	private static final long serialVersionUID = 2924281870738631982L;
 
 	private static final Logger logger = LoggerFactory.getLogger(App.class.getCanonicalName());
+
+	public String jarPath = "";
 
 	/**
 	 * title of the application;
@@ -123,6 +129,14 @@ public class App extends JPanel {
 		inputListener = new InputListener(this);
 		resManager = new ResourceManager();
 		soundCtrl = SoundControl.getInstance();
+
+		String path = App.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		try {
+			jarPath = URLDecoder.decode(path, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Unable to detect the path for this jar file", e);
+		}
+
 	}
 
 	/**
@@ -155,27 +169,31 @@ public class App extends JPanel {
 	 */
 	private void prepareKeyBinding() {
 		Map<KeyBinding, Integer> myKB = new HashMap<>();
-		// temporary set key/action mapping
-		myKB.put(KeyBinding.UP, KeyEvent.VK_UP);
-		myKB.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
-		myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
-		myKB.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
+		myKB = loadMappingKey();
 
-		myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD2);
-		myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD5);
-		myKB.put(KeyBinding.FIRE3, KeyEvent.VK_PAGE_UP);
-		myKB.put(KeyBinding.FIRE4, KeyEvent.VK_PAGE_DOWN);
+		if (myKB.size() == 0) {
+			// temporary set key/action mapping
+			myKB.put(KeyBinding.UP, KeyEvent.VK_UP);
+			myKB.put(KeyBinding.DOWN, KeyEvent.VK_DOWN);
+			myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
+			myKB.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
 
-		myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
-		myKB.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
+			myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD2);
+			myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD5);
+			myKB.put(KeyBinding.FIRE3, KeyEvent.VK_PAGE_UP);
+			myKB.put(KeyBinding.FIRE4, KeyEvent.VK_PAGE_DOWN);
 
-		myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
-		myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
-		myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
-		myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
+			myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
+			myKB.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
+
+			myKB.put(KeyBinding.SCREENSHOT, KeyEvent.VK_F3);
+			myKB.put(KeyBinding.DEBUG, KeyEvent.VK_D);
+			myKB.put(KeyBinding.RESET, KeyEvent.VK_DELETE);
+			myKB.put(KeyBinding.FULLSCREEN, KeyEvent.VK_F11);
+
+			writeKeyMapping(myKB);
+		}
 		inputListener.prepareKeyBinding(myKB);
-
-		writeKeyMapping(myKB);
 	}
 
 	/**
@@ -188,13 +206,29 @@ public class App extends JPanel {
 		Gson gson = new Gson();
 		logger.info("Keymapping:" + gson.toJson(myKB));
 		try {
-			Files.write(Paths.get(this.getClass().getResource("/keymapping.json").toURI()),
-					gson.toJson(myKB).getBytes("utf-8"));
-			logger.debug("mapping keys:" + App.class.getClassLoader().getResource("/").getFile() + "keymapping.json");
+			Path filePath = Paths.get(jarPath.substring(1) + "/keymapping.json").toAbsolutePath();
+			Files.write(filePath, gson.toJson(myKB).getBytes("utf-8"));
+			logger.debug("mapping keys:" + "keymapping.json");
 		} catch (Exception ioe) {
 			logger.error("Unable to write the file", ioe);
 		}
 
+	}
+
+	private Map<KeyBinding, Integer> loadMappingKey() {
+		Gson gson = new Gson();
+		HashMap<KeyBinding, Integer> myKB = new HashMap<>();
+		logger.info("Keymapping:" + gson.toJson(myKB));
+		try {
+			Path filePath = Paths.get(jarPath.substring(1) + "/keymapping.json").toAbsolutePath();
+			String file = new String(Files.readAllBytes(filePath));
+			myKB = gson.fromJson(file, new TypeToken<Map<KeyBinding, Integer>>() {
+			}.getType());
+			logger.info("mapping keys:" + "keymapping.json = " + myKB.toString());
+		} catch (Exception ioe) {
+			logger.error("Unable to write the file", ioe);
+		}
+		return myKB;
 	}
 
 	/**
