@@ -1,7 +1,6 @@
 package fr.snapgames.bgf.core.entity;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 
 public interface GameEntity {
 
@@ -39,7 +38,7 @@ public interface GameEntity {
 	/**
 	 * @return the boundingBox
 	 */
-	Rectangle getBoundingBox();
+	BoundingBox getBoundingBox();
 
 	/**
 	 * @return the layer
@@ -50,5 +49,26 @@ public interface GameEntity {
 	 * @return the priority
 	 */
 	int getPriority();
+
+	/**
+	 * @return the X position
+	 */
+	float getX();
+
+	/**
+	 * @return the Y position
+	 */
+	float getY();
+
+	/**
+	 * 
+	 * @return the width of this object
+	 */
+	float getWidth();
+
+	/**
+	 * @return the height of this object
+	 */
+	float getHeight();
 
 }

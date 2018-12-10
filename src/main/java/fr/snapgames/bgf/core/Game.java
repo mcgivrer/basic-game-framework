@@ -31,8 +31,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import fr.snapgames.bgf.core.audio.SoundControl;
+import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
-import fr.snapgames.bgf.core.entity.GameObject;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.Window;
 import fr.snapgames.bgf.core.io.InputListener;
@@ -48,11 +48,11 @@ import fr.snapgames.bgf.sample.states.SampleGameState;
  * @since 2018
  * @see https://github.com/snapgames/basic-game-framework/wiki
  */
-public class App extends JPanel {
+public class Game extends JPanel {
 
 	private static final long serialVersionUID = 2924281870738631982L;
 
-	private static final Logger logger = LoggerFactory.getLogger(App.class.getCanonicalName());
+	private static final Logger logger = LoggerFactory.getLogger(Game.class.getCanonicalName());
 
 	public String jarPath = "";
 
@@ -121,7 +121,7 @@ public class App extends JPanel {
 	 * 
 	 * @param title the title of this app.
 	 */
-	public App(String title, String[] args) {
+	public Game(String title, String[] args) {
 		super();
 		this.title = title;
 		render = new Render(this, new Rectangle(320, 240));
@@ -131,7 +131,7 @@ public class App extends JPanel {
 		resManager = new ResourceManager();
 		soundCtrl = SoundControl.getInstance();
 
-		String path = App.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		String path = Game.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		try {
 			jarPath = URLDecoder.decode(path, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -408,7 +408,7 @@ public class App extends JPanel {
 	/**
 	 * Set Pause mode.
 	 * 
-	 * @param b a flag to set the App in pause mode (true).
+	 * @param b a flag to set the Game in pause mode (true).
 	 */
 	public void setPause(boolean b) {
 		this.pause = b;
@@ -424,7 +424,7 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * Return the Window created for this App.
+	 * Return the Window created for this Game.
 	 * 
 	 * @return the Window instance.
 	 */
@@ -458,7 +458,7 @@ public class App extends JPanel {
 	/**
 	 * return the InputListener.
 	 * 
-	 * @return an InputListener attached to this App.
+	 * @return an InputListener attached to this Game.
 	 */
 	public KeyListener getInputListener() {
 		return inputListener;
@@ -474,7 +474,7 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * Return the Render instance for this App.
+	 * Return the Render instance for this Game.
 	 * 
 	 * @return a Render instance.
 	 */
@@ -492,7 +492,7 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * Request to Main App to exit.
+	 * Request to Main Game to exit.
 	 * 
 	 * @param b
 	 */
@@ -509,7 +509,7 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * Return true if the main App is in pause mode.
+	 * Return true if the main Game is in pause mode.
 	 * 
 	 * @return true if in pause or not.
 	 */
@@ -518,13 +518,21 @@ public class App extends JPanel {
 	}
 
 	/**
-	 * App execution EntryPoint.
+	 * Game execution EntryPoint.
 	 * 
 	 * @param args the command line arguments passed to the main method.
 	 */
 	public static void main(String[] args) {
-		App app = new App("BGF", args);
+		Game app = new Game("BGF", args);
 		app.run();
 	}
 
+	/**
+	 * Get the current active Camera.
+	 * 
+	 * @return the current active Camera object in the current active GameState.
+	 */
+	public Camera getActiveCamera() {
+		return gsm.getCurrentState().getActiveCamera();
+	}
 }

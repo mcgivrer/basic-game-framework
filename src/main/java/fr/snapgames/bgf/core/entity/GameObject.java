@@ -12,18 +12,19 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
 
 /**
- * Internal object managed by the {@link App}.
+ * Internal object managed by the {@link Game}.
  * 
  * This <code>GameObject</code> is a graphical entity to be moved and animated
  * by the parent Game.
  * 
- * The <code>GameObject</code> is referenced into 2 {@link App} attributes :
+ * The <code>GameObject</code> is referenced into 2 {@link Game} attributes :
  * <ul>
- * <li>into the {@link App#objects} map for an object's management purpose,</li>
- * <li>into the {@link App#renderingList} as a sort rendering list of graphical
+ * <li>into the {@link Game#objects} map for an object's management purpose,</li>
+ * <li>into the {@link Game#renderingList} as a sort rendering list of graphical
  * object.</li>
  * </ul>
  * 
@@ -63,9 +64,8 @@ import fr.snapgames.bgf.core.App;
  * </ul>
  * <p>
  * And some useful {@link GameObject#builder(String)} and accessors to create
- * easily new <code>GameObject</code>, like
- * {@link GameObject#moveTo(int, int)} or
- * {@link GameObject#setVelocity(float, float)}.
+ * easily new <code>GameObject</code>, like {@link GameObject#moveTo(int, int)}
+ * or {@link GameObject#setVelocity(float, float)}.
  * 
  * </p>
  * 
@@ -74,44 +74,6 @@ import fr.snapgames.bgf.core.App;
  * 
  */
 public class GameObject implements GameEntity {
-
-	public class BoundingBox {
-		private Rectangle box;
-		private BoundingBoxType type;
-
-		BoundingBox(BoundingBoxType type) {
-			this.type = type;
-			box = new Rectangle();
-		}
-
-		public void setBox(int x, int y, int width, int height) {
-			box.x = x;
-			box.y = y;
-			box.width = width;
-			box.height = height;
-		}
-		public Rectangle getBox() {
-			return box;
-		}
-		
-		public BoundingBoxType getType() {
-			return type;
-		}
-	}
-
-	/**
-	 * Bounding Box Type for this object ?
-	 * <ul>
-	 * <li>RECTANGLE for rectangle shapes,</li>
-	 * <li>CIRCLE for ... CIRCLE shapes.</li>
-	 * </ul>
-	 * 
-	 * @author Frédéric Delorme
-	 *
-	 */
-	public enum BoundingBoxType {
-		RECTANGLE, CIRCLE
-	}
 
 	public int id;
 	public String name;
@@ -133,8 +95,6 @@ public class GameObject implements GameEntity {
 	public Color color;
 
 	public BoundingBox bBox = new BoundingBox(BoundingBoxType.RECTANGLE);
-	public Rectangle boundingBox = new Rectangle(0, 0, 0, 0);
-	public BoundingBoxType boundingType = BoundingBoxType.RECTANGLE;
 
 	/**
 	 * Create a new GameObject.
@@ -314,7 +274,7 @@ public class GameObject implements GameEntity {
 	 * @param type the bounding box type to be set for this GameObject.
 	 */
 	public GameObject setBoundingType(BoundingBoxType type) {
-		this.boundingType = type;
+		this.bBox.setType(type);
 		return this;
 	}
 
@@ -380,15 +340,15 @@ public class GameObject implements GameEntity {
 	 * @see fr.snapgames.bgf.core.entity.GameEntity#getBoundingBox()
 	 */
 	@Override
-	public Rectangle getBoundingBox() {
-		return boundingBox;
+	public BoundingBox getBoundingBox() {
+		return bBox;
 	}
 
 	/**
 	 * @param boundingBox the boundingBox to set
 	 */
 	public void setBoundingBox(Rectangle boundingBox) {
-		this.boundingBox = boundingBox;
+		this.bBox = bBox;
 	}
 
 	/*
@@ -409,6 +369,46 @@ public class GameObject implements GameEntity {
 	@Override
 	public int getPriority() {
 		return priority;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getX()
+	 */
+	@Override
+	public float getX() {
+		return x;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getY()
+	 */
+	@Override
+	public float getY() {
+		return y;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getHeight()
+	 */
+	@Override
+	public float getHeight() {
+		return height;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.snapgames.bgf.core.entity.GameEntity#getWidth()
+	 */
+	@Override
+	public float getWidth() {
+		return width;
 	}
 
 }

@@ -8,12 +8,13 @@
 package fr.snapgames.bgf.core.states;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
@@ -36,7 +37,7 @@ public class GameStateDefault {
 
 	protected Camera activeCamera;
 
-	protected App app;
+	protected Game app;
 
 	protected Map<String, Camera> cameras = new ConcurrentHashMap<>();
 	protected Map<String, GameEntity> objects = new ConcurrentHashMap<>();
@@ -77,7 +78,7 @@ public class GameStateDefault {
 		this.activeCamera = activeCamera;
 	}
 
-	public void initialize(App app) {
+	public void initialize(Game app) {
 		this.app = app;
 	}
 
@@ -102,6 +103,7 @@ public class GameStateDefault {
 	public void add(Camera camera) {
 		if (!this.cameras.containsKey(camera.getName())) {
 			this.cameras.put(camera.getName(), camera);
+
 		} else {
 			logger.error("A camera name {} already exists", camera.getName());
 		}
@@ -139,9 +141,25 @@ public class GameStateDefault {
 	 * @param app
 	 * @param render
 	 */
-	public void render(App app, Render render) {
+	public void render(Game app, Render render) {
 		render.clearRenderBuffer();
 		render.drawToRenderBuffer(app);
 		render.drawRenderBufferToScreen();
 	}
+
+	/**
+	 * Update all the GameObject and camera from the current active GameState.
+	 * 
+	 * @param app
+	 * @param dt
+	 */
+	public void update(Game app, long dt) {
+		for (Entry<String, GameEntity> entry : objects.entrySet()) {
+			entry.getValue().update(dt);
+		}
+		for (Camera cam : cameras.values()) {
+			cam.update(dt);
+		}
+	}
+
 }

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import cucumber.api.java8.En;
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.gfx.Window;
 
 /**
@@ -16,7 +16,7 @@ import fr.snapgames.bgf.core.gfx.Window;
  *
  */
 public class ApplicationCliFullScreenSteps implements En {
-	private App application;
+	private Game application;
 	private Window window;
 	private String[] args;
 
@@ -28,7 +28,7 @@ public class ApplicationCliFullScreenSteps implements En {
 	public ApplicationCliFullScreenSteps() {
 		Given("^An Application fullWindow$", () -> {
 			args = new String[] { "" };
-			application = new App("fullWindow", args);
+			application = new Game("fullWindow", args);
 		});
 
 		Given("^has arg f=(.*)+$", (Boolean fullScreenModeValue) -> {

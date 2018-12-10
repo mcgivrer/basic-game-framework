@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 
 public class Window {
 
@@ -33,7 +33,7 @@ public class Window {
     private Dimension back;
     private boolean fullScreenMode;
 
-    private App app;
+    private Game app;
 
     private String iconpath = "res/app-icon.png";
 
@@ -42,11 +42,11 @@ public class Window {
     private GraphicsDevice device;
 
     /**
-     * Create a window for the App <code>app</code>.
+     * Create a window for the Game <code>app</code>.
      * 
      * @param app
      */
-    public Window(App app) {
+    public Window(Game app) {
         this(app, app.getTitle());
     }
 
@@ -56,7 +56,7 @@ public class Window {
      * @param app
      * @param title
      */
-    private Window(App app, String title) {
+    private Window(Game app, String title) {
         this.app = app;
 
         try {
@@ -129,11 +129,11 @@ public class Window {
     }
 
     /**
-     * Set Window Size according the {@link App} object.
+     * Set Window Size according the {@link Game} object.
      * 
      * @param app the apret app to align size with.
      */
-    public void setSize(App app) {
+    public void setSize(Game app) {
         // fix a platform linked issue about window sizing.
         Insets insets = frame.getInsets();
         int addedWidth = insets.left + insets.right;

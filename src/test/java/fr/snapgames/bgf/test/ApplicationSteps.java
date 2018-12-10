@@ -15,7 +15,7 @@ import java.util.Collection;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.GameEntity;
 
 /**
@@ -26,7 +26,7 @@ import fr.snapgames.bgf.core.entity.GameEntity;
  */
 public class ApplicationSteps {
 
-	private App application;
+	private Game application;
 	private BufferedImage buffer;
 	private String[] args;
 	private int debug;
@@ -37,7 +37,7 @@ public class ApplicationSteps {
 	@Given("^An application wihtout arg$")
 	public void anApplicationWithoutArg() {
 		args = new String[] {};
-		application = new App("mytests", args);
+		application = new Game("mytests", args);
 		application.initialize();
 	}
 
@@ -54,7 +54,7 @@ public class ApplicationSteps {
 	@Given("^An Application with args$")
 	public void anApplicationWithArgs() {
 		args = new String[] { "" };
-		application = new App("mytests", args);
+		application = new Game("mytests", args);
 		application.initialize();
 	};
 

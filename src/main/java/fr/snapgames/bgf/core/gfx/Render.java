@@ -20,10 +20,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
-import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 
 /**
  * The Render class is the rendering processor for all GameObject to an internal
@@ -35,7 +35,7 @@ import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
  */
 public class Render {
 
-	private App app;
+	private Game app;
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
@@ -43,6 +43,7 @@ public class Render {
 
 	private Rectangle viewport;
 	private Dimension dimension;
+	private Camera camera;
 
 	private int debug = 0;
 	private Font dbgFont;
@@ -68,10 +69,10 @@ public class Render {
 	/**
 	 * Initialize the renderer with a viewport size.
 	 * 
-	 * @param app      the parent App
+	 * @param app      the parent Game
 	 * @param viewPort the requested viewPort.
 	 */
-	public Render(App app, Rectangle viewPort) {
+	public Render(Game app, Rectangle viewPort) {
 		this.app = app;
 		this.viewport = viewPort;
 		this.dimension = new Dimension(viewPort.width, viewPort.width);
@@ -91,19 +92,21 @@ public class Render {
 	/**
 	 * Render the game screen.
 	 */
-	public void drawToRenderBuffer(App app) {
+	public void drawToRenderBuffer(Game app) {
 
 		// prepare pipeline anti-aliasing.
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		// TODO add Camera preRender operation
-
+		if(app.getActiveCamera()!=null) {
+			app.getActiveCamera().preRender(app,g);
+		}
 		// render anything game ?
 		for (GameEntity o : renderingList) {
 			o.render(g);
 			if (debug >= 2) {
-				renderBoundingBox(g, o);
+				o.getBoundingBox().render(g);
 			}
 			if (debug >= 3) {
 				drawObjectDebugInfo(g, o);
@@ -111,6 +114,9 @@ public class Render {
 		}
 
 		// TODO add Camera postRender operation
+		if(app.getActiveCamera()!=null) {
+			app.getActiveCamera().postRender(app,g);
+		}
 
 		// render pause status
 		if (pause) {
@@ -133,31 +139,6 @@ public class Render {
 		if (debug > 0) {
 			drawGlobalDebugInformation(g);
 		}
-	}
-
-	/**
-	 * rendering the bounding box shape with a black color of the <code>o</code>
-	 * GameBject using the <code>g</code> API.
-	 * 
-	 * @param g the Graphics2D API to render things
-	 * @param o the GameObject to render the BoundingBox of.
-	 */
-	public void renderBoundingBox(Graphics2D g, GameEntity e) {
-		GameObject o = (GameObject) e;
-		BoundingBoxType boundingType = o.boundingType;
-		Rectangle boundingBox = o.boundingBox;
-		g.setColor(Color.GREEN);
-		switch (boundingType) {
-		case RECTANGLE:
-			g.drawRect((int) o.x, (int) o.y, (int) boundingBox.width, boundingBox.height);
-			break;
-		case CIRCLE:
-			g.drawOval((int) o.x, (int) o.y, boundingBox.width, boundingBox.height);
-			break;
-		default:
-			break;
-		}
-
 	}
 
 	/**
@@ -329,6 +310,10 @@ public class Render {
 		this.SCALE = scale;
 	}
 
+	public void setCamera(Camera cam) {
+		this.camera = cam;
+	}
+
 	/**
 	 * return the pixel scale.
 	 * 
@@ -387,12 +372,12 @@ public class Render {
 	 * 
 	 * @param image image to be saved to disk.
 	 */
-	public static void screenshot(App app) {
+	public static void screenshot(Game app) {
 		int scindex = 0;
 		app.suspendRendering(true);
 		try {
 			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG",
+			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, Game.WIDTH, Game.HEIGHT), "PNG",
 					out);
 		} catch (Exception e) {
 			System.err.println("Unable to write screenshot to " + path);

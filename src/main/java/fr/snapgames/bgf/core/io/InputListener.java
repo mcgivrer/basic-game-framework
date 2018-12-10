@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 
 /**
  * The class InputListener is the main input manager for the game. Here are
@@ -46,7 +46,7 @@ public class InputListener implements KeyListener {
 		FULLSCREEN;
 	}
 
-    private App app;
+    private Game app;
 
 	/**
 	 * Map for key binding.
@@ -68,7 +68,7 @@ public class InputListener implements KeyListener {
      * 
      * @param app
      */
-    public InputListener(App app) {
+    public InputListener(Game app) {
         this.app = app;
     }
 

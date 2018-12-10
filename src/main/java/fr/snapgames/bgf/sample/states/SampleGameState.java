@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
 import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
-import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.ui.UIText;
 import fr.snapgames.bgf.core.io.InputListener;
@@ -47,10 +47,10 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 * 
 	 * @see
 	 * fr.snapgames.bgf.core.states.GameStateDefault#initialize(fr.snapgames.bgf.
-	 * core.App)
+	 * core.Game)
 	 */
 	@Override
-	public void initialize(App app) {
+	public void initialize(Game app) {
 		this.app = app;
 
 		app.resManager.addResource("images/playerBall", "res/images/blue-bouncing-ball-64x64.png");
@@ -62,28 +62,46 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see fr.snapgames.bgf.core.states.GameState#create(fr.snapgames.bgf.core.App,
+	 * @see
+	 * fr.snapgames.bgf.core.states.GameState#create(fr.snapgames.bgf.core.Game,
 	 * long)
 	 */
 	@Override
-	public void create(App app, long uid) {
+	public void create(Game app, long uid) {
 		this.uid = uid;
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(1)
-				.moveTo(12, 24).setLayer(20);
+		scoreUiText = (UIText) UIText.builder("score")
+				.setFont(scoreFont)
+				.setText("00000")
+				.setThickness(2)
+				.moveTo(12, 24)
+				.setLayer(20)
+				.setPriority(100);
 		add(scoreUiText);
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
+			player = GameObject.builder("player")
+					.setSize(24, 24)
+					.setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(0.95f)
+					.moveTo(0, 0)
+					.setColor(Color.GREEN)
+					.setVelocity(0.0f, 0.0f)
+					.setLayer(10)
+					.setPriority(100)
+					.setElasticity(1.2f)
+					.setFriction(0.98f)
+					.setBoundingType(BoundingBoxType.CIRCLE);
 			;
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.22f);
+			Camera cam1 = Camera.builder("cam1")
+					.setTarget(player)
+					.setTween(0.86f)
+					.setView(app.getRender().getViewport());
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
@@ -99,7 +117,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 * 
 	 * @param nbEnemies
 	 */
-	private void createGameObjects(App app, String baseName, int nbEnemies) {
+	private void createGameObjects(Game app, String baseName, int nbEnemies) {
 		app.suspendRendering(true);
 		Rectangle vp = app.getRender().getViewport();
 		try {
@@ -108,8 +126,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 						.setImage(app.resManager.getImage("images/enemyBall"))
 						.moveTo((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
 						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
-						.setColor(randomColor()).setPriority(i).setLayer(1).setElasticity(1.0f).setFriction(1.0f)
-						.setBoundingType(BoundingBoxType.CIRCLE);
+						.setColor(randomColor()).setPriority(100 - i).setLayer(1).setElasticity(0.98f)
+						.setFriction(0.96f).setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
 			}
 		} catch (ResourceUnknownException rue) {
@@ -129,14 +147,14 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	}
 
 	/**
-	 * Remove {@link GameObject} from the {@link App} where name contains with
+	 * Remove {@link GameObject} from the {@link Game} where name contains with
 	 * nameFilter if nbToRemove equals -1, all corresponding
 	 * <code>nameFilter</code>ed object will be removed.
 	 * 
 	 * @param nameFilter
 	 * @param i
 	 */
-	private void removeGameObjects(App app, String nameFilter, int nbToRemove) {
+	private void removeGameObjects(Game app, String nameFilter, int nbToRemove) {
 		app.suspendRendering(true);
 
 		// parse Object map and remove matching object with filtering string.
@@ -159,12 +177,12 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	}
 
 	@Override
-	public void dispose(App app) {
+	public void dispose(Game app) {
 		// TODO next time some release of resource will implemented here.
 	}
 
 	@Override
-	public void input(App app, InputListener inputListener) {
+	public void input(Game app, InputListener inputListener) {
 		GameObject goPlayer = (GameObject) objects.get("player");
 
 		float factor = 1.0f;
@@ -192,20 +210,21 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	}
 
 	@Override
-	public void update(App app, long dt) {
+	public void update(Game app, long dt) {
+		super.update(app, dt);
 		for (Entry<String, GameEntity> entry : objects.entrySet()) {
-			entry.getValue().update(dt);
 			constrains(app, entry.getValue());
 		}
+
 		scoreUiText.setText(String.format("%05d", score++));
 	}
 
 	/**
-	 * Contained object to App viewport display.
+	 * Contained object to Game viewport display.
 	 * 
 	 * @param o
 	 */
-	private void constrains(App app, GameEntity ge) {
+	private void constrains(Game app, GameEntity ge) {
 
 		boolean colliding = false;
 

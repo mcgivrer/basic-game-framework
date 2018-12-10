@@ -4,9 +4,11 @@
 package fr.snapgames.bgf.core.entity;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
 
 /**
  * @author frede
@@ -14,15 +16,18 @@ import fr.snapgames.bgf.core.App;
  */
 public class Camera extends GameObject implements GameEntity {
 
-	private GameObject target;
+	private GameObject trackedObject;
 
-	private float tween = 1.0f;
+	private float tweenFactor = 1.0f;
+
+	private Rectangle view;
 
 	/**
 	 * @param name
 	 */
 	public Camera(String name) {
 		super(name);
+		this.bBox = new BoundingBox(BoundingBoxType.RECTANGLE);
 	}
 
 	/**
@@ -56,43 +61,43 @@ public class Camera extends GameObject implements GameEntity {
 	}
 
 	/**
-	 * Define the target for this camera.
+	 * Define the trackedObject for this camera.
 	 * 
-	 * @param target
+	 * @param trackedObject
 	 */
 	public Camera setTarget(GameObject target) {
-		this.target = target;
+		this.trackedObject = target;
 		return this;
 	}
 
 	/**
-	 * get the target for this camera.
+	 * get the trackedObject for this camera.
 	 * 
 	 * @return
 	 */
 	public GameObject getTarget() {
-		return target;
+		return trackedObject;
 	}
 
 	/**
-	 * Define the tween factor for this camera, defining the "following speed" delay
-	 * for the camera to track the target object.
+	 * Define the tweenFactor factor for this camera, defining the "following speed"
+	 * delay for the camera to track the trackedObject object.
 	 * 
-	 * @param tween
+	 * @param tweenFactor
 	 */
 	public Camera setTween(float tween) {
-		this.tween = tween;
+		this.tweenFactor = tween;
 		return this;
 	}
 
 	/**
-	 * retrieve the tween factor for this camera, defining the "following speed"
-	 * delay to track the target object.
+	 * retrieve the tweenFactor factor for this camera, defining the "following
+	 * speed" delay to track the trackedObject object.
 	 * 
 	 * @return
 	 */
 	public float getTween() {
-		return tween;
+		return tweenFactor;
 	}
 
 	/*
@@ -102,7 +107,8 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-
+		x += (trackedObject.x - (view.width / 2) - this.x) * tweenFactor * dt/1000;
+		y += (trackedObject.y - (view.height / 2) - this.y) * tweenFactor * dt/1000;
 	}
 
 	/**
@@ -111,8 +117,8 @@ public class Camera extends GameObject implements GameEntity {
 	 * @param app
 	 * @param g
 	 */
-	public void preRender(App app, Graphics2D g) {
-
+	public void preRender(Game app, Graphics2D g) {
+		g.translate(-x, -y);
 	}
 
 	/**
@@ -122,8 +128,8 @@ public class Camera extends GameObject implements GameEntity {
 	 * @param app
 	 * @param g
 	 */
-	public void postRender(App app, Graphics2D g) {
-
+	public void postRender(Game app, Graphics2D g) {
+		g.translate(x, y);
 	}
 
 	/**
@@ -136,4 +142,16 @@ public class Camera extends GameObject implements GameEntity {
 		return new Camera(name);
 	}
 
+	/**
+	 * define the Game view to compute camera position.
+	 * 
+	 * @param view
+	 */
+	public Camera setView(Rectangle view) {
+		this.view = view;
+		this.width = this.view.width - 20;
+		this.height = this.view.height - 20;
+
+		return this;
+	}
 }
