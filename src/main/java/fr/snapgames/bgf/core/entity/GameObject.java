@@ -11,9 +11,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
+import fr.snapgames.bgf.core.math.Vector2D;
+import fr.snapgames.bgf.core.math.physic.CollisionSystem.Physic;
 
 /**
  * Internal object managed by the {@link Game}.
@@ -23,7 +26,8 @@ import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
  * 
  * The <code>GameObject</code> is referenced into 2 {@link Game} attributes :
  * <ul>
- * <li>into the {@link Game#objects} map for an object's management purpose,</li>
+ * <li>into the {@link Game#objects} map for an object's management
+ * purpose,</li>
  * <li>into the {@link Game#renderingList} as a sort rendering list of graphical
  * object.</li>
  * </ul>
@@ -88,8 +92,19 @@ public class GameObject implements GameEntity {
 	public float scale = 1.0f;
 	public float dx = 0.0f;
 	public float dy = 0.0f;
+
+	/**
+	 * New Physical attributes.
+	 */
+	public Vector2D position;
+	public Vector2D size;
+	public Vector2D speed;
+	public List<Vector2D> forces;
+
 	public float friction = 0.13f;
 	public float elasticity = 0.98f;
+
+	public Physic type;
 
 	public BufferedImage image;
 	public Color color;
