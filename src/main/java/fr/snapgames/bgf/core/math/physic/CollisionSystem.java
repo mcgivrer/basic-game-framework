@@ -76,7 +76,7 @@ public class CollisionSystem implements Runnable {
      * <p>
      * Here is the list of moving object in the scene.
      */
-    private List<GameObject> dynamicObjects = new ArrayList<>();
+    private List<Collidable> dynamicObjects = new ArrayList<>();
     /**
      * <p>
      * Static Object List
@@ -84,7 +84,7 @@ public class CollisionSystem implements Runnable {
      * Here is the list of static object whose can be blocker for dynamic object
      * movement.
      */
-    private List<GameObject> staticObjects = new ArrayList<>();
+    private List<Collidable> staticObjects = new ArrayList<>();
 
     /**
      * <p>
@@ -99,13 +99,14 @@ public class CollisionSystem implements Runnable {
      * @param obj the GameObject to be added to collision System object set.
      */
     public void addCollider(GameObject obj) {
+        Collidable col = new Collidable(obj);
         switch (obj.type) {
         case STATIC:
-            staticObjects.add(obj);
+            staticObjects.add(col);
             break;
         case DYNAMIC:
         case KINEMATIC:
-            dynamicObjects.add(obj);
+            dynamicObjects.add(col);
             break;
         }
     }
@@ -124,32 +125,36 @@ public class CollisionSystem implements Runnable {
      */
     public void collide(float elapsed) {
         // updateObjects(dynamicObjects, elapsed);
-        for (GameObject dyna : dynamicObjects) {
+        for (Collidable collidable : dynamicObjects) {
             // if object need to be constraint into Viewport.
-            if (dyna.constraintsToViewport) {
-                constrainsInViewPort(dyna);
+            if (collidable.constraintsToViewport) {
+                constrainsInViewPort(collidable);
             }
             // compute collision with Kinematic Objects
-            for (GameObject kinema : staticObjects) {
-                if (!dyna.equals(kinema)) {
-                    dyna.top = false;
-                    dyna.bottom = false;
-                    dyna.left = false;
-                    dyna.right = false;
-                    if (dyna.boundingBox.intersects(kinema.boundingBox)) {
+            for (Collidable kinema : staticObjects) {
+                if (!collidable.equals(kinema)) {
+                    collidable.top = false;
+                    collidable.bottom = false;
+                    collidable.left = false;
+                    collidable.right = false;
+                    if (collidable.boundingBox.getBox().intersects(kinema.boundingBox.getBox())) {
                         // A collision exist, compute response.
-                        computeRestitution(dyna, kinema);
-                        logger.debug(String.format("%s collides %s at (%f,%f) on %s", dyna.getName(), kinema.getName(),
-                                dyna.position.x, dyna.position.y, dyna.getCollidingSide()));
-                        if (GamePanel.debug) {
-                            dyna.color = Color.RED;
-                            kinema.color = Color.RED;
+                        computeRestitution(collidable, kinema);
+                        logger.debug(String.format("%s collides %s at (%f,%f) on %s", 
+                            collidable.parent.getName(), 
+                            kinema.parent.getName(),
+                            collidable.parent.position.x, 
+                            collidable.parent.position.y, 
+                            collidable.getCollidingSide()));
+                        if (game.getDebugMode()>2) {
+                            collidable.parent.color = Color.RED;
+                            kinema.parent.color = Color.RED;
                         }
 
                     } else {
                         if (game.getDebugMode() > 2) {
-                            dyna.color = Color.GREEN;
-                            kinema.color = Color.DARK_GRAY;
+                            collidable.parent.color = Color.GREEN;
+                            kinema.parent.color = Color.DARK_GRAY;
                         }
                     }
                 }
@@ -163,7 +168,7 @@ public class CollisionSystem implements Runnable {
      * 
      * @param o
      */
-    private void constrainsInViewPort(Collaidable c) {
+    private void constrainsInViewPort(Collidable c) {
         Rectangle viewport = game.getRender().getViewport();
         GameObject o = c.parent;
         if (o.newPosition.x < viewport.x) {
@@ -173,11 +178,11 @@ public class CollisionSystem implements Runnable {
             o.newPosition.y = viewport.y;
             o.speed.y = 0;
         }
-        if (o.newPosition.x > viewport.width - o.width) {
-            o.newPosition.x = viewport.width - o.width;
+        if (o.newPosition.x > viewport.width - o.size.x) {
+            o.newPosition.x = viewport.width - o.size.x;
         }
-        if (o.newPosition.y >= GamePanel.viewport.height - o.height) {
-            o.newPosition.y = viewport.height - o.height;
+        if (o.newPosition.y >= viewport.height - o.size.y) {
+            o.newPosition.y = viewport.height - o.size.y;
             o.speed.y = 0;
         }
     }
@@ -194,8 +199,8 @@ public class CollisionSystem implements Runnable {
      *                <code>entity2</code>
      * @param entity2 the {@link GameObject} to test colliding with.
      */
-    private void computeRestitution(GameObject entity1, GameObject entity2) {
-        // Find the mid points of the entity and player
+    private void computeRestitution(Collidable entity1, Collidable entity2) {
+        // Find the mid points of the 2 entities
         float pMidX = entity1.getMidX();
         float pMidY = entity1.getMidY();
         float aMidX = entity2.getMidX();
@@ -203,15 +208,15 @@ public class CollisionSystem implements Runnable {
 
         // To find the side of entry calculate based on
         // the normalized sides
-        float dx = (aMidX - pMidX) / entity2.midWidth;
-        float dy = (aMidY - pMidY) / entity2.midHeight;
+        float dx = (aMidX - pMidX) / entity2.getMidWidth();
+        float dy = (aMidY - pMidY) / entity2.getMidHeight();
 
         // Calculate the absolute change in x and y
         float absDX = Math.abs(dx);
         float absDY = Math.abs(dy);
 
         // compute restitution.
-        float restitution = Math.min(entity1.restitution, entity2.restitution);
+        float restitution = Math.min(entity1.parent.elasticity, entity2.parent.elasticity);
 
         // If the distance between the normalized x and y
         // position is less than a small threshold (.1 in this case)
@@ -222,19 +227,19 @@ public class CollisionSystem implements Runnable {
             if (dx < 0) {
 
                 // Set the player x to the right side
-                entity1.newPosition.x = entity2.getRight();
+                entity1.parent.newPosition.x = entity2.getRight();
                 entity1.right = true;
-                entity1.speed.x = 0;
-                entity1.acceleration.x = 0;
+                entity1.parent.speed.x = 0;
+                entity1.parent.acceleration.x = 0;
 
                 // If the player is approaching from negative X
             } else {
 
                 // Set the player x to the left side
-                entity1.newPosition.x = entity2.getLeft() - entity1.width;
+                entity1.parent.newPosition.x = entity2.getLeft() - entity1.parent.size.x;
                 entity1.left = true;
-                entity1.speed.x = 0;
-                entity1.acceleration.x = 0;
+                entity1.parent.speed.x = 0;
+                entity1.parent.acceleration.x = 0;
 
             }
 
@@ -242,40 +247,40 @@ public class CollisionSystem implements Runnable {
             if (dy < 0) {
 
                 // Set the player y to the bottom
-                entity1.newPosition.y = entity2.getBottom();
+                entity1.parent.newPosition.y = entity2.getBottom();
                 entity1.top = true;
-                entity1.speed.y = 0;
-                entity1.acceleration.y = 0;
+                entity1.parent.speed.y = 0;
+                entity1.parent.acceleration.y = 0;
 
                 // If the player is approaching from negative Y
             } else {
 
                 // Set the player y to the top
-                entity1.newPosition.y = entity2.getTop() - entity1.height;
+                entity1.parent.newPosition.y = entity2.getTop() - entity1.parent.size.y;
                 entity1.bottom = true;
-                entity1.speed.y = 0;
-                entity1.acceleration.y = 0;
+                entity1.parent.speed.y = 0;
+                entity1.parent.acceleration.y = 0;
             }
 
             // Randomly select a x/y direction to reflect velocity on
             if (Math.random() < .5) {
 
                 // Reflect the velocity at a reduced rate
-                entity1.speed.x = -entity1.speed.x * restitution;
+                entity1.parent.speed.x = -entity1.parent.speed.x * restitution;
 
                 // If the object's velocity is nearing 0, set it to 0
                 // STICKY_THRESHOLD is set to .0004
-                if (Math.abs(entity1.speed.x) < STICKY_THRESHOLD) {
-                    entity1.speed.x = 0;
-                    entity1.acceleration.x = 0;
+                if (Math.abs(entity1.parent.speed.x) < STICKY_THRESHOLD) {
+                    entity1.parent.speed.x = 0;
+                    entity1.parent.acceleration.x = 0;
 
                 }
             } else {
 
-                entity1.speed.y = -entity1.speed.y * restitution;
-                if (Math.abs(entity1.speed.y) < STICKY_THRESHOLD) {
-                    entity1.speed.y = 0;
-                    entity1.acceleration.y = 0;
+                entity1.parent.speed.y = -entity1.parent.speed.y * restitution;
+                if (Math.abs(entity1.parent.speed.y) < STICKY_THRESHOLD) {
+                    entity1.parent.speed.y = 0;
+                    entity1.parent.acceleration.y = 0;
 
                 }
             }
@@ -285,21 +290,21 @@ public class CollisionSystem implements Runnable {
 
             // If the player is approaching from positive X
             if (dx < 0) {
-                entity1.newPosition.x = entity2.getRight();
+                entity1.parent.newPosition.x = entity2.getRight();
                 entity1.right = true;
 
             } else {
                 // If the player is approaching from negative X
-                entity1.newPosition.x = entity2.getLeft() - entity1.width;
+                entity1.parent.newPosition.x = entity2.getLeft() - entity1.parent.size.x;
                 entity1.left = true;
             }
 
             // Velocity component
-            entity1.speed.x = -entity1.speed.x * entity2.restitution;
+            entity1.parent.speed.x = -entity1.parent.speed.x * entity2.parent.elasticity;
 
-            if (Math.abs(entity1.speed.x) < STICKY_THRESHOLD) {
-                entity1.speed.x = 0;
-                entity1.acceleration.x = 0;
+            if (Math.abs(entity1.parent.speed.x) < STICKY_THRESHOLD) {
+                entity1.parent.speed.x = 0;
+                entity1.parent.acceleration.x = 0;
             }
 
             // If this collision is coming from the top or bottom more
@@ -307,20 +312,20 @@ public class CollisionSystem implements Runnable {
 
             // If the player is approaching from positive Y
             if (dy < 0) {
-                entity1.newPosition.y = entity2.getBottom();
+                entity1.parent.newPosition.y = entity2.getBottom();
                 entity1.top = true;
 
             } else {
                 // If the player is approaching from negative Y
-                entity1.newPosition.y = entity2.getTop() - entity1.height;
+                entity1.parent.newPosition.y = entity2.getTop() - entity1.parent.size.y;
                 entity1.bottom = true;
             }
 
             // Velocity component
-            entity1.speed.y = -entity1.speed.y * entity2.restitution;
-            if (Math.abs(entity1.speed.y) < STICKY_THRESHOLD) {
-                entity1.speed.y = 0;
-                entity1.acceleration.y = 0;
+            entity1.parent.speed.y = -entity1.parent.speed.y * entity2.parent.elasticity;
+            if (Math.abs(entity1.parent.speed.y) < STICKY_THRESHOLD) {
+                entity1.parent.speed.y = 0;
+                entity1.parent.acceleration.y = 0;
             }
         }
     }
@@ -375,10 +380,7 @@ public class CollisionSystem implements Runnable {
             break;
         }
 
-        go.boundingBox.x = (int) go.position.x;
-        go.boundingBox.y = (int) go.position.y;
-        go.boundingBox.width = (int) go.size.x;
-        go.boundingBox.height = (int) go.size.y;
+        go.getBoundingBox().update(go);
     }
 
     private Vector2D constraint(Vector2D vector, float f) {

@@ -47,7 +47,7 @@ public class UIText extends GameObject {
 	public void render(Graphics2D g) {
 		g.setFont(font);
 
-		Render.drawOutlinedString(g, (int)x, (int)y, text, thickness, Color.WHITE, Color.BLACK);
+		Render.drawOutlinedString(g, (int)position.x, (int)position.y, text, thickness, Color.WHITE, Color.BLACK);
 	}
 
 	public UIText setThickness(int thickness) {

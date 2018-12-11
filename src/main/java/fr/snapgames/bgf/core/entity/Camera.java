@@ -107,8 +107,13 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		x += (trackedObject.x - (view.width / 2) - this.x) * tweenFactor * dt/1000;
-		y += (trackedObject.y - (view.height / 2) - this.y) * tweenFactor * dt/1000;
+		//Vector2D view2D = new Vector2D("view",view.x,view.y);
+		//position = position.add(trackedObject.position.sub(view2D.multiply(0.5f))).multiply(tweenFactor*dt/1000.0f);
+
+	
+		position.x += (trackedObject.position.x - (view.width / 2) - this.position.x) * tweenFactor * dt/1000;
+		position.y += (trackedObject.position.y - (view.height / 2) - this.position.y) * tweenFactor * dt/1000;
+		
 	}
 
 	/**
@@ -118,7 +123,7 @@ public class Camera extends GameObject implements GameEntity {
 	 * @param g
 	 */
 	public void preRender(Game app, Graphics2D g) {
-		g.translate(-x, -y);
+		g.translate(-position.x, -position.y);
 	}
 
 	/**
@@ -129,7 +134,7 @@ public class Camera extends GameObject implements GameEntity {
 	 * @param g
 	 */
 	public void postRender(Game app, Graphics2D g) {
-		g.translate(x, y);
+		g.translate(position.x, position.y);
 	}
 
 	/**
@@ -149,8 +154,8 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	public Camera setView(Rectangle view) {
 		this.view = view;
-		this.width = this.view.width - 20;
-		this.height = this.view.height - 20;
+		this.size.x = this.view.width - 20;
+		this.size.y = this.view.height - 20;
 
 		return this;
 	}
