@@ -66,10 +66,11 @@ public class BoundingBox {
 	 * @param ge
 	 */
 	public void update(GameEntity ge) {
-		this.box.x = ge.getX();
-		this.box.y = ge.getY();
-		this.box.width = ge.getWidth();
-		this.box.height = ge.getHeight();
+		GameObject go = (GameObject) ge;
+		this.box.x = go.position.x;
+		this.box.y = go.position.y;
+		this.box.width = go.size.x;
+		this.box.height = go.size.y;
 	}
 
 	/**
@@ -81,9 +82,10 @@ public class BoundingBox {
 		g.setColor(this.color);
 		switch (type) {
 		case CIRCLE:
-			g.drawArc((int)box.x, (int)box.y, (int)box.width, (int)box.height, 0, 360);
+			g.drawArc((int) box.x, (int) box.y, (int) box.width, (int) box.height, 0, 360);
 			break;
 		case RECTANGLE:
+			g.drawRect((int) box.x, (int) box.y, (int) box.width, (int) box.height);
 			break;
 		default:
 			break;

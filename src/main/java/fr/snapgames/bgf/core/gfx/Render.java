@@ -98,7 +98,7 @@ public class Render {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// TODO add Camera preRender operation
+		// Camera preRender operation
 		if(app.getActiveCamera()!=null) {
 			app.getActiveCamera().preRender(app,g);
 		}
@@ -113,7 +113,7 @@ public class Render {
 			}
 		}
 
-		// TODO add Camera postRender operation
+		// Camera postRender operation
 		if(app.getActiveCamera()!=null) {
 			app.getActiveCamera().postRender(app,g);
 		}
@@ -152,17 +152,17 @@ public class Render {
 		g.setFont(dbgFont);
 		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
+		g.fillRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
+		g.drawRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
 
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.getName()), o.x + o.width + 4, o.y + (12 * 1));
-		g.drawString(String.format("Pos:%03.2f,%03.2f", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
-		g.drawString(String.format("Size:%03.2f,%03.2f", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
-		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
+		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + 4, o.position.y + (12 * 1));
+		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y), o.position.x + o.size.x + 4, o.position.y + (12 * 2));
+		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y), o.position.x + o.size.x + 4, o.position.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y), o.position.x + o.size.x + 4, o.position.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + 4, o.position.y + (12 * 5));
 	}
 
 	/**

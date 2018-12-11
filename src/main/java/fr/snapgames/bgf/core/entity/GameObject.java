@@ -9,8 +9,8 @@ package fr.snapgames.bgf.core.entity;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.snapgames.bgf.core.Game;
@@ -85,22 +85,19 @@ public class GameObject implements GameEntity {
 	public int layer = 0;
 	public int priority = 0;
 
-	public float x = 0.0f;
-	public float y = 0.0f;
-	public float width = 16.0f;
-	public float height = 16.0f;
 	public float scale = 1.0f;
-	public float dx = 0.0f;
-	public float dy = 0.0f;
 
 	/**
 	 * New Physical attributes.
 	 */
-	public Vector2D position;
-	public Vector2D size;
-	public Vector2D speed;
-	public List<Vector2D> forces;
-
+	public Vector2D position = new Vector2D("position");;
+	public Vector2D newPosition = new Vector2D("newposition");
+	public Vector2D size = new Vector2D("size");;
+	public Vector2D speed = new Vector2D("speed");;
+	public Vector2D acceleration = new Vector2D("acceleration");;
+	public Vector2D gravity = new Vector2D("gravity");;
+	public List<Vector2D> forces = new ArrayList<>();
+	public float mass;
 	public float friction = 0.13f;
 	public float elasticity = 0.98f;
 
@@ -140,7 +137,8 @@ public class GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		moveTo((int) (x + (dx * dt)), (int) (y + (dy * dt)));
+		position = position.add(speed.multiply(dt));
+		bBox.update(this);
 	}
 
 	/*
@@ -151,17 +149,18 @@ public class GameObject implements GameEntity {
 	@Override
 	public void render(Graphics2D g) {
 		if (image != null) {
-			g.drawImage(image, (int) x, (int) y, (int) (width * scale), (int) (height * scale), null);
+			g.drawImage(image, (int) position.x, (int) position.y, (int) (size.x * scale), (int) (size.y * scale),
+					null);
 		} else {
 			g.setColor(color);
-			g.fillRect((int) x, (int) y, (int) width, (int) height);
+			g.fillRect((int) position.x, (int) position.y, (int) size.x, (int) size.y);
 			g.setColor(Color.BLACK);
-			g.drawRect((int) x, (int) y, (int) width, (int) height);
+			g.drawRect((int) position.x, (int) position.y, (int) size.x, (int) size.y);
 		}
 	}
 
 	private void computeBoundingBox(GameObject o) {
-		bBox.setBox((int) o.x, (int) o.y, (int) o.width, (int) o.height);
+		bBox.setBox((int) o.position.x, (int) o.position.y, (int) o.size.x, (int) o.size.y);
 	}
 
 	/*
@@ -184,8 +183,8 @@ public class GameObject implements GameEntity {
 	 * @return
 	 */
 	public GameObject moveTo(float x, float y) {
-		this.x = x;
-		this.y = y;
+		this.position.x = x;
+		this.position.y = y;
 		computeBoundingBox(this);
 		return this;
 	}
@@ -198,8 +197,8 @@ public class GameObject implements GameEntity {
 	 * @return
 	 */
 	public GameObject setVelocity(float dx, float dy) {
-		this.dx = dx;
-		this.dy = dy;
+		this.speed.x = dx;
+		this.speed.y = dy;
 		return this;
 	}
 
@@ -211,8 +210,8 @@ public class GameObject implements GameEntity {
 	 * @return
 	 */
 	public GameObject setSize(int width, int height) {
-		this.width = width;
-		this.height = height;
+		this.size.x = width;
+		this.size.y = height;
 		computeBoundingBox(this);
 		return this;
 	}
@@ -360,10 +359,14 @@ public class GameObject implements GameEntity {
 	}
 
 	/**
-	 * @param boundingBox the boundingBox to set
+	 * Define Object Physic computation type.
+	 * 
+	 * @param type
+	 * @return
 	 */
-	public void setBoundingBox(Rectangle boundingBox) {
-		this.bBox = bBox;
+	public GameObject setPhysic(Physic type) {
+		this.type = type;
+		return this;
 	}
 
 	/*
@@ -385,45 +388,4 @@ public class GameObject implements GameEntity {
 	public int getPriority() {
 		return priority;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.snapgames.bgf.core.entity.GameEntity#getX()
-	 */
-	@Override
-	public float getX() {
-		return x;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.snapgames.bgf.core.entity.GameEntity#getY()
-	 */
-	@Override
-	public float getY() {
-		return y;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.snapgames.bgf.core.entity.GameEntity#getHeight()
-	 */
-	@Override
-	public float getHeight() {
-		return height;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.snapgames.bgf.core.entity.GameEntity#getWidth()
-	 */
-	@Override
-	public float getWidth() {
-		return width;
-	}
-
 }

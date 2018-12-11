@@ -6,7 +6,8 @@ package fr.snapgames.bgf.core.math;
  * @author Frédéric Delorme<frederic.delorme@snapgames.fr>
  */
 public class Vector2D {
-    private String name;
+
+	private String name;
 
     /**
      * X axe factor.

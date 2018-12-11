@@ -193,19 +193,19 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.dx = -0.1f * factor;
+			goPlayer.speed.x = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.dx = 0.1f * factor;
+			goPlayer.speed.x = 0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.dy = -0.1f * factor;
+			goPlayer.speed.y = -0.1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.dy = 0.1f * factor;
+			goPlayer.speed.y = 0.1f * factor;
 		}
-		goPlayer.dy *= goPlayer.friction;
-		goPlayer.dx *= goPlayer.friction;
+		goPlayer.speed.y *= goPlayer.friction;
+		goPlayer.speed.x *= goPlayer.friction;
 
 	}
 
@@ -232,13 +232,13 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		// detect is there are some collision with out viewport border
 
-		if ((int) (o.x + o.width) > app.getRender().getViewport().width || o.x < 0.0f) {
-			o.dx = -o.dx * o.elasticity;
+		if ((int) (o.position.x + o.size.x) > app.getRender().getViewport().width || o.position.x < 0.0f) {
+			o.speed.x = -o.speed.x * o.elasticity;
 			colliding = true;
 		}
-		if ((int) (o.y + o.height) > app.getRender().getViewport().height || o.y < 0.0f) {
+		if ((int) (o.position.y + o.size.y) > app.getRender().getViewport().height || o.position.y < 0.0f) {
 
-			o.dy = -o.dy * o.elasticity;
+			o.speed.y = -o.speed.y * o.elasticity;
 			colliding = true;
 		}
 
@@ -254,8 +254,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			app.soundCtrl.play("sounds/boing");
 		}
 
-		o.x = boxingValue(o.x, 0.0f, app.getRender().getViewport().width);
-		o.y = boxingValue(o.y, 0.0f, app.getRender().getViewport().height);
+		o.position.x = boxingValue(o.position.x, 0.0f, app.getRender().getViewport().width);
+		o.position.y = boxingValue(o.position.y, 0.0f, app.getRender().getViewport().height);
 	}
 
 	/**
