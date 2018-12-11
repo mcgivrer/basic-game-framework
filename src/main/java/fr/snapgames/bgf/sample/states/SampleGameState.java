@@ -30,14 +30,27 @@ import fr.snapgames.bgf.core.resources.ResourceUnknownException;
 import fr.snapgames.bgf.core.states.GameState;
 import fr.snapgames.bgf.core.states.GameStateDefault;
 
+/**
+ * This is a Sample GameState implementation to illustrate the usage of such
+ * class. It provides basic object like blue and red balls. Where the **blue
+ * ball** simulates the player, and the red balls enemies.
+ * 
+ * @author Frédéric Delorme.
+ */
 public class SampleGameState extends GameStateDefault implements GameState {
 
 	public static final String NAME = "SampleGameState";
 
 	private static final Logger logger = LoggerFactory.getLogger(SampleGameState.class);
 
+	/**
+	 * Some score variable.
+	 */
 	private int score = 0;
 
+	/**
+	 * some resources needed for the demonstration.
+	 */
 	private Font scoreFont;
 	private UIText scoreUiText;
 	private GameObject player;
@@ -72,35 +85,19 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score")
-				.setFont(scoreFont)
-				.setText("00000")
-				.setThickness(2)
-				.moveTo(12, 24)
-				.setLayer(20)
-				.setPriority(100);
+		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(2)
+				.moveTo(12, 24).setLayer(20).setPriority(100);
 		add(scoreUiText);
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player")
-					.setSize(24, 24)
-					.setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f)
-					.moveTo(0, 0)
-					.setColor(Color.GREEN)
-					.setVelocity(0.0f, 0.0f)
-					.setLayer(10)
-					.setPriority(100)
-					.setElasticity(1.2f)
-					.setFriction(0.98f)
-					.setBoundingType(BoundingBoxType.CIRCLE);
+			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(0.95f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
 			;
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = Camera.builder("cam1")
-					.setTarget(player)
-					.setTween(0.86f)
+			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.86f)
 					.setView(app.getRender().getViewport());
 			add(cam1);
 
