@@ -78,6 +78,7 @@ public class Game extends JPanel {
 	private boolean pause = false;
 	private boolean pauseRendering = false;
 	private boolean fullScreen = false;
+	private boolean audioMode = false;
 
 	/**
 	 * Graphical and loop parameters
@@ -129,7 +130,7 @@ public class Game extends JPanel {
 		gsm = new GameStateManager(this);
 		inputListener = new InputListener(this);
 		resManager = new ResourceManager();
-		soundCtrl = SoundControl.getInstance();
+		soundCtrl = SoundControl.getInstance(this);
 
 		String path = Game.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		try {
@@ -368,6 +369,12 @@ public class Game extends JPanel {
 						logger.debug("debug mode set to {}", debugMode);
 
 						break;
+					case "a":
+					case "audio":
+						audioMode = (argSplit[1].toLowerCase().equals("on") ? true : false);
+						logger.debug("audio mode set to {}", audioMode);
+
+						break;
 					case "fps":
 						setFPS(Integer.parseInt(argSplit[1]));
 						break;
@@ -539,5 +546,9 @@ public class Game extends JPanel {
 	 */
 	public Camera getActiveCamera() {
 		return gsm.getCurrentState().getActiveCamera();
+	}
+	
+	public boolean getAudioOff() {
+		return audioMode;
 	}
 }
