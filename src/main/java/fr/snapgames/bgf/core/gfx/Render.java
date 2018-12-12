@@ -16,10 +16,17 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.Camera;
@@ -36,6 +43,8 @@ import fr.snapgames.bgf.core.entity.GameObject;
  */
 public class Render {
 
+	private final static Logger logger = LoggerFactory.getLogger(Render.class);
+
 	private Game app;
 
 	private int WIDTH = 320;
@@ -50,7 +59,7 @@ public class Render {
 	private Font dbgFont;
 
 	private boolean pause;
-	BasicStroke basicStroke = new BasicStroke(0.5f);
+	private BasicStroke basicStroke = new BasicStroke(0.5f);
 
 	/**
 	 * Rendering pipeline
@@ -103,9 +112,16 @@ public class Render {
 		// Camera preRender operation
 		if (app.getActiveCamera() != null) {
 			app.getActiveCamera().preRender(app, g);
+		}else if (camera != null) {
+			camera.preRender(app, g);
 		}
 		// render anything game ?
+		int previousLayer=0,layer=0;
 		for (GameEntity o : renderingList) {
+			layer = o.getLayer();
+			if(previousLayer==layer){
+				logger.debug("Draw objects from layer {}",layer);
+			}
 			o.render(g);
 			if (debug >= 2) {
 				o.getBoundingBox().render(g);
@@ -113,18 +129,18 @@ public class Render {
 			if (debug >= 3) {
 				drawObjectDebugInfo(g, o);
 			}
+			previousLayer=layer;
 		}
 
-		if (debug >= 3) {
-			g.setColor(Color.ORANGE);
-			g.setStroke(basicStroke);
-			g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
-
+		if (debug >= 2) {
+			drawViewPort(app, g);
 		}
 
 		// Camera postRender operation
 		if (app.getActiveCamera() != null) {
 			app.getActiveCamera().postRender(app, g);
+		}else if(camera!=null){
+			camera.postRender(app, g);
 		}
 
 		// render pause status
@@ -150,6 +166,13 @@ public class Render {
 
 		}
 	}
+
+	private void drawViewPort(Game app, Graphics2D g){
+		g.setColor(Color.ORANGE);
+	g.setStroke(basicStroke);
+	g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+	}
+
 
 	/**
 	 * Render debug information for the object <code>o</code> to the Graphics2D
@@ -389,12 +412,18 @@ public class Render {
 	public static void screenshot(Game app) {
 		int scindex = 0;
 		app.suspendRendering(true);
+
+		Path targetDir = Paths.get(path + File.separator);
+		String filename = path + File.separator + app.getTitle()+"-sc-" + System.nanoTime() + "-" + (scindex++) + ".png";
 		try {
-			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, Game.WIDTH, Game.HEIGHT), "PNG",
+			if(!Files.exists(targetDir)){
+				Files.createDirectory(targetDir);
+			}			
+			File out = new File(filename);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG",
 					out);
-		} catch (Exception e) {
-			System.err.println("Unable to write screenshot to " + path);
+		} catch (IOException e) {
+			logger.error("Unable to write screenshot to " + filename,e);
 		}
 		app.suspendRendering(false);
 	}
