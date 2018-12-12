@@ -221,11 +221,16 @@ public class Game extends JPanel {
 		HashMap<KeyBinding, Integer> myKB = new HashMap<>();
 		logger.info("Keymapping:" + gson.toJson(myKB));
 		try {
+
 			Path filePath = Paths.get(jarPath.substring(1) + "/keymapping.json").toAbsolutePath();
-			String file = new String(Files.readAllBytes(filePath));
-			myKB = gson.fromJson(file, new TypeToken<Map<KeyBinding, Integer>>() {
-			}.getType());
-			logger.info("mapping keys:" + "keymapping.json = " + myKB.toString());
+			if(Files.exists(filePath)){
+				String file = new String(Files.readAllBytes(filePath));
+				myKB = gson.fromJson(file, new TypeToken<Map<KeyBinding, Integer>>() {
+				}.getType());
+				logger.info("mapping keys:" + "keymapping.json = " + myKB.toString());
+			}else{
+				logger.info("Keymapping.json file does not exist, will create it.");
+			}
 		} catch (Exception ioe) {
 			logger.error("Unable to write the file", ioe);
 		}
