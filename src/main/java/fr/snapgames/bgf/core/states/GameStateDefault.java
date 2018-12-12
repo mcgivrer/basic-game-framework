@@ -8,12 +8,15 @@
 package fr.snapgames.bgf.core.states;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.Camera;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
 import fr.snapgames.bgf.core.gfx.Render;
 
@@ -32,9 +35,12 @@ public class GameStateDefault {
 	protected long uid = 0;
 	protected String stateName = "NoName";
 
-	protected App app;
+	protected Camera activeCamera;
 
-	protected Map<String, GameObject> objects = new ConcurrentHashMap<>();
+	protected Game app;
+
+	protected Map<String, Camera> cameras = new ConcurrentHashMap<>();
+	protected Map<String, GameEntity> objects = new ConcurrentHashMap<>();
 
 	/**
 	 * retrieve the name for this state.
@@ -54,7 +60,25 @@ public class GameStateDefault {
 		return uid;
 	}
 
-	public void initialize(App app) {
+	/**
+	 * Return the active camera.
+	 * 
+	 * @return
+	 */
+	public Camera getActiveCamera() {
+		return activeCamera;
+	}
+
+	/**
+	 * define the active camera.
+	 * 
+	 * @param activeCamera
+	 */
+	public void setActiveCamera(Camera activeCamera) {
+		this.activeCamera = activeCamera;
+	}
+
+	public void initialize(Game app) {
 		this.app = app;
 	}
 
@@ -65,10 +89,30 @@ public class GameStateDefault {
 	 */
 	public void add(GameObject go) {
 		app.suspendRendering(true);
-		objects.put(go.name, go);
+		objects.put(go.getName(), go);
 		app.getRender().addObject(go);
 		app.suspendRendering(false);
 		logger.debug("Add object %s", go);
+	}
+
+	/**
+	 * Add a caemra to the State. if first camera, becomes the default active one.
+	 * 
+	 * @param camera
+	 */
+	public void add(Camera camera) {
+		if (!this.cameras.containsKey(camera.getName())) {
+			this.cameras.put(camera.getName(), camera);
+
+		} else {
+			logger.error("A camera name {} already exists", camera.getName());
+		}
+		/**
+		 * define this camera as default active one if first one.
+		 */
+		if (cameras.size() == 1) {
+			activeCamera = camera;
+		}
 	}
 
 	/**
@@ -76,8 +120,8 @@ public class GameStateDefault {
 	 * 
 	 * @param go
 	 */
-	public void remove(GameObject go) {
-		objects.remove(go.name);
+	public void remove(GameEntity go) {
+		objects.remove(go.getName());
 		app.getRender().removeObject(go);
 		logger.debug("Object %s removed", go);
 	}
@@ -87,19 +131,35 @@ public class GameStateDefault {
 	 * 
 	 * @return a list of GameObject's.
 	 */
-	public Map<String, GameObject> getObjects() {
+	public Map<String, GameEntity> getObjects() {
 		return objects;
 	}
 
-
 	/**
 	 * The game state rendering phase.
+	 * 
 	 * @param app
 	 * @param render
 	 */
-	public void render(App app, Render render){
+	public void render(Game app, Render render) {
 		render.clearRenderBuffer();
-		render.drawToRenderBuffer();
+		render.drawToRenderBuffer(app);
 		render.drawRenderBufferToScreen();
 	}
+
+	/**
+	 * Update all the GameObject and camera from the current active GameState.
+	 * 
+	 * @param app
+	 * @param dt
+	 */
+	public void update(Game app, long dt) {
+		for (Entry<String, GameEntity> entry : objects.entrySet()) {
+			entry.getValue().update(dt);
+		}
+		for (Camera cam : cameras.values()) {
+			cam.update(dt);
+		}
+	}
+
 }

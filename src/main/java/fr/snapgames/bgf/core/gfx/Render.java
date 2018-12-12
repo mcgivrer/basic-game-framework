@@ -6,6 +6,7 @@
  */
 package fr.snapgames.bgf.core.gfx;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,14 +16,22 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import fr.snapgames.bgf.core.App;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.Camera;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
-import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
 
 /**
  * The Render class is the rendering processor for all GameObject to an internal
@@ -34,7 +43,9 @@ import fr.snapgames.bgf.core.entity.GameObject.BoundingBoxType;
  */
 public class Render {
 
-	private App app;
+	private final static Logger logger = LoggerFactory.getLogger(Render.class);
+
+	private Game app;
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
@@ -42,11 +53,13 @@ public class Render {
 
 	private Rectangle viewport;
 	private Dimension dimension;
+	private Camera camera;
 
 	private int debug = 0;
 	private Font dbgFont;
 
 	private boolean pause;
+	private BasicStroke basicStroke = new BasicStroke(0.5f);
 
 	/**
 	 * Rendering pipeline
@@ -57,7 +70,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameObject> renderingList = new CopyOnWriteArrayList<>();
+	private List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -67,10 +80,10 @@ public class Render {
 	/**
 	 * Initialize the renderer with a viewport size.
 	 * 
-	 * @param app      the parent App
+	 * @param app      the parent Game
 	 * @param viewPort the requested viewPort.
 	 */
-	public Render(App app, Rectangle viewPort) {
+	public Render(Game app, Rectangle viewPort) {
 		this.app = app;
 		this.viewport = viewPort;
 		this.dimension = new Dimension(viewPort.width, viewPort.width);
@@ -90,21 +103,44 @@ public class Render {
 	/**
 	 * Render the game screen.
 	 */
-	public void drawToRenderBuffer() {
+	public void drawToRenderBuffer(Game app) {
 
 		// prepare pipeline anti-aliasing.
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+		// Camera preRender operation
+		if (app.getActiveCamera() != null) {
+			app.getActiveCamera().preRender(app, g);
+		}else if (camera != null) {
+			camera.preRender(app, g);
+		}
 		// render anything game ?
-		for (GameObject o : renderingList) {
+		int previousLayer=0,layer=0;
+		for (GameEntity o : renderingList) {
+			layer = o.getLayer();
+			if(previousLayer==layer){
+				logger.debug("Draw objects from layer {}",layer);
+			}
 			o.render(g);
 			if (debug >= 2) {
-				renderBoundingBox(g, o);
+				o.getBoundingBox().render(g);
 			}
 			if (debug >= 3) {
 				drawObjectDebugInfo(g, o);
 			}
+			previousLayer=layer;
+		}
+
+		if (debug >= 2) {
+			drawViewPort(app, g);
+		}
+
+		// Camera postRender operation
+		if (app.getActiveCamera() != null) {
+			app.getActiveCamera().postRender(app, g);
+		}else if(camera!=null){
+			camera.postRender(app, g);
 		}
 
 		// render pause status
@@ -127,32 +163,16 @@ public class Render {
 		// render debug information
 		if (debug > 0) {
 			drawGlobalDebugInformation(g);
+
 		}
 	}
 
-	/**
-	 * rendering the bounding box shape with a black color of the <code>o</code>
-	 * GameBject using the <code>g</code> API.
-	 * 
-	 * @param g the Graphics2D API to render things
-	 * @param o the GameObject to render the BoundingBox of.
-	 */
-	public void renderBoundingBox(Graphics2D g, GameObject o) {
-		BoundingBoxType boundingType = o.boundingType;
-		Rectangle boundingBox = o.boundingBox;
-		g.setColor(Color.GREEN);
-		switch (boundingType) {
-		case RECTANGLE:
-			g.drawRect((int) o.x, (int) o.y, (int) boundingBox.width, boundingBox.height);
-			break;
-		case CIRCLE:
-			g.drawOval((int) o.x, (int) o.y, boundingBox.width, boundingBox.height);
-			break;
-		default:
-			break;
-		}
-
+	private void drawViewPort(Game app, Graphics2D g){
+		g.setColor(Color.ORANGE);
+	g.setStroke(basicStroke);
+	g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
 	}
+
 
 	/**
 	 * Render debug information for the object <code>o</code> to the Graphics2D
@@ -161,21 +181,25 @@ public class Render {
 	 * @param g the Graphics2D to render things.
 	 * @param o the object to be debugged.
 	 */
-	public void drawObjectDebugInfo(Graphics2D g, GameObject o) {
+	public void drawObjectDebugInfo(Graphics2D g, GameEntity ge) {
 		g.setFont(dbgFont);
-
+		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
+		g.fillRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect((int) (o.x + o.width + 2), (int) o.y, 80, 60);
+		g.drawRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
 
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.name), o.x + o.width + 4, o.y + (12 * 1));
-		g.drawString(String.format("Pos:%03.2f,%03.2f", o.x, o.y), o.x + o.width + 4, o.y + (12 * 2));
-		g.drawString(String.format("Size:%03.2f,%03.2f", o.width, o.height), o.x + o.width + 4, o.y + (12 * 3));
-		g.drawString(String.format("Vel:%03.2f,%03.2f", o.dx, o.dy), o.x + o.width + 4, o.y + (12 * 4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.x + o.width + 4, o.y + (12 * 5));
+		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + 4, o.position.y + (12 * 1));
+		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y), o.position.x + o.size.x + 4,
+				o.position.y + (12 * 2));
+		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y), o.position.x + o.size.x + 4,
+				o.position.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y), o.position.x + o.size.x + 4,
+				o.position.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + 4,
+				o.position.y + (12 * 5));
 	}
 
 	/**
@@ -235,11 +259,11 @@ public class Render {
 	 */
 	public void addObject(GameObject go) {
 		renderingList.add(go);
-		renderingList.sort(new Comparator<GameObject>() {
-			public int compare(GameObject o1, GameObject o2) {
+		renderingList.sort(new Comparator<GameEntity>() {
+			public int compare(GameEntity o1, GameEntity o2) {
 				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
 				// -1 : (o1.priority < o2.priority ? -1 : 1)));
-				return (o1.layer < o2.layer ? -1 : (o1.priority < o2.priority ? -1 : 1));
+				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
 			}
 		});
 	}
@@ -249,7 +273,7 @@ public class Render {
 	 * 
 	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
-	public void addAllObjects(Collection<GameObject> l) {
+	public void addAllObjects(Collection<GameEntity> l) {
 		renderingList.addAll(l);
 	}
 
@@ -258,7 +282,7 @@ public class Render {
 	 * 
 	 * @param go remove an object from the rendering pipeline.
 	 */
-	public void removeObject(GameObject go) {
+	public void removeObject(GameEntity go) {
 		renderingList.remove(go);
 	}
 
@@ -323,6 +347,10 @@ public class Render {
 		this.SCALE = scale;
 	}
 
+	public void setCamera(Camera cam) {
+		this.camera = cam;
+	}
+
 	/**
 	 * return the pixel scale.
 	 * 
@@ -372,7 +400,7 @@ public class Render {
 	 * 
 	 * @return a list of GameObject.
 	 */
-	public List<GameObject> getRenderingList() {
+	public List<GameEntity> getRenderingList() {
 		return renderingList;
 	}
 
@@ -381,15 +409,21 @@ public class Render {
 	 * 
 	 * @param image image to be saved to disk.
 	 */
-	public static void screenshot(App app) {
+	public static void screenshot(Game app) {
 		int scindex = 0;
 		app.suspendRendering(true);
+
+		Path targetDir = Paths.get(path + File.separator);
+		String filename = path + File.separator + app.getTitle()+"-sc-" + System.nanoTime() + "-" + (scindex++) + ".png";
 		try {
-			File out = new File(path + File.separator + "screenshot-" + System.nanoTime() + "-" + (scindex++) + ".png");
-			javax.imageio.ImageIO.write(app.getRender().getBuffer().getSubimage(0, 0, App.WIDTH, App.HEIGHT), "PNG",
+			if(!Files.exists(targetDir)){
+				Files.createDirectory(targetDir);
+			}			
+			File out = new File(filename);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG",
 					out);
-		} catch (Exception e) {
-			System.err.println("Unable to write screenshot to " + path);
+		} catch (IOException e) {
+			logger.error("Unable to write screenshot to " + filename,e);
 		}
 		app.suspendRendering(false);
 	}

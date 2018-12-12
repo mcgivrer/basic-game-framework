@@ -7,21 +7,22 @@ import java.util.Collection;
 import java.util.List;
 
 import cucumber.api.java8.En;
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
 import fr.snapgames.bgf.core.gfx.Render;
 
 public class RenderObjectsSteps implements En {
 
 	private Render render;
-	private App application;
+	private Game application;
 	private String[] args;
-	private Collection<GameObject> objects;
+	private Collection<GameEntity> objects;
 
 	public RenderObjectsSteps() {
-		Given("^A new App with viewport set to (\\d+) x (\\d+)$", (Integer width, Integer height) -> {
+		Given("^A new Game with viewport set to (\\d+) x (\\d+)$", (Integer width, Integer height) -> {
 			args = new String[] { "w=" + width, "h=" + height };
-			application = new App("Render tests", args);
+			application = new Game("Render tests", args);
 			application.initialize();
 		});
 
@@ -36,7 +37,7 @@ public class RenderObjectsSteps implements En {
 		When("^adding a list of (\\d+) GameObject$", (Integer arg1) -> {
 			render = application.getRender();
 			render.clearRenderingList();
-			List<GameObject> goToAdd = new ArrayList<>();
+			List<GameEntity> goToAdd = new ArrayList<>();
 			for (int i = 0; i < arg1; i++) {
 				goToAdd.add(GameObject.builder("testObj_" + i));
 			}

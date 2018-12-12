@@ -7,7 +7,7 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "fr.snapgames.bgf.core.App",
+            "mainClass": "fr.snapgames.bgf.core.Game",
             "args": [
                 "d=2",
                 "w=320",

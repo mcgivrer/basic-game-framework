@@ -6,9 +6,9 @@ import cucumber.api.CucumberOptions;
 import cucumber.api.junit.Cucumber;
 
 /**
- * This is the starting point for Unit testing of <code>App</code>.
+ * This is the starting point for Unit testing of <code>Game</code>.
  * 
- * @see App
+ * @see Game
  * 
  * @author Frédéric Delorme
  */

@@ -15,8 +15,8 @@ import java.util.Collection;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import fr.snapgames.bgf.core.App;
-import fr.snapgames.bgf.core.entity.GameObject;
+import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.GameEntity;
 
 /**
  * Here are all the application's steps to perform the Cucumber tests.
@@ -26,18 +26,18 @@ import fr.snapgames.bgf.core.entity.GameObject;
  */
 public class ApplicationSteps {
 
-	private App application;
+	private Game application;
 	private BufferedImage buffer;
 	private String[] args;
 	private int debug;
 	private float scale;
 
-	private Collection<GameObject> objects;
+	private Collection<GameEntity> objects;
 
 	@Given("^An application wihtout arg$")
 	public void anApplicationWithoutArg() {
 		args = new String[] {};
-		application = new App("mytests", args);
+		application = new Game("mytests", args);
 		application.initialize();
 	}
 
@@ -54,7 +54,7 @@ public class ApplicationSteps {
 	@Given("^An Application with args$")
 	public void anApplicationWithArgs() {
 		args = new String[] { "" };
-		application = new App("mytests", args);
+		application = new Game("mytests", args);
 		application.initialize();
 	};
 
@@ -114,6 +114,7 @@ public class ApplicationSteps {
 
 	@Then("the scale value is (\\d+\\.\\d+)$")
 	public void theScaleValueIs(Float scaleValue) {
-		assertNotEquals(String.format("Scale mode has not been set to %f", scale), scaleValue.floatValue(), new Float(scale).intValue());
+		assertNotEquals(String.format("Scale mode has not been set to %f", scale), scaleValue.floatValue(),
+				new Float(scale).intValue());
 	}
 }

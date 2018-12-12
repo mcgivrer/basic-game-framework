@@ -13,14 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.io.InputListener;
 import fr.snapgames.bgf.core.io.InputListener.KeyBinding;
 
 /**
  * The Game state manager is the service to switch smouthlessly between 2
- * gameplays (GameState) for the parent App.
+ * gameplays (GameState) for the parent Game.
  * 
  * @since 2018
  * @author Frédéric Delorme
@@ -37,7 +37,7 @@ public class GameStateManager {
 	/**
 	 * the parent app.
 	 */
-	private App app;
+	private Game app;
 
 	/**
 	 * list of declared GameState for this manager
@@ -49,7 +49,7 @@ public class GameStateManager {
 	 */
 	private GameState currentState;
 
-	public GameStateManager(App app) {
+	public GameStateManager(Game app) {
 		this.app = app;
 		states = new ConcurrentHashMap<>();
 	}
@@ -57,9 +57,9 @@ public class GameStateManager {
 	/**
 	 * Initialize the Game State Manager for the parent app.
 	 * 
-	 * @param app the parent App instance.
+	 * @param app the parent Game instance.
 	 */
-	public void initialize(App app) {
+	public void initialize(Game app) {
 		if (states.size() == 0) {
 			logger.error("need to add State to the GameStateManager");
 		}
@@ -86,10 +86,10 @@ public class GameStateManager {
 	 * Switch to the <code>nameState</code> GameState instance, if exists in the
 	 * <code>states</code> map.
 	 * 
-	 * @param app       the parent App instance.
+	 * @param app       the parent Game instance.
 	 * @param nameState the new state to be activated.
 	 */
-	public void switchState(App app, String nameState) {
+	public void switchState(Game app, String nameState) {
 		if (states.containsKey(nameState)) {
 			if (currentState != null) {
 				currentState.dispose(app);
@@ -105,22 +105,22 @@ public class GameStateManager {
 	/**
 	 * Load from teh states.xml file all the defined GameState for the game.
 	 * <p>
-	 * TODO implements the load(App) method.
+	 * TODO implements the load(Game) method.
 	 * </p>
 	 * 
-	 * @param app the parent App instance.
+	 * @param app the parent Game instance.
 	 */
-	public void load(App app) {
+	public void load(Game app) {
 		// TODO implements the loading process of states to the GameStateManager.
 	}
 
 	/**
 	 * Delegate the input management to the current active state.
 	 * 
-	 * @param app the parent App instance.
-	 * @param il  the Inupot listeener instantiated for the parent App.
+	 * @param app the parent Game instance.
+	 * @param il  the Inupot listeener instantiated for the parent Game.
 	 */
-	public void input(App app, InputListener il) {
+	public void input(Game app, InputListener il) {
 		currentState.input(app, il);
 	}
 
@@ -128,29 +128,29 @@ public class GameStateManager {
 	 * Delegate the Update action according to the dt elapsed time to the current
 	 * active state.
 	 * 
-	 * @param app the parent App instance.
+	 * @param app the parent Game instance.
 	 * @param dt  the elasped time since previous call.
 	 */
-	public void update(App app, long dt) {
+	public void update(Game app, long dt) {
 		currentState.update(app, dt);
 	}
 
 	/**
 	 * Delegate the rendering process to the current active state
 	 * 
-	 * @param app the parent App instance.
+	 * @param app the parent Game instance.
 	 * @param g   the Graphics2D API to use for the rendering process.
 	 */
-	public void render(App app, Render r) {
+	public void render(Game app, Render r) {
 		currentState.render(app, r);
 	}
 
 	/**
 	 * Release all resources for the initialized states.
 	 * 
-	 * @param app the parent App instance.
+	 * @param app the parent Game instance.
 	 */
-	public void dispose(App app) {
+	public void dispose(Game app) {
 		for (Entry<String, GameState> entry : states.entrySet()) {
 			entry.getValue().dispose(app);
 		}

@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import fr.snapgames.bgf.core.App;
+import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.gfx.Render;
 
 /**
@@ -22,13 +22,13 @@ import fr.snapgames.bgf.core.gfx.Render;
 public class RenderSteps {
 
 	private Render render;
-	private App application;
+	private Game application;
 	private String[] args;
 
-	@Given("^A new App$")
+	@Given("^A new Game$")
 	public void aNewApplication() {
 		args = new String[] {};
-		application = new App("Render tests", args);
+		application = new Game("Render tests", args);
 		application.initialize();
 	}
 
