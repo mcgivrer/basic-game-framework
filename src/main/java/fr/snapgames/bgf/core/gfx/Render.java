@@ -150,11 +150,14 @@ public class Render {
 			// render anything game ?
 			for (GameEntity o : layer.getObjects()) {
 				o.render(g);
-				if (debug >= 2) {
-					o.getBoundingBox().render(g);
-				}
-				if (debug >= 3) {
-					drawObjectDebugInfo(g, o);
+				// Display debug information if requested.
+				if (debug > 0) {
+					if (debug >= 2) {
+						o.getBoundingBox().render(g);
+					}
+					if (debug >= 3) {
+						drawObjectDebugInfo(g, o);
+					}
 				}
 			}
 
@@ -172,7 +175,7 @@ public class Render {
 			}
 
 		}
-		if(debug>=4) {
+		if (debug >= 4) {
 			drawObjectDebugInfo(g, app.getActiveCamera());
 		}
 		// render pause status
@@ -215,37 +218,23 @@ public class Render {
 		g.setFont(dbgFont);
 		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect(
-				(int) (o.position.x + o.size.x + o.debugInfoOffset.x-2), 
-				(int) (o.position.y + o.debugInfoOffset.y+2), 
-				80, 60);
+		g.fillRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect(
-				(int) (o.position.x + o.size.x + o.debugInfoOffset.x-2), 
-				(int) (o.position.y + o.debugInfoOffset.y+2), 
-				80, 60);
+		g.drawRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
 
 		g.setColor(Color.GREEN);
-		g.drawString(
-				String.format("Name:%s", o.getName()), 
-				o.position.x + o.size.x + o.debugInfoOffset.x, 
-				o.position.y + o.debugInfoOffset.y+ (12 * 1));
-		g.drawString(
-				String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y), 
-				o.position.x + o.size.x + o.debugInfoOffset.x,
-				o.position.y + o.debugInfoOffset.y + (12 * 2));
-		g.drawString(
-				String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y), 
-				o.position.x + o.size.x + o.debugInfoOffset.x,
-				o.position.y + o.debugInfoOffset.y + (12 * 3));
-		g.drawString(
-				String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y), 
-				o.position.x + o.size.x + o.debugInfoOffset.x,
-				o.position.y + o.debugInfoOffset.y + (12 * 4));
-		g.drawString(
-				String.format("L/P:%d/%d", o.layer, o.priority), 
-				o.position.x + o.size.x + o.debugInfoOffset.x,
+		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + o.debugInfoOffset.x,
+				o.position.y + o.debugInfoOffset.y + (12 * 1));
+		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 2));
+		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + o.debugInfoOffset.x,
 				o.position.y + o.debugInfoOffset.y + (12 * 5));
 	}
 

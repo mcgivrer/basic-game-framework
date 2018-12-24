@@ -31,6 +31,7 @@ public class ApplicationSteps {
 	private String[] args;
 	private int debug;
 	private float scale;
+	private boolean audioMode;
 
 	private Collection<GameEntity> objects;
 
@@ -62,6 +63,12 @@ public class ApplicationSteps {
 	public void hasArgsContainingWith(Integer argWidth) {
 		Arrays.copyOf(args, args.length + 1);
 		args[args.length - 1] = "w=" + argWidth.intValue();
+	}
+	
+	@Given("^has arg a=(\\d+)$")
+	public void hasArgsContainingAudio(Boolean audioMode) {
+		Arrays.copyOf(args, args.length + 1);
+		args[args.length - 1] = "a=" + audioMode.booleanValue();
 	}
 
 	@Given("^has arg h=(\\d+)$")
@@ -117,4 +124,17 @@ public class ApplicationSteps {
 		assertNotEquals(String.format("Scale mode has not been set to %f", scale), scaleValue.floatValue(),
 				new Float(scale).intValue());
 	}
+
+	@When("^getting audio mode$")
+	public void gettingAudioMode() {
+		audioMode = application.getAudioOff();
+	}
+
+	@Then("the scale value is (\\d+\\.\\d+)$")
+	public void theAudioModeIs(boolean audioMode) {
+		assertNotEquals(String.format("Audio mode has not been set to %d", scale), audioMode,
+				new Float(scale).intValue());
+	}
+
+
 }
