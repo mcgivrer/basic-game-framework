@@ -87,7 +87,7 @@ public class Render {
 		this.app = app;
 		this.viewport = viewPort;
 		this.dimension = new Dimension(viewPort.width, viewPort.width);
-		this.buffer = new BufferedImage(viewPort.width, viewPort.height, BufferedImage.TYPE_INT_ARGB);
+		this.buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		this.g = (Graphics2D) this.buffer.getGraphics();
 		dbgFont = g.getFont().deriveFont(9.0f);
 	}
