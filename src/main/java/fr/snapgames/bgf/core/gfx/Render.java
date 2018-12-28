@@ -130,7 +130,7 @@ public class Render {
 				o.getBoundingBox().render(g);
 			}
 			if (debug >= 3) {
-				dEngine.drawObjectDebugInfo(g, o);
+				dEngine.drawObjectDebugInfo(this,g, o);
 			}
 			previousLayer = layer;
 		}
@@ -165,7 +165,7 @@ public class Render {
 
 		// render debug information
 		if (debug > 0) {
-			drawGlobalDebugInformation(g);
+			dEngine.drawGlobalDebugInformation(this,g);
 
 		}
 	}
@@ -174,22 +174,6 @@ public class Render {
 		g.setColor(Color.ORANGE);
 		g.setStroke(basicStroke);
 		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
-	}
-
-	/**
-	 * Draw debug information.
-	 * 
-	 * @param g the Graphics2D to render things.
-	 */
-	public void drawGlobalDebugInformation(Graphics2D g) {
-		g.setFont(dbgFont);
-		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
-				(debug == 0 ? "off" : "" + debug), app.getRealFPS(), app.getObjects().size(), renderingList.size());
-		int dbgStringHeight = g.getFontMetrics().getHeight() + 8;
-		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - (dbgStringHeight + 8), WIDTH, (dbgStringHeight));
-		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - dbgStringHeight);
 	}
 
 	/**

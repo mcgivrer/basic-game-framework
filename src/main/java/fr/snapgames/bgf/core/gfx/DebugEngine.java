@@ -58,7 +58,7 @@ public class DebugEngine {
 	 * @param g the Graphics2D to render things.
 	 * @param o the object to be debugged.
 	 */
-	public void drawObjectDebugInfo(Graphics2D g, GameEntity ge) {
+	public void drawObjectDebugInfo(Render r, Graphics2D g, GameEntity ge) {
 		g.setFont(dbgFont);
 		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
