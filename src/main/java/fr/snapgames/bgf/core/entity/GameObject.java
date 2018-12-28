@@ -4,7 +4,6 @@
  * @since 2018
  * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
-
 package fr.snapgames.bgf.core.entity;
 
 import java.awt.Color;
@@ -387,5 +386,14 @@ public class GameObject implements GameEntity {
 	@Override
 	public int getPriority() {
 		return priority;
+	}
+
+	/**
+	 * Add some Custom debug info if necessary.
+	 * 
+	 * @return
+	 */
+	public List<String> getCustomDebugInfo() {
+		return null;
 	}
 }

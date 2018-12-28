@@ -45,11 +45,13 @@ public class Render {
 
 	private final static Logger logger = LoggerFactory.getLogger(Render.class);
 
-	private Game app;
+	public Game app;
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
 	private float SCALE = 2;
+
+	private DebugEngine dEngine;
 
 	private Rectangle viewport;
 	private Dimension dimension;
@@ -70,7 +72,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
+	public List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -87,9 +89,10 @@ public class Render {
 		this.app = app;
 		this.viewport = viewPort;
 		this.dimension = new Dimension(viewPort.width, viewPort.width);
-		this.buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		this.buffer = new BufferedImage(viewPort.width, viewPort.width, BufferedImage.TYPE_INT_ARGB);
 		this.g = (Graphics2D) this.buffer.getGraphics();
 		dbgFont = g.getFont().deriveFont(9.0f);
+		dEngine = new DebugEngine(g);
 	}
 
 	/**
@@ -112,24 +115,24 @@ public class Render {
 		// Camera preRender operation
 		if (app.getActiveCamera() != null) {
 			app.getActiveCamera().preRender(app, g);
-		}else if (camera != null) {
+		} else if (camera != null) {
 			camera.preRender(app, g);
 		}
 		// render anything game ?
-		int previousLayer=0,layer=0;
+		int previousLayer = 0, layer = 0;
 		for (GameEntity o : renderingList) {
 			layer = o.getLayer();
-			if(previousLayer==layer){
-				logger.debug("Draw objects from layer {}",layer);
+			if (previousLayer == layer) {
+				logger.debug("Draw objects from layer {}", layer);
 			}
 			o.render(g);
 			if (debug >= 2) {
 				o.getBoundingBox().render(g);
 			}
 			if (debug >= 3) {
-				drawObjectDebugInfo(g, o);
+				dEngine.drawObjectDebugInfo(g, o);
 			}
-			previousLayer=layer;
+			previousLayer = layer;
 		}
 
 		if (debug >= 2) {
@@ -139,7 +142,7 @@ public class Render {
 		// Camera postRender operation
 		if (app.getActiveCamera() != null) {
 			app.getActiveCamera().postRender(app, g);
-		}else if(camera!=null){
+		} else if (camera != null) {
 			camera.postRender(app, g);
 		}
 
@@ -167,39 +170,10 @@ public class Render {
 		}
 	}
 
-	private void drawViewPort(Game app, Graphics2D g){
+	private void drawViewPort(Game app, Graphics2D g) {
 		g.setColor(Color.ORANGE);
-	g.setStroke(basicStroke);
-	g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
-	}
-
-
-	/**
-	 * Render debug information for the object <code>o</code> to the Graphics2D
-	 * <code>g</code>.
-	 * 
-	 * @param g the Graphics2D to render things.
-	 * @param o the object to be debugged.
-	 */
-	public void drawObjectDebugInfo(Graphics2D g, GameEntity ge) {
-		g.setFont(dbgFont);
-		GameObject o = (GameObject) ge;
-		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
-
-		g.setColor(Color.DARK_GRAY);
-		g.drawRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
-
-		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + 4, o.position.y + (12 * 1));
-		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 2));
-		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 3));
-		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 5));
+		g.setStroke(basicStroke);
+		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
 	}
 
 	/**
@@ -339,6 +313,15 @@ public class Render {
 	}
 
 	/**
+	 * return the debug mode status.
+	 * 
+	 * @return
+	 */
+	public int getDebugMode() {
+		return this.debug;
+	}
+
+	/**
 	 * Set the Pixel Scale
 	 * 
 	 * @param scale new pixel scale to set.
@@ -414,16 +397,16 @@ public class Render {
 		app.suspendRendering(true);
 
 		Path targetDir = Paths.get(path + File.separator);
-		String filename = path + File.separator + app.getTitle()+"-sc-" + System.nanoTime() + "-" + (scindex++) + ".png";
+		String filename = path + File.separator + app.getTitle() + "-sc-" + System.nanoTime() + "-" + (scindex++)
+				+ ".png";
 		try {
-			if(!Files.exists(targetDir)){
+			if (!Files.exists(targetDir)) {
 				Files.createDirectory(targetDir);
-			}			
+			}
 			File out = new File(filename);
-			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG",
-					out);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG", out);
 		} catch (IOException e) {
-			logger.error("Unable to write screenshot to " + filename,e);
+			logger.error("Unable to write screenshot to " + filename, e);
 		}
 		app.suspendRendering(false);
 	}
