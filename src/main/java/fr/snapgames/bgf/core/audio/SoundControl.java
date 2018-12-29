@@ -10,8 +10,16 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.Mixer.Info;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
+import fr.snapgames.bgf.core.Game;
 
 /**
  * This class is intend to manage and control Sound play and output.
@@ -28,7 +36,7 @@ public class SoundControl {
 	/**
 	 * Internal instance for the SoundControl system.
 	 */
-	private final static SoundControl instance = new SoundControl();
+	private static SoundControl instance;
 
 	/**
 	 * Max number of SoundClip to be stored in cache.
@@ -44,12 +52,20 @@ public class SoundControl {
 	 */
 	private Map<String, SoundClip> soundBank = new ConcurrentHashMap<String, SoundClip>();
 
+	private Game app;
+
 	/**
 	 * Internal constructor.
 	 */
-	private SoundControl() {
+	private SoundControl(Game app) {
+		this.app = app;
 		soundsStack.setSize(MAX_SOUNDS_IN_STACK);
 		logger.info("Initialize SoundControl with {} stack places", MAX_SOUNDS_IN_STACK);
+		Mixer.Info[] infos = AudioSystem.getMixerInfo();
+		for (Info info : infos) {
+			Gson gson = new Gson();
+			logger.info("Mixer info:{}", gson.toJson(info));
+		}
 	}
 
 	/**
@@ -61,12 +77,16 @@ public class SoundControl {
 	 */
 	public String load(String code, String filename) {
 		if (!soundBank.containsKey(code)) {
-			SoundClip sc = new SoundClip(filename);
-			if (sc != null) {
-				soundBank.put(code, sc);
-				logger.debug("Load sound {} to sound bank with code {}", filename, code);
+			if (!app.getAudioOff()) {
+				SoundClip sc = new SoundClip(filename);
+				if (sc != null) {
+					soundBank.put(code, sc);
+					logger.debug("Load sound {} to sound bank with code {}", filename, code);
+				}
+				return filename;
+			}else {
+				return null;
 			}
-			return filename;
 		} else {
 			return null;
 		}
@@ -78,12 +98,14 @@ public class SoundControl {
 	 * @param code internal code of the sound to be played.
 	 */
 	public void play(String code) {
-		if (soundBank.containsKey(code)) {
-			SoundClip sc = soundBank.get(code);
-			sc.play();
-			logger.debug("Play sound {}", code);
-		} else {
-			logger.error("unable to find the sound {} in the SoundBank !", code);
+		if (!app.getAudioOff()) {
+			if (soundBank.containsKey(code)) {
+				SoundClip sc = soundBank.get(code);
+				sc.play();
+				logger.debug("Play sound {}", code);
+			} else {
+				logger.error("unable to find the sound {} in the SoundBank !", code);
+			}
 		}
 	}
 
@@ -94,12 +116,14 @@ public class SoundControl {
 	 * @param volume volume level to be played.
 	 */
 	public void play(String code, float volume) {
-		if (soundBank.containsKey(code)) {
-			SoundClip sc = soundBank.get(code);
-			sc.play(0.5f, volume);
-			logger.debug("Play sound {} with volume {}", code, volume);
-		} else {
-			logger.error("unable to find the sound {} in the SoundBank !", code);
+		if (!app.getAudioOff()) {
+			if (soundBank.containsKey(code)) {
+				SoundClip sc = soundBank.get(code);
+				sc.play(0.5f, volume);
+				logger.debug("Play sound {} with volume {}", code, volume);
+			} else {
+				logger.error("unable to find the sound {} in the SoundBank !", code);
+			}
 		}
 	}
 
@@ -140,7 +164,10 @@ public class SoundControl {
 	 * 
 	 * @return
 	 */
-	public static SoundControl getInstance() {
+	public static SoundControl getInstance(Game app) {
+		if (instance == null) {
+			instance = new SoundControl(app);
+		}
 		return instance;
 	}
 }

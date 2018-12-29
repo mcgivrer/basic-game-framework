@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
@@ -43,9 +46,35 @@ import fr.snapgames.bgf.core.entity.GameObject;
  */
 public class Render {
 
+	public class Layer {
+		private int index = 0;
+		private String name = "";
+		/**
+		 * Fixed flag:if true, layer does not follow camera moves.
+		 */
+		private boolean fixed;
+		private List<GameObject> objects = new ArrayList<>();
+
+		public Layer(int index, String name) {
+			this.index = index;
+			this.name = (name == null ? "layer_" + index : name);
+		}
+
+		public void add(GameObject go) {
+			this.objects.add(go);
+		}
+
+		public List<GameObject> getObjects() {
+			return objects;
+		}
+	}
+
 	private final static Logger logger = LoggerFactory.getLogger(Render.class);
 
 	private Game app;
+
+	private Map<Integer, Layer> layers = new HashMap<>();
+	private List<Layer> sortLayers = new ArrayList<>();
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
@@ -109,40 +138,46 @@ public class Render {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// Camera preRender operation
-		if (app.getActiveCamera() != null) {
-			app.getActiveCamera().preRender(app, g);
-		}else if (camera != null) {
-			camera.preRender(app, g);
-		}
-		// render anything game ?
-		int previousLayer=0,layer=0;
-		for (GameEntity o : renderingList) {
-			layer = o.getLayer();
-			if(previousLayer==layer){
-				logger.debug("Draw objects from layer {}",layer);
+		for (Layer layer : sortLayers) {
+			// Camera preRender operation
+			if (!layer.fixed) {
+				if (app.getActiveCamera() != null) {
+					app.getActiveCamera().preRender(app, g);
+				} else if (camera != null) {
+					camera.preRender(app, g);
+				}
 			}
-			o.render(g);
+			// render anything game ?
+			for (GameEntity o : layer.getObjects()) {
+				o.render(g);
+				// Display debug information if requested.
+				if (debug > 0) {
+					if (debug >= 2) {
+						o.getBoundingBox().render(g);
+					}
+					if (debug >= 3) {
+						drawObjectDebugInfo(g, o);
+					}
+				}
+			}
+
 			if (debug >= 2) {
-				o.getBoundingBox().render(g);
+				drawViewPort(app, g);
 			}
-			if (debug >= 3) {
-				drawObjectDebugInfo(g, o);
+
+			// Camera postRender operation
+			if (!layer.fixed) {
+				if (app.getActiveCamera() != null) {
+					app.getActiveCamera().postRender(app, g);
+				} else if (camera != null) {
+					camera.postRender(app, g);
+				}
 			}
-			previousLayer=layer;
-		}
 
-		if (debug >= 2) {
-			drawViewPort(app, g);
 		}
-
-		// Camera postRender operation
-		if (app.getActiveCamera() != null) {
-			app.getActiveCamera().postRender(app, g);
-		}else if(camera!=null){
-			camera.postRender(app, g);
+		if (debug >= 4) {
+			drawObjectDebugInfo(g, app.getActiveCamera());
 		}
-
 		// render pause status
 		if (pause) {
 			String pauseLabel = app.getLabel("app.label.pause");
@@ -163,16 +198,14 @@ public class Render {
 		// render debug information
 		if (debug > 0) {
 			drawGlobalDebugInformation(g);
-
 		}
 	}
 
-	private void drawViewPort(Game app, Graphics2D g){
+	private void drawViewPort(Game app, Graphics2D g) {
 		g.setColor(Color.ORANGE);
-	g.setStroke(basicStroke);
-	g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+		g.setStroke(basicStroke);
+		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
 	}
-
 
 	/**
 	 * Render debug information for the object <code>o</code> to the Graphics2D
@@ -185,21 +218,24 @@ public class Render {
 		g.setFont(dbgFont);
 		GameObject o = (GameObject) ge;
 		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
-		g.fillRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
+		g.fillRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
 
 		g.setColor(Color.DARK_GRAY);
-		g.drawRect((int) (o.position.x + o.size.x + 2), (int) o.position.y, 80, 60);
+		g.drawRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
 
 		g.setColor(Color.GREEN);
-		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + 4, o.position.y + (12 * 1));
-		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 2));
-		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 3));
-		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 4));
-		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + 4,
-				o.position.y + (12 * 5));
+		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + o.debugInfoOffset.x,
+				o.position.y + o.debugInfoOffset.y + (12 * 1));
+		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 2));
+		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + o.debugInfoOffset.x,
+				o.position.y + o.debugInfoOffset.y + (12 * 5));
 	}
 
 	/**
@@ -258,6 +294,30 @@ public class Render {
 	 * @param go the GameObject to be added.
 	 */
 	public void addObject(GameObject go) {
+		Layer layer;
+		if (!layers.containsKey(go.getLayer())) {
+			layer = new Layer(go.getLayer(), null);
+			layers.put(go.getLayer(), layer);
+			sortLayers.add(layer);
+			/**
+			 * Sort Layer
+			 */
+			sortLayers.sort(new Comparator<Layer>() {
+				public int compare(Layer l1, Layer l2) {
+					return (l1.index < l2.index ? -1 : 1);
+				}
+			});
+		}
+		layer = layers.get(go.getLayer());
+		layer.fixed = go.fixed;
+		layer.add(go);
+		layer.getObjects().sort(new Comparator<GameEntity>() {
+			public int compare(GameEntity o1, GameEntity o2) {
+				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
+				// -1 : (o1.priority < o2.priority ? -1 : 1)));
+				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
+			}
+		});
 		renderingList.add(go);
 		renderingList.sort(new Comparator<GameEntity>() {
 			public int compare(GameEntity o1, GameEntity o2) {
@@ -414,16 +474,16 @@ public class Render {
 		app.suspendRendering(true);
 
 		Path targetDir = Paths.get(path + File.separator);
-		String filename = path + File.separator + app.getTitle()+"-sc-" + System.nanoTime() + "-" + (scindex++) + ".png";
+		String filename = path + File.separator + app.getTitle() + "-sc-" + System.nanoTime() + "-" + (scindex++)
+				+ ".png";
 		try {
-			if(!Files.exists(targetDir)){
+			if (!Files.exists(targetDir)) {
 				Files.createDirectory(targetDir);
-			}			
+			}
 			File out = new File(filename);
-			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG",
-					out);
+			javax.imageio.ImageIO.write(app.getRender().getBuffer(), "PNG", out);
 		} catch (IOException e) {
-			logger.error("Unable to write screenshot to " + filename,e);
+			logger.error("Unable to write screenshot to " + filename, e);
 		}
 		app.suspendRendering(false);
 	}

@@ -23,13 +23,13 @@ public class AppTest{
     @Test
     public void testAppTitle()
     {
-        Game app = new Game("My title", new String[]{});
+        Game app = new Game("My title", new String[]{"a=off"});
         assertTrue(app.getTitle().equals("My title"));
     }
 
     @Test
     public void testAppWindowSize(){
-        Game app = new Game("My title", new String[]{"w=320","h=240"});
+        Game app = new Game("My title", new String[]{"w=320","h=240","a=off"});
         app.initialize();
         assertNotNull("The Window object is null !", app.getWindow());
         assertEquals("the window width is not set to the requested value", app.getRender().getBuffer().getWidth(),320);

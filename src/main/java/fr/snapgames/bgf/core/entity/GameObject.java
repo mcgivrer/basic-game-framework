@@ -90,16 +90,22 @@ public class GameObject implements GameEntity {
 	/**
 	 * New Physical attributes.
 	 */
-	public Vector2D position = new Vector2D("position");;
+	public Vector2D position = new Vector2D("position");
 	public Vector2D newPosition = new Vector2D("newposition");
-	public Vector2D size = new Vector2D("size");;
-	public Vector2D speed = new Vector2D("speed");;
-	public Vector2D acceleration = new Vector2D("acceleration");;
-	public Vector2D gravity = new Vector2D("gravity");;
+	public Vector2D size = new Vector2D("size");
+	public Vector2D speed = new Vector2D("speed");
+	public Vector2D acceleration = new Vector2D("acceleration");
+	public Vector2D gravity = new Vector2D("gravity");
 	public List<Vector2D> forces = new ArrayList<>();
+	public Vector2D debugInfoOffset = new Vector2D("offset", 10, 10);
 	public float mass;
 	public float friction = 0.13f;
 	public float elasticity = 0.98f;
+
+	/**
+	 * If fixed=true, object does not follow camera moves.
+	 */
+	public boolean fixed = false;
 
 	public Physic type;
 
@@ -137,7 +143,7 @@ public class GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		position = position.add(speed.multiply(dt));
+		position = position.add(speed.multiply(dt).multiply(friction));
 		bBox.update(this);
 	}
 
@@ -387,5 +393,27 @@ public class GameObject implements GameEntity {
 	@Override
 	public int getPriority() {
 		return priority;
+	}
+
+	/**
+	 * Set the statuc fixed flag. if true, this object won't follow camera moves and
+	 * stay static on display.
+	 * 
+	 * @param fixedFlag the flag for fixed effect.
+	 */
+	public GameObject setFixed(boolean fixedFlag) {
+		this.fixed = fixedFlag;
+		return this;
+	}
+
+	/**
+	 * Set the offset of info panel for debug mode.
+	 * 
+	 * @param debugDisplayOffset
+	 * @return
+	 */
+	public GameObject setDebugInfoOffset(Vector2D debugDisplayOffset) {
+		this.debugInfoOffset = debugDisplayOffset;
+		return this;
 	}
 }
