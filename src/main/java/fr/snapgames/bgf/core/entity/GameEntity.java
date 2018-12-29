@@ -49,4 +49,10 @@ public interface GameEntity {
 	 * @return the priority
 	 */
 	int getPriority();
+
+	/**
+	 * return the Layer Fixed attribute.
+	 * @return
+	 */
+	boolean getFixed();
 }

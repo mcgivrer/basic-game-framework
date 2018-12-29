@@ -82,7 +82,7 @@ public class DebugEngine {
 	 */
 	public void drawGlobalDebugInformation(Render r, Graphics2D g) {
 		g.setFont(dbgFont);
-		int debug = r.getDebugMode();
+		int debug = r.debug;
 		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
 				(debug == 0 ? "off" : "" + debug), 
 				r.app.getRealFPS(), 

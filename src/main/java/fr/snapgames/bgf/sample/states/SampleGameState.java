@@ -26,6 +26,7 @@ import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.gfx.ui.UIText;
 import fr.snapgames.bgf.core.io.InputListener;
 import fr.snapgames.bgf.core.io.InputListener.KeyBinding;
+import fr.snapgames.bgf.core.math.Vector2D;
 import fr.snapgames.bgf.core.resources.ResourceUnknownException;
 import fr.snapgames.bgf.core.states.GameState;
 import fr.snapgames.bgf.core.states.GameStateDefault;
@@ -86,28 +87,25 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
 		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(2)
-				.moveTo(12, 24).setLayer(20).setPriority(100);
+				.moveTo(12, 24).setLayer(20).setPriority(100).setFixed(true);
 		add(scoreUiText);
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(0.95f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
-
+			player = GameObject.builder("player").setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(1f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(0.0f).setFriction(0.45f).setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
-			
-			createGameObjects(app, "enemy_", 10);
-			
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.94f)
-					.setView(app.getRender().getViewport());
+			Camera cam1 = ((Camera) Camera.builder("cam1").setDebugInfoOffset(new Vector2D("offset"))).setTarget(player)
+					.setTween(0.98f).setView(app.getRender().getViewport());
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
 			logger.error("Unable to load the resource", rue);
 		}
 
+		createGameObjects(app, "enemy_", 10);
 
 	}
 
@@ -184,24 +182,24 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void input(Game app, InputListener inputListener) {
 		GameObject goPlayer = (GameObject) objects.get("player");
 
-		float factor = 0.024f;
+		float factor = 0.05f;
 		if (inputListener.getKey(KeyEvent.VK_SHIFT)) {
-			factor = factor*2.0f;
+			factor = 0.075f;
 		} else if (inputListener.getKey(KeyEvent.VK_CONTROL)) {
-			factor = factor*4.0f;
+			factor = 0.1f;
 		}
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.speed.x = -1f * factor;
+			goPlayer.speed.x = -0.01f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.speed.x = 1f * factor;
+			goPlayer.speed.x = 0.01f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.speed.y = -1f * factor;
+			goPlayer.speed.y = -0.01f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.speed.y = 1f * factor;
+			goPlayer.speed.y = 0.01f * factor;
 		}
 		goPlayer.speed.y *= goPlayer.friction;
 		goPlayer.speed.x *= goPlayer.friction;
@@ -231,11 +229,12 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		// detect is there are some collision with out viewport border
 
-		if ((int) (o.position.x + o.size.x) > app.getRender().getViewport().width || o.position.x < 0.0f) {
+		if (o.position.x + o.size.x > app.getRender().getViewport().width || o.position.x < 0.0f) {
 			o.speed.x = -o.speed.x * o.elasticity;
+
 			colliding = true;
 		}
-		if ((int) (o.position.y + o.size.y) > app.getRender().getViewport().height || o.position.y < 0.0f) {
+		if (o.position.y + o.size.y > app.getRender().getViewport().height || o.position.y < 0.0f) {
 
 			o.speed.y = -o.speed.y * o.elasticity;
 			colliding = true;
@@ -250,11 +249,16 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		// if colliding and the object is the player, play boing.
 		if (colliding && o.getName().equals(player.getName()) && !app.soundCtrl.isPlaying("sounds/boing")) {
 
-			app.soundCtrl.play("sounds/boing");
+			// app.soundCtrl.play("sounds/boing");
 		}
 
-		o.position.x = boxingValue(o.position.x, 0.0f, app.getRender().getViewport().width);
-		o.position.y = boxingValue(o.position.y, 0.0f, app.getRender().getViewport().height);
+		o.speed.x = boxingValue(o.speed.x, -0.3f, 0.3f);
+		o.speed.y = boxingValue(o.speed.y, -0.3f, 0.3f);
+		o.acceleration.x = boxingValue(o.acceleration.x, -1.0f, 1.0f);
+		o.acceleration.y = boxingValue(o.acceleration.y, -1.0f, 1.0f);
+
+		o.position.x = boxingValue(o.position.x, 0.0f, app.getRender().getViewport().width - o.size.x);
+		o.position.y = boxingValue(o.position.y, 0.0f, app.getRender().getViewport().height - o.size.y);
 	}
 
 	/**
@@ -368,5 +372,4 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public String getName() {
 		return NAME;
 	}
-
 }

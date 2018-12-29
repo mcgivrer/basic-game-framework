@@ -1,3 +1,0 @@
-# Colliding Response
-
-TODO

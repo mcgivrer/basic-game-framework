@@ -30,6 +30,13 @@ And has arg s=2.0
 When getting scale value
 Then the scale value is 2.0
 
+Scenario: Application has an audio mode
+Given An Application with args
+And has arg a=0
+And Application is initialized
+When getting audio mode
+Then the audio mode is 1
+
 Scenario: Application has a full screen mode
 Given An Application fullWindow
 And has arg f=1

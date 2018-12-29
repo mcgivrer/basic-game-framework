@@ -10,8 +10,16 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.Mixer.Info;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+
+import fr.snapgames.bgf.core.Game;
 
 /**
  * This class is intend to manage and control Sound play and output.
@@ -28,7 +36,9 @@ public class SoundControl {
 	/**
 	 * Internal instance for the SoundControl system.
 	 */
-	private final static SoundControl instance = new SoundControl();
+	private static SoundControl instance;
+
+	private Game app;
 
 	/**
 	 * Max number of SoundClip to be stored in cache.
@@ -49,9 +59,15 @@ public class SoundControl {
 	/**
 	 * Internal constructor.
 	 */
-	private SoundControl() {
+	private SoundControl(Game app) {
+		this.app = app;
 		soundsStack.setSize(MAX_SOUNDS_IN_STACK);
 		logger.info("Initialize SoundControl with {} stack places", MAX_SOUNDS_IN_STACK);
+		Mixer.Info[] infos = AudioSystem.getMixerInfo();
+		for (Info info : infos) {
+			Gson gson = new Gson();
+			logger.info("Mixer info:{}", gson.toJson(info));
+		}
 	}
 
 	/**
@@ -155,7 +171,10 @@ public class SoundControl {
 	 * 
 	 * @return
 	 */
-	public static SoundControl getInstance() {
+	public static SoundControl getInstance(Game app) {
+		if (instance == null) {
+			instance = new SoundControl(app);
+		}
 		return instance;
 	}
 

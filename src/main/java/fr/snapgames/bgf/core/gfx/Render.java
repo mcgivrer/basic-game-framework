@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
@@ -43,21 +46,45 @@ import fr.snapgames.bgf.core.entity.GameObject;
  */
 public class Render {
 
+	public class Layer {
+		private int index = 0;
+		private String name = "";
+		/**
+		 * Fixed flag:if true, layer does not follow camera moves.
+		 */
+		private boolean fixed;
+		private List<GameEntity> objects = new ArrayList<>();
+
+		public Layer(int index, String name) {
+			this.index = index;
+			this.name = (name == null ? "layer_" + index : name);
+		}
+
+		public void add(GameEntity go) {
+			this.objects.add(go);
+		}
+
+		public List<GameEntity> getObjects() {
+			return objects;
+		}
+	}
+
 	private final static Logger logger = LoggerFactory.getLogger(Render.class);
 
-	public Game app;
+	Game app;
+
+	private Map<Integer, Layer> layers = new HashMap<>();
+	private List<Layer> sortLayers = new ArrayList<>();
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
 	private float SCALE = 2;
 
-	private DebugEngine dEngine;
-
 	private Rectangle viewport;
 	private Dimension dimension;
 	private Camera camera;
 
-	private int debug = 0;
+	int debug = 0;
 	private Font dbgFont;
 
 	private boolean pause;
@@ -72,7 +99,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	public List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
+	List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -89,17 +116,16 @@ public class Render {
 		this.app = app;
 		this.viewport = viewPort;
 		this.dimension = new Dimension(viewPort.width, viewPort.width);
-		this.buffer = new BufferedImage(viewPort.width, viewPort.width, BufferedImage.TYPE_INT_ARGB);
+		this.buffer = new BufferedImage(viewPort.width, viewPort.height, BufferedImage.TYPE_INT_ARGB);
 		this.g = (Graphics2D) this.buffer.getGraphics();
 		dbgFont = g.getFont().deriveFont(9.0f);
-		dEngine = new DebugEngine(g);
 	}
 
 	/**
 	 * clear the graphic buffer.
 	 */
 	public void clearRenderBuffer() {
-		g.setColor(Color.BLACK);
+		g.setColor(Color.BLUE);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 	}
 
@@ -112,40 +138,46 @@ public class Render {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// Camera preRender operation
-		if (app.getActiveCamera() != null) {
-			app.getActiveCamera().preRender(app, g);
-		} else if (camera != null) {
-			camera.preRender(app, g);
-		}
-		drawViewPort(app, g);
-
-		// render anything game ?
-		int previousLayer = 0, layer = 0;
-		for (GameEntity o : renderingList) {
-			layer = o.getLayer();
-			if (previousLayer == layer) {
-				logger.debug("Draw objects from layer {}", layer);
+		for (Layer layer : sortLayers) {
+			// Camera preRender operation
+			if (!layer.fixed) {
+				if (app.getActiveCamera() != null) {
+					app.getActiveCamera().preRender(app, g);
+				} else if (camera != null) {
+					camera.preRender(app, g);
+				}
 			}
-			o.render(g);
+			// render anything game ?
+			for (GameEntity o : layer.getObjects()) {
+				o.render(g);
+				// Display debug information if requested.
+				if (debug > 0) {
+					if (debug >= 2) {
+						o.getBoundingBox().render(g);
+					}
+					if (debug >= 3) {
+						drawObjectDebugInfo(g, o);
+					}
+				}
+			}
+
 			if (debug >= 2) {
-				o.getBoundingBox().render(g);
+				drawViewPort(app, g);
 			}
-			if (debug >= 3) {
-				dEngine.drawObjectDebugInfo(this, g, o);
+
+			// Camera postRender operation
+			if (!layer.fixed) {
+				if (app.getActiveCamera() != null) {
+					app.getActiveCamera().postRender(app, g);
+				} else if (camera != null) {
+					camera.postRender(app, g);
+				}
 			}
-			previousLayer = layer;
+
 		}
-
-		drawDebugViewPort(app, g);
-
-		// Camera postRender operation
-		if (app.getActiveCamera() != null) {
-			app.getActiveCamera().postRender(app, g);
-		} else if (camera != null) {
-			camera.postRender(app, g);
+		if (debug >= 4) {
+			drawObjectDebugInfo(g, app.getActiveCamera());
 		}
-
 		// render pause status
 		if (pause) {
 			String pauseLabel = app.getLabel("app.label.pause");
@@ -165,28 +197,61 @@ public class Render {
 
 		// render debug information
 		if (debug > 0) {
-			dEngine.drawGlobalDebugInformation(this, g);
-
+			drawGlobalDebugInformation(g);
 		}
+	}
+
+	private void drawViewPort(Game app, Graphics2D g) {
+		g.setColor(Color.ORANGE);
+		g.setStroke(basicStroke);
+		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
 	}
 
 	/**
-	 * draw background viewport
+	 * Render debug information for the object <code>o</code> to the Graphics2D
+	 * <code>g</code>.
 	 * 
-	 * @param app
-	 * @param g
+	 * @param g the Graphics2D to render things.
+	 * @param o the object to be debugged.
 	 */
-	private void drawViewPort(Game app, Graphics2D g) {
-		g.setColor(Color.BLUE);
-		g.fillRect(viewport.x, viewport.y, viewport.width, viewport.height);
+	public void drawObjectDebugInfo(Graphics2D g, GameEntity ge) {
+		g.setFont(dbgFont);
+		GameObject o = (GameObject) ge;
+		g.setColor(new Color(0.1f, 0.1f, 0.1f, 0.80f));
+		g.fillRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
+
+		g.setColor(Color.DARK_GRAY);
+		g.drawRect((int) (o.position.x + o.size.x + o.debugInfoOffset.x - 2),
+				(int) (o.position.y + o.debugInfoOffset.y + 2), 80, 60);
+
+		g.setColor(Color.GREEN);
+		g.drawString(String.format("Name:%s", o.getName()), o.position.x + o.size.x + o.debugInfoOffset.x,
+				o.position.y + o.debugInfoOffset.y + (12 * 1));
+		g.drawString(String.format("Pos:%03.2f,%03.2f", o.position.x, o.position.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 2));
+		g.drawString(String.format("Size:%03.2f,%03.2f", o.size.x, o.size.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 3));
+		g.drawString(String.format("Vel:%03.2f,%03.2f", o.speed.x, o.speed.y),
+				o.position.x + o.size.x + o.debugInfoOffset.x, o.position.y + o.debugInfoOffset.y + (12 * 4));
+		g.drawString(String.format("L/P:%d/%d", o.layer, o.priority), o.position.x + o.size.x + o.debugInfoOffset.x,
+				o.position.y + o.debugInfoOffset.y + (12 * 5));
 	}
 
-	private void drawDebugViewPort(Game app, Graphics2D g) {
-		if (debug >= 2) {
-			g.setColor(Color.ORANGE);
-			g.setStroke(basicStroke);
-			g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
-		}
+	/**
+	 * Draw debug information.
+	 * 
+	 * @param g the Graphics2D to render things.
+	 */
+	public void drawGlobalDebugInformation(Graphics2D g) {
+		g.setFont(dbgFont);
+		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
+				(debug == 0 ? "off" : "" + debug), app.getRealFPS(), app.getObjects().size(), renderingList.size());
+		int dbgStringHeight = g.getFontMetrics().getHeight() + 8;
+		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
+		g.fillRect(0, HEIGHT - (dbgStringHeight + 8), WIDTH, (dbgStringHeight));
+		g.setColor(Color.ORANGE);
+		g.drawString(debugString, 4, HEIGHT - dbgStringHeight);
 	}
 
 	/**
@@ -228,12 +293,36 @@ public class Render {
 	 * 
 	 * @param go the GameObject to be added.
 	 */
-	public void addObject(GameObject go) {
+	public void addObject(GameEntity go) {
+		Layer layer;
+		if (!layers.containsKey(go.getLayer())) {
+			layer = new Layer(go.getLayer(), null);
+			layers.put(go.getLayer(), layer);
+			sortLayers.add(layer);
+			/**
+			 * Sort Layer
+			 */
+			sortLayers.sort(new Comparator<Layer>() {
+				public int compare(Layer l1, Layer l2) {
+					return (l1.index < l2.index ? -1 : 1);
+				}
+			});
+		}
+		layer = layers.get(go.getLayer());
+		layer.fixed = go.getFixed();
+		layer.add(go);
+		layer.getObjects().sort(new Comparator<GameEntity>() {
+			public int compare(GameEntity o1, GameEntity o2) {
+				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
+				// -1 : (o1.priority < o2.priority ? -1 : 1)));
+				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
+			}
+		});
 		renderingList.add(go);
 		renderingList.sort(new Comparator<GameEntity>() {
 			public int compare(GameEntity o1, GameEntity o2) {
-				System.out.printf("comparison (%s,%s) => %d\r\n", o1, o2,
-						(o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1)));
+				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
+				// -1 : (o1.priority < o2.priority ? -1 : 1)));
 				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
 			}
 		});
@@ -245,7 +334,9 @@ public class Render {
 	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
 	public void addAllObjects(Collection<GameEntity> l) {
-		renderingList.addAll(l);
+		for(GameEntity ge:l) {
+			addObject(ge);
+		}
 	}
 
 	/**
@@ -261,6 +352,7 @@ public class Render {
 	 * Clear the rendering list.
 	 */
 	public void clearRenderingList() {
+		layers.clear();
 		renderingList.clear();
 	}
 
@@ -307,15 +399,6 @@ public class Render {
 	 */
 	public void setDebugMode(int debug) {
 		this.debug = debug;
-	}
-
-	/**
-	 * return the debug mode status.
-	 * 
-	 * @return
-	 */
-	public int getDebugMode() {
-		return this.debug;
 	}
 
 	/**
