@@ -99,7 +99,7 @@ public class Render {
 	 * clear the graphic buffer.
 	 */
 	public void clearRenderBuffer() {
-		g.setColor(Color.BLUE);
+		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 	}
 
@@ -118,6 +118,8 @@ public class Render {
 		} else if (camera != null) {
 			camera.preRender(app, g);
 		}
+		drawViewPort(app, g);
+
 		// render anything game ?
 		int previousLayer = 0, layer = 0;
 		for (GameEntity o : renderingList) {
@@ -130,14 +132,12 @@ public class Render {
 				o.getBoundingBox().render(g);
 			}
 			if (debug >= 3) {
-				dEngine.drawObjectDebugInfo(this,g, o);
+				dEngine.drawObjectDebugInfo(this, g, o);
 			}
 			previousLayer = layer;
 		}
 
-		if (debug >= 2) {
-			drawViewPort(app, g);
-		}
+		drawDebugViewPort(app, g);
 
 		// Camera postRender operation
 		if (app.getActiveCamera() != null) {
@@ -165,15 +165,28 @@ public class Render {
 
 		// render debug information
 		if (debug > 0) {
-			dEngine.drawGlobalDebugInformation(this,g);
+			dEngine.drawGlobalDebugInformation(this, g);
 
 		}
 	}
 
+	/**
+	 * draw background viewport
+	 * 
+	 * @param app
+	 * @param g
+	 */
 	private void drawViewPort(Game app, Graphics2D g) {
-		g.setColor(Color.ORANGE);
-		g.setStroke(basicStroke);
-		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+		g.setColor(Color.BLUE);
+		g.fillRect(viewport.x, viewport.y, viewport.width, viewport.height);
+	}
+
+	private void drawDebugViewPort(Game app, Graphics2D g) {
+		if (debug >= 2) {
+			g.setColor(Color.ORANGE);
+			g.setStroke(basicStroke);
+			g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+		}
 	}
 
 	/**
@@ -219,8 +232,8 @@ public class Render {
 		renderingList.add(go);
 		renderingList.sort(new Comparator<GameEntity>() {
 			public int compare(GameEntity o1, GameEntity o2) {
-				// System.out.printf("comparison (%s,%s) => %d\r\n",o1,o2,(o1.layer < o2.layer ?
-				// -1 : (o1.priority < o2.priority ? -1 : 1)));
+				System.out.printf("comparison (%s,%s) => %d\r\n", o1, o2,
+						(o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1)));
 				return (o1.getLayer() < o2.getLayer() ? -1 : (o1.getPriority() < o2.getPriority() ? -1 : 1));
 			}
 		});

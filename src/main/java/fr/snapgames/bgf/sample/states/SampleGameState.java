@@ -94,10 +94,13 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			player = GameObject.builder("player").setSize(24, 24).setImage(app.resManager.getImage("images/playerBall"))
 					.setScale(0.95f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
 					.setPriority(100).setElasticity(1.2f).setFriction(0.98f).setBoundingType(BoundingBoxType.CIRCLE);
-			;
+
 			add(player);
+			
+			createGameObjects(app, "enemy_", 10);
+			
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.86f)
+			Camera cam1 = Camera.builder("cam1").setTarget(player).setTween(0.94f)
 					.setView(app.getRender().getViewport());
 			add(cam1);
 
@@ -105,7 +108,6 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			logger.error("Unable to load the resource", rue);
 		}
 
-		createGameObjects(app, "enemy_", 10);
 
 	}
 
@@ -182,24 +184,24 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public void input(Game app, InputListener inputListener) {
 		GameObject goPlayer = (GameObject) objects.get("player");
 
-		float factor = 1.0f;
+		float factor = 0.024f;
 		if (inputListener.getKey(KeyEvent.VK_SHIFT)) {
-			factor = 2.0f;
+			factor = factor*2.0f;
 		} else if (inputListener.getKey(KeyEvent.VK_CONTROL)) {
-			factor = 4.0f;
+			factor = factor*4.0f;
 		}
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.speed.x = -0.1f * factor;
+			goPlayer.speed.x = -1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.speed.x = 0.1f * factor;
+			goPlayer.speed.x = 1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.speed.y = -0.1f * factor;
+			goPlayer.speed.y = -1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.speed.y = 0.1f * factor;
+			goPlayer.speed.y = 1f * factor;
 		}
 		goPlayer.speed.y *= goPlayer.friction;
 		goPlayer.speed.x *= goPlayer.friction;
