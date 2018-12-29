@@ -38,6 +38,8 @@ public class SoundControl {
 	 */
 	private static SoundControl instance;
 
+	private Game app;
+
 	/**
 	 * Max number of SoundClip to be stored in cache.
 	 */
@@ -52,7 +54,7 @@ public class SoundControl {
 	 */
 	private Map<String, SoundClip> soundBank = new ConcurrentHashMap<String, SoundClip>();
 
-	private Game app;
+	private boolean mute = true;
 
 	/**
 	 * Internal constructor.
@@ -77,16 +79,12 @@ public class SoundControl {
 	 */
 	public String load(String code, String filename) {
 		if (!soundBank.containsKey(code)) {
-			if (!app.getAudioOff()) {
-				SoundClip sc = new SoundClip(filename);
-				if (sc != null) {
-					soundBank.put(code, sc);
-					logger.debug("Load sound {} to sound bank with code {}", filename, code);
-				}
-				return filename;
-			}else {
-				return null;
+			SoundClip sc = new SoundClip(filename);
+			if (sc != null) {
+				soundBank.put(code, sc);
+				logger.debug("Load sound {} to sound bank with code {}", filename, code);
 			}
+			return filename;
 		} else {
 			return null;
 		}
@@ -98,7 +96,7 @@ public class SoundControl {
 	 * @param code internal code of the sound to be played.
 	 */
 	public void play(String code) {
-		if (!app.getAudioOff()) {
+		if (!mute) {
 			if (soundBank.containsKey(code)) {
 				SoundClip sc = soundBank.get(code);
 				sc.play();
@@ -106,6 +104,8 @@ public class SoundControl {
 			} else {
 				logger.error("unable to find the sound {} in the SoundBank !", code);
 			}
+		} else {
+			logger.debug("Mute mode activated, {} not played", code);
 		}
 	}
 
@@ -116,7 +116,7 @@ public class SoundControl {
 	 * @param volume volume level to be played.
 	 */
 	public void play(String code, float volume) {
-		if (!app.getAudioOff()) {
+		if (!mute) {
 			if (soundBank.containsKey(code)) {
 				SoundClip sc = soundBank.get(code);
 				sc.play(0.5f, volume);
@@ -124,6 +124,8 @@ public class SoundControl {
 			} else {
 				logger.error("unable to find the sound {} in the SoundBank !", code);
 			}
+		} else {
+			logger.debug("Mute mode activated, {} not played", code);
 		}
 	}
 
@@ -136,12 +138,17 @@ public class SoundControl {
 	 */
 
 	public void play(String code, float volume, float pan) {
-		if (soundBank.containsKey(code)) {
-			SoundClip sc = soundBank.get(code);
-			sc.play(0.5f, volume);
-			logger.debug("Play sound {} with volume {} and pan {}", code, volume, pan);
+		if (!mute) {
+
+			if (soundBank.containsKey(code)) {
+				SoundClip sc = soundBank.get(code);
+				sc.play(0.5f, volume);
+				logger.debug("Play sound {} with volume {} and pan {}", code, volume, pan);
+			} else {
+				logger.error("unable to find the sound {} in the SoundBank !", code);
+			}
 		} else {
-			logger.error("unable to find the sound {} in the SoundBank !", code);
+			logger.debug("Mute mode activated, {} not played", code);
 		}
 	}
 
@@ -169,5 +176,13 @@ public class SoundControl {
 			instance = new SoundControl(app);
 		}
 		return instance;
+	}
+
+	public boolean isMute() {
+		return mute;
+	}
+
+	public void setMute(boolean mute) {
+		this.mute = mute;
 	}
 }

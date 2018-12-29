@@ -92,27 +92,13 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player")
-					.setSize(32, 32)
-					.setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(1f)
-					.moveTo(0, 0)
-					.setColor(Color.GREEN)
-					.setVelocity(0.0f, 0.0f)
-					.setLayer(10)
-					.setPriority(100)
-					.setElasticity(0.0f)
-					.setFriction(0.45f)
-					.setBoundingType(BoundingBoxType.CIRCLE);
+			player = GameObject.builder("player").setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(1f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
+					.setPriority(100).setElasticity(0.0f).setFriction(0.45f).setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = ((Camera)Camera.builder("cam1")
-					.setDebugInfoOffset(
-							new Vector2D("offset")))
-					.setTarget(player)
-					.setTween(0.98f)
-					.setView(app.getRender().getViewport())
-					;
+			Camera cam1 = ((Camera) Camera.builder("cam1").setDebugInfoOffset(new Vector2D("offset"))).setTarget(player)
+					.setTween(0.98f).setView(app.getRender().getViewport());
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
@@ -245,7 +231,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		if (o.position.x + o.size.x > app.getRender().getViewport().width || o.position.x < 0.0f) {
 			o.speed.x = -o.speed.x * o.elasticity;
-			
+
 			colliding = true;
 		}
 		if (o.position.y + o.size.y > app.getRender().getViewport().height || o.position.y < 0.0f) {
@@ -263,7 +249,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		// if colliding and the object is the player, play boing.
 		if (colliding && o.getName().equals(player.getName()) && !app.soundCtrl.isPlaying("sounds/boing")) {
 
-			//app.soundCtrl.play("sounds/boing");
+			// app.soundCtrl.play("sounds/boing");
 		}
 
 		o.speed.x = boxingValue(o.speed.x, -0.3f, 0.3f);
@@ -271,8 +257,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		o.acceleration.x = boxingValue(o.acceleration.x, -1.0f, 1.0f);
 		o.acceleration.y = boxingValue(o.acceleration.y, -1.0f, 1.0f);
 
-		o.position.x = boxingValue(o.position.x, 0.0f, app.getRender().getViewport().width-o.size.x);
-		o.position.y = boxingValue(o.position.y, 0.0f, app.getRender().getViewport().height-o.size.y);
+		o.position.x = boxingValue(o.position.x, 0.0f, app.getRender().getViewport().width - o.size.x);
+		o.position.y = boxingValue(o.position.y, 0.0f, app.getRender().getViewport().height - o.size.y);
 	}
 
 	/**
@@ -386,5 +372,4 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	public String getName() {
 		return NAME;
 	}
-
 }

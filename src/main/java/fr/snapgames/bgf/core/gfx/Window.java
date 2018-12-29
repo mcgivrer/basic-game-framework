@@ -37,8 +37,6 @@ public class Window {
 
     private String iconpath = "res/app-icon.png";
 
-    private float backScale;
-
     private GraphicsDevice device;
 
     /**
@@ -111,18 +109,16 @@ public class Window {
         frame.setVisible(false);
         if (fullScreen) {
             back = frame.getSize();
-            backScale = app.getRender().getScale();
             frame.dispose();
             initialize(false, false);
             device.setFullScreenWindow(frame);
-            app.setSize(new Dimension(device.getDisplayMode().getWidth(), device.getDisplayMode().getHeight()));
         } else {
             frame.dispose();
             frame.setSize(back);
-            app.setSize(back);
+            /*app.setSize(back);*/
             initialize(true, false);
             device.setFullScreenWindow(null);
-            app.getRender().setScale(backScale);
+            /*app.getRender().setScale(backScale);*/
         }
 
         frame.setVisible(true);

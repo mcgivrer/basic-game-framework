@@ -14,6 +14,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,18 @@ public class SoundClip {
 						16, baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
 				AudioInputStream dais = AudioSystem.getAudioInputStream(decodeFormat, ais);
 				clip = AudioSystem.getClip();
+				/*
+				 * bugfix proposed
+				 * 
+				 * @see
+				 * https://stackoverflow.com/questions/5808560/error-playing-sound-java-no-line-
+				 * matching-interface-clip-supporting-format#answer-41647865
+				 */
+				clip.addLineListener(event -> {
+					if (LineEvent.Type.STOP.equals(event.getType())) {
+						clip.close();
+					}
+				});
 				clip.open(dais);
 
 				if (clip.isControlSupported(FloatControl.Type.BALANCE)) {

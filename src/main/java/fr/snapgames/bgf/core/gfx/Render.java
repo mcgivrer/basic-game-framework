@@ -53,25 +53,25 @@ public class Render {
 		 * Fixed flag:if true, layer does not follow camera moves.
 		 */
 		private boolean fixed;
-		private List<GameObject> objects = new ArrayList<>();
+		private List<GameEntity> objects = new ArrayList<>();
 
 		public Layer(int index, String name) {
 			this.index = index;
 			this.name = (name == null ? "layer_" + index : name);
 		}
 
-		public void add(GameObject go) {
+		public void add(GameEntity go) {
 			this.objects.add(go);
 		}
 
-		public List<GameObject> getObjects() {
+		public List<GameEntity> getObjects() {
 			return objects;
 		}
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(Render.class);
 
-	private Game app;
+	Game app;
 
 	private Map<Integer, Layer> layers = new HashMap<>();
 	private List<Layer> sortLayers = new ArrayList<>();
@@ -84,7 +84,7 @@ public class Render {
 	private Dimension dimension;
 	private Camera camera;
 
-	private int debug = 0;
+	int debug = 0;
 	private Font dbgFont;
 
 	private boolean pause;
@@ -99,7 +99,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	private List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
+	List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -293,7 +293,7 @@ public class Render {
 	 * 
 	 * @param go the GameObject to be added.
 	 */
-	public void addObject(GameObject go) {
+	public void addObject(GameEntity go) {
 		Layer layer;
 		if (!layers.containsKey(go.getLayer())) {
 			layer = new Layer(go.getLayer(), null);
@@ -309,7 +309,7 @@ public class Render {
 			});
 		}
 		layer = layers.get(go.getLayer());
-		layer.fixed = go.fixed;
+		layer.fixed = go.getFixed();
 		layer.add(go);
 		layer.getObjects().sort(new Comparator<GameEntity>() {
 			public int compare(GameEntity o1, GameEntity o2) {
@@ -334,7 +334,9 @@ public class Render {
 	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
 	public void addAllObjects(Collection<GameEntity> l) {
-		renderingList.addAll(l);
+		for(GameEntity ge:l) {
+			addObject(ge);
+		}
 	}
 
 	/**
@@ -350,6 +352,7 @@ public class Render {
 	 * Clear the rendering list.
 	 */
 	public void clearRenderingList() {
+		layers.clear();
 		renderingList.clear();
 	}
 

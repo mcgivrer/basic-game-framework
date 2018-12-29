@@ -105,7 +105,7 @@ public class GameObject implements GameEntity {
 	/**
 	 * If fixed=true, object does not follow camera moves.
 	 */
-	public boolean fixed = false;
+	private boolean fixed = false;
 
 	public Physic type;
 
@@ -415,5 +415,18 @@ public class GameObject implements GameEntity {
 	public GameObject setDebugInfoOffset(Vector2D debugDisplayOffset) {
 		this.debugInfoOffset = debugDisplayOffset;
 		return this;
+	}
+	/**
+	 * Add some Custom debug info if necessary.
+	 * 
+	 * @return
+	 */
+	public List<String> getCustomDebugInfo() {
+		return null;
+	}
+
+	@Override
+	public boolean getFixed() {
+		return fixed;
 	}
 }
