@@ -259,7 +259,8 @@ public class Render {
 	 */
 	public void drawRenderBufferToScreen() {
 		Graphics g2 = app.getGraphics();
-		g2.drawImage(buffer, 0, 0, (int) (WIDTH * SCALE), (int) (HEIGHT * SCALE), null);
+		Rectangle dim = app.getWindow().getDimension();
+		g2.drawImage(buffer, 0, 0, (int) (dim.getWidth()), (int) (dim.getHeight()), null);
 		g2.dispose();
 	}
 

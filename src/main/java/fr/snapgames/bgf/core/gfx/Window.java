@@ -115,10 +115,8 @@ public class Window {
         } else {
             frame.dispose();
             frame.setSize(back);
-            /*app.setSize(back);*/
             initialize(true, false);
             device.setFullScreenWindow(null);
-            /*app.getRender().setScale(backScale);*/
         }
 
         frame.setVisible(true);
