@@ -1,3 +1,0 @@
-# Collision Component
-
-TODO
