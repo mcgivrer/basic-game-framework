@@ -1,3 +1,0 @@
-# ParticleComponent
-
-TODO
