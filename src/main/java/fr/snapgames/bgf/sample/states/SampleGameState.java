@@ -101,8 +101,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 					.setVelocity(0.0f, 0.0f)
 					.setLayer(10)
 					.setPriority(100)
-					.setElasticity(0.0f)
-					.setFriction(0.45f)
+					.setElasticity(0.12f)
+					.setFriction(0.55f)
 					.setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
@@ -217,6 +217,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 		goPlayer.speed.y *= goPlayer.friction;
 		goPlayer.speed.x *= goPlayer.friction;
+		objects.put("player",goPlayer);
 
 	}
 
@@ -263,7 +264,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		// if colliding and the object is the player, play boing.
 		if (colliding && o.getName().equals(player.getName()) && !app.soundCtrl.isPlaying("sounds/boing")) {
 
-			//app.soundCtrl.play("sounds/boing");
+			app.soundCtrl.play("sounds/boing");
 		}
 
 		o.speed.x = boxingValue(o.speed.x, -0.3f, 0.3f);

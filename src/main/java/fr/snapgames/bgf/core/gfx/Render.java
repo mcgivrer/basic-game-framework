@@ -45,10 +45,10 @@ import fr.snapgames.bgf.core.entity.GameObject;
  *
  */
 public class Render {
-
+	private static int layerIndex = 0;
 	public class Layer {
 		private int index = 0;
-		private String name = "";
+		private String name = "layer_"+(layerIndex++);
 		/**
 		 * Fixed flag:if true, layer does not follow camera moves.
 		 */
@@ -66,6 +66,9 @@ public class Render {
 
 		public List<GameObject> getObjects() {
 			return objects;
+		}
+		public String getName() {
+			return name;
 		}
 	}
 
