@@ -332,7 +332,7 @@ public class TGameObject<T> implements GameEntity {
 	 * @param name
 	 * @return
 	 */
-	protected T builder(String name){
+	public T builderObject(String name){
 		T objectInstance = null;
 
 		// Get the class name of this instance's type.

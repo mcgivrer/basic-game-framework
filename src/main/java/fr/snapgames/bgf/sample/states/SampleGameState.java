@@ -93,14 +93,32 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		try {
 			// create a simple blue ball as a player
-			player = Player.builder("player");
-					player.setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(1f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(0.0f).setFriction(0.45f).setBoundingType(BoundingBoxType.CIRCLE);
+			player = (Player)GameObject.builder("player")
+				.setSize(32, 32)
+				.setImage(app.resManager.getImage("images/playerBall"))
+				.setScale(1f)
+				.moveTo(0, 0)
+				.setColor(Color.GREEN)
+				.setVelocity(0.0f, 0.0f)
+				.setLayer(10)
+				.setPriority(100)
+				.setElasticity(0.0f)
+				.setFriction(0.45f)
+				.setBoundingType(BoundingBoxType.CIRCLE);
+
+			player.setScore(0)
+				.setEnergy(100)
+				.setMana(100)
+				.setLife(3);
+
 			add(player);
+
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = ((Camera) Camera.builder("cam1").setDebugInfoOffset(new Vector2D("offset"))).setTarget(player)
-					.setTween(0.98f).setView(app.getRender().getViewport());
+			Camera cam1 = ((Camera) Camera.builder("cam1")
+				.setDebugInfoOffset(new Vector2D("offset",-10.0f,-10.0f)))
+				.setTarget(player)
+				.setTween(0.98f)
+				.setView(app.getRender().getViewport());
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
@@ -133,7 +151,6 @@ public class SampleGameState extends GameStateDefault implements GameState {
 			logger.error("Unable to load the resource", rue);
 		}
 		app.suspendRendering(false);
-
 	}
 
 	/**
