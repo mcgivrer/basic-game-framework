@@ -7,6 +7,7 @@
 
 package fr.snapgames.bgf.core.states;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,9 +122,21 @@ public class GameStateDefault {
 	 * @param go
 	 */
 	public void remove(GameEntity go) {
-		objects.remove(go.getName());
 		app.getRender().removeObject(go);
+		objects.remove(go.getName());
 		logger.debug("Object %s removed", go);
+	}
+
+	/**
+	 * Remove all objects from collection <code>col</code> from the rendering
+	 * pipeline.
+	 * 
+	 * @param col collection of GameEntty to be removed from State.
+	 */
+	public void removeAll(Collection<GameEntity> col) {
+		col.forEach(i -> {
+			remove(i);
+		});
 	}
 
 	/**

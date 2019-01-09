@@ -86,15 +86,30 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(2)
-				.moveTo(12, 24).setLayer(20).setPriority(100).setFixed(true);
+		scoreUiText = (UIText) UIText.builder("score")
+				.setFont(scoreFont)
+				.setText("00000")
+				.setThickness(2)
+				.moveTo(12, 24)
+				.setLayer(20)
+				.setPriority(100)
+				.setFixed(true);
 		add(scoreUiText);
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player").setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(1f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
-					.setPriority(100).setElasticity(0.0f).setFriction(0.45f).setBoundingType(BoundingBoxType.CIRCLE);
+			player = GameObject.builder("player")
+					.setSize(32, 32)
+					.setImage(app.resManager.getImage("images/playerBall"))
+					.setScale(1f)
+					.moveTo(0, 0)
+					.setColor(Color.GREEN)
+					.setVelocity(0.0f, 0.0f)
+					.setLayer(10)
+					.setPriority(100)
+					.setElasticity(0.12f)
+					.setFriction(1.0f/0.75f)
+					.setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
 			Camera cam1 = ((Camera) Camera.builder("cam1").setDebugInfoOffset(new Vector2D("offset"))).setTarget(player)
@@ -122,7 +137,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 				GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
 						.setImage(app.resManager.getImage("images/enemyBall"))
 						.moveTo((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
-						.setVelocity((float) (Math.random() * 0.4f) - 0.2f, (float) (Math.random() * 0.4f) - 0.2f)
+						.setVelocity((float) (Math.random() * 0.04f) - 0.02f, (float) (Math.random() * 0.04f) - 0.02f)
 						.setColor(randomColor()).setPriority(100 - i).setLayer(1).setElasticity(0.98f)
 						.setFriction(0.96f).setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
@@ -165,11 +180,9 @@ public class SampleGameState extends GameStateDefault implements GameState {
 				.collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
 
 		// remove all matching objects from objects buffer.
-		objects.entrySet().removeAll(collect.entrySet());
-
+		removeAll(collect.values());
+		
 		// re-fulfill the rendering buffer.
-		app.getRender().clearRenderingList();
-		app.getRender().addAllObjects(objects.values());
 		app.suspendRendering(false);
 	}
 
@@ -190,16 +203,16 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.speed.x = -0.01f * factor;
+			goPlayer.speed.x = -1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.speed.x = 0.01f * factor;
+			goPlayer.speed.x = 1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.speed.y = -0.01f * factor;
+			goPlayer.speed.y = -1f * factor;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.speed.y = 0.01f * factor;
+			goPlayer.speed.y = 1f * factor;
 		}
 		goPlayer.speed.y *= goPlayer.friction;
 		goPlayer.speed.x *= goPlayer.friction;

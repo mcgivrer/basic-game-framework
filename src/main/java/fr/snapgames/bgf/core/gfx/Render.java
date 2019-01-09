@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
@@ -48,12 +49,12 @@ public class Render {
 
 	public class Layer {
 		private int index = 0;
-		private String name = "";
+		private String name = "layer_0";
 		/**
 		 * Fixed flag:if true, layer does not follow camera moves.
 		 */
 		private boolean fixed;
-		private List<GameEntity> objects = new ArrayList<>();
+		private List<GameEntity> objects = new CopyOnWriteArrayList<>();
 
 		public Layer(int index, String name) {
 			this.index = index;
@@ -73,13 +74,14 @@ public class Render {
 
 	Game app;
 
-	private Map<Integer, Layer> layers = new HashMap<>();
-	private List<Layer> sortLayers = new ArrayList<>();
+	private Map<Integer, Layer> layers = new ConcurrentHashMap<>();
+	private List<Layer> sortLayers = new CopyOnWriteArrayList<>();
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
 	private float SCALE = 2;
 
+	private Color clearColor = Color.BLACK;
 	private Rectangle viewport;
 	private Dimension dimension;
 	private Camera camera;
@@ -125,7 +127,7 @@ public class Render {
 	 * clear the graphic buffer.
 	 */
 	public void clearRenderBuffer() {
-		g.setColor(Color.BLUE);
+		g.setColor(clearColor);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 	}
 
@@ -147,6 +149,9 @@ public class Render {
 					camera.preRender(app, g);
 				}
 			}
+
+			drawViewPort(app, g);			
+
 			// render anything game ?
 			for (GameEntity o : layer.getObjects()) {
 				o.render(g);
@@ -161,9 +166,6 @@ public class Render {
 				}
 			}
 
-			if (debug >= 2) {
-				drawViewPort(app, g);
-			}
 
 			// Camera postRender operation
 			if (!layer.fixed) {
@@ -202,9 +204,13 @@ public class Render {
 	}
 
 	private void drawViewPort(Game app, Graphics2D g) {
-		g.setColor(Color.ORANGE);
-		g.setStroke(basicStroke);
-		g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+		if(debug>=2) {
+			g.setColor(Color.ORANGE);
+			g.setStroke(basicStroke);
+			g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+		}
+		//g.setColor(Color.BLUE);
+		//g.fillRect(viewport.x, viewport.y, viewport.width, viewport.height);
 	}
 
 	/**
@@ -334,7 +340,7 @@ public class Render {
 	 * @param l the list of GameObject to ad dthe the rendering pipeline.
 	 */
 	public void addAllObjects(Collection<GameEntity> l) {
-		for(GameEntity ge:l) {
+		for (GameEntity ge : l) {
 			addObject(ge);
 		}
 	}
@@ -345,7 +351,24 @@ public class Render {
 	 * @param go remove an object from the rendering pipeline.
 	 */
 	public void removeObject(GameEntity go) {
+		for (Layer l : layers.values()) {
+			if (l.getObjects().contains(go)) {
+				l.getObjects().remove(go);
+			}
+		}
 		renderingList.remove(go);
+	}
+
+	/**
+	 * Remove all objects from entrySet from render list and layers
+	 * 
+	 * @param entrySet
+	 */
+	public void removeAll(Collection<GameEntity> l) {
+		l.forEach(x -> {
+			removeObject(x);
+		});
+
 	}
 
 	/**
