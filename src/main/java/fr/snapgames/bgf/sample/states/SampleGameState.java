@@ -30,6 +30,7 @@ import fr.snapgames.bgf.core.math.Vector2D;
 import fr.snapgames.bgf.core.resources.ResourceUnknownException;
 import fr.snapgames.bgf.core.states.GameState;
 import fr.snapgames.bgf.core.states.GameStateDefault;
+import fr.snapgames.bgf.sample.entity.Player;
 
 /**
  * This is a Sample GameState implementation to illustrate the usage of such
@@ -54,7 +55,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	 */
 	private Font scoreFont;
 	private UIText scoreUiText;
-	private GameObject player;
+	private Player player;
 
 	/*
 	 * (non-Javadoc)
@@ -92,7 +93,8 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		try {
 			// create a simple blue ball as a player
-			player = GameObject.builder("player").setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
+			player = Player.builder("player");
+					player.setSize(32, 32).setImage(app.resManager.getImage("images/playerBall"))
 					.setScale(1f).moveTo(0, 0).setColor(Color.GREEN).setVelocity(0.0f, 0.0f).setLayer(10)
 					.setPriority(100).setElasticity(0.0f).setFriction(0.45f).setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);

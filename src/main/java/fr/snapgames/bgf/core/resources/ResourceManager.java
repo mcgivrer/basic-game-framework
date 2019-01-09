@@ -7,10 +7,12 @@
 package fr.snapgames.bgf.core.resources;
 
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
+
+import fr.snapgames.bgf.core.Game;
 
 /**
  * the ResourceManager class intends to load and cache some objects like image,
@@ -19,7 +21,23 @@ import javax.imageio.ImageIO;
  * @author Frédéric Delorme <frederic.delorme@snapgames.fr>
  */
 public class ResourceManager {
-	private Map<String, Object> objects = new HashMap<>();
+	/**
+	 * internal instance.
+	 */
+	private static ResourceManager instance;
+	/**
+	 * list of resources manage by this service.
+	 */
+	private Map<String, Object> objects;
+
+	private Game game;
+
+	/**
+	 * Create the resource manager and initialize resource map.
+	 */
+	private ResourceManager() {
+		objects = new ConcurrentHashMap<>();
+	}
 
 	/**
 	 * Add a resource to the set.
@@ -53,5 +71,18 @@ public class ResourceManager {
 		} else {
 			throw new ResourceUnknownException(String.format("Unknown resource named %s", name));
 		}
+	}
+
+	/**
+	 * get the instance of the resource manager.
+	 * 
+	 * @return
+	 */
+	public static ResourceManager getInstance(Game game) {
+		if (instance == null) {
+			instance = new ResourceManager();
+		}
+		instance.game = game;
+		return instance;
 	}
 }

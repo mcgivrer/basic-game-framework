@@ -12,6 +12,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
@@ -79,12 +81,24 @@ import fr.snapgames.bgf.core.math.physic.CollisionSystem.Physic;
  */
 public class GameObject implements GameEntity {
 
+	/**
+	 * internal unique idendifier.
+	 */
 	public int id;
+	/**
+	 * internal name of this object.
+	 */
 	public String name;
 
+	/**
+	 * Object position in layer and priority in the rendering pipeline.
+	 */
 	public int layer = 0;
 	public int priority = 0;
 
+	/**
+	 * Object scale.
+	 */
 	public float scale = 1.0f;
 
 	/**
@@ -112,7 +126,15 @@ public class GameObject implements GameEntity {
 	public BufferedImage image;
 	public Color color;
 
+	/**
+	 * Object boundingbox.
+	 */
 	public BoundingBox bBox = new BoundingBox(BoundingBoxType.RECTANGLE);
+
+	/**
+	 * Object specific properties.
+	 */
+	public Map<String, Object> properties = new ConcurrentHashMap<>();
 
 	/**
 	 * Create a new GameObject.
@@ -416,6 +438,7 @@ public class GameObject implements GameEntity {
 		this.debugInfoOffset = debugDisplayOffset;
 		return this;
 	}
+
 	/**
 	 * Add some Custom debug info if necessary.
 	 * 

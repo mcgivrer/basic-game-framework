@@ -1,3 +1,9 @@
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
 package fr.snapgames.bgf.core.math.physic;
 
 import fr.snapgames.bgf.core.entity.BoundingBox;

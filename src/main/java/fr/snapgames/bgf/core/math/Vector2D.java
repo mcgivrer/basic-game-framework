@@ -1,3 +1,9 @@
+/**
+ * SnapGames
+ * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
+ */
 package fr.snapgames.bgf.core.math;
 
 /**
@@ -7,7 +13,7 @@ package fr.snapgames.bgf.core.math;
  */
 public class Vector2D {
 
-	private String name;
+    private String name;
 
     /**
      * X axe factor.

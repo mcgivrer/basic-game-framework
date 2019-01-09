@@ -1,30 +1,52 @@
 /**
+ * SnapGames
  * 
+ * @since 2018
+ * @see https://github.com//SnapGames/basic-game-framework/wiki
  */
 package fr.snapgames.bgf.core.entity;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
-import fr.snapgames.bgf.core.math.Vector2D;
 
 /**
- * @author frede
+ * <p>
+ * The Camera object is the component that focus th viewport on some specific
+ * target(Mainly another GameObject).
+ * <p>
+ * A sort of delay(the {@link Camera#tweenFactor}) is used in this specific
+ * implementation to follow the {@link Camera#trackedObject}.
+ * <p>
+ * It also use the game viewport ({@link Camera#view}) as the view window for
+ * the game.
+ * 
+ * @author Frederic Delorme<frederic.delorme@snapgames.fr>
  *
  */
 public class Camera extends GameObject implements GameEntity {
 
+	/**
+	 * The tracked object by camera.
+	 */
 	private GameObject trackedObject;
 
+	/**
+	 * the tracked object following tween factor.
+	 */
 	private float tweenFactor = 1.0f;
 
+	/**
+	 * the reference View to compute camera view.
+	 */
 	private Rectangle view;
 
 	/**
-	 * @param name
+	 * Creata a new camera with a specific game object <code>name</code>.
+	 * 
+	 * @param name name of this new Camera object.
 	 */
 	public Camera(String name) {
 		super(name);
@@ -32,13 +54,15 @@ public class Camera extends GameObject implements GameEntity {
 	}
 
 	/**
+	 * Create a brand new Camera object with a specific <code>name</code>, and
+	 * position at(<code>x,y<c/ode>).
+	 * 
 	 * @param name
 	 * @param x
 	 * @param y
-	 * @param image
 	 */
-	public Camera(String name, int x, int y, BufferedImage image) {
-		super(name, x, y, image);
+	public Camera(String name, int x, int y) {
+		super(name, x, y, null);
 	}
 
 	/*
@@ -108,13 +132,15 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		/*Vector2D view2D = new Vector2D("view",view.x,view.y);
-		position = position.add(trackedObject.position.sub(view2D.multiply(0.5f))).multiply(tweenFactor*dt/1000.0f);
-		*/
-			
-		position.x += (trackedObject.position.x - (view.width / 2) - this.position.x) * tweenFactor * dt/1000;
-		position.y += (trackedObject.position.y - (view.height / 2) - this.position.y) * tweenFactor * dt/1000;
-		
+		/*
+		 * Vector2D view2D = new Vector2D("view",view.x,view.y); position =
+		 * position.add(trackedObject.position.sub(view2D.multiply(0.5f))).multiply(
+		 * tweenFactor*dt/1000.0f);
+		 */
+
+		position.x += (trackedObject.position.x - (view.width / 2) - this.position.x) * tweenFactor * dt / 1000;
+		position.y += (trackedObject.position.y - (view.height / 2) - this.position.y) * tweenFactor * dt / 1000;
+
 	}
 
 	/**

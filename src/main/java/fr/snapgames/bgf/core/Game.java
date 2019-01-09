@@ -118,7 +118,8 @@ public class Game extends JPanel {
 	private ResourceBundle msg = ResourceBundle.getBundle("messages");
 
 	/**
-	 * Create a new Application with <code>title</code> as main title.
+	 * Create a new Application with <code>title</code> as main title. As a second
+	 * parameter, the arguments from the Java CLI.
 	 * 
 	 * @param title the title of this app.
 	 */
@@ -129,7 +130,7 @@ public class Game extends JPanel {
 		parseArgs(args);
 		gsm = new GameStateManager(this);
 		inputListener = new InputListener(this);
-		resManager = new ResourceManager();
+		resManager = ResourceManager.getInstance(this);
 		soundCtrl = SoundControl.getInstance(this);
 
 		String path = Game.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -224,12 +225,12 @@ public class Game extends JPanel {
 		try {
 
 			Path filePath = Paths.get(jarPath.substring(1) + "/keymapping.json").toAbsolutePath();
-			if(Files.exists(filePath)){
+			if (Files.exists(filePath)) {
 				String file = new String(Files.readAllBytes(filePath));
 				myKB = gson.fromJson(file, new TypeToken<Map<KeyBinding, Integer>>() {
 				}.getType());
 				logger.info("mapping keys:" + "keymapping.json = " + myKB.toString());
-			}else{
+			} else {
 				logger.info("Keymapping.json file does not exist, will create it.");
 			}
 		} catch (Exception ioe) {
@@ -547,7 +548,7 @@ public class Game extends JPanel {
 	public Camera getActiveCamera() {
 		return gsm.getCurrentState().getActiveCamera();
 	}
-	
+
 	public boolean getAudioOff() {
 		return audioMode;
 	}
