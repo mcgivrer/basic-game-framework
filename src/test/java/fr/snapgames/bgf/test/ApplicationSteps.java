@@ -122,7 +122,7 @@ public class ApplicationSteps {
 	@Then("the scale value is (\\d+\\.\\d+)$")
 	public void theScaleValueIs(Float scaleValue) {
 		assertNotEquals(String.format("Scale mode has not been set to %f", scale), scaleValue.floatValue(),
-				new Float(scale).intValue());
+				Float.valueOf(scale));
 	}
 
 	@When("^getting audio mode$")
@@ -130,10 +130,10 @@ public class ApplicationSteps {
 		audioMode = application.getAudioOff();
 	}
 
-	@Then("the scale value is (\\d+\\.\\d+)$")
+	@Then("the audio value is (\\d+\\.\\d+)$")
 	public void theAudioModeIs(boolean audioMode) {
 		assertNotEquals(String.format("Audio mode has not been set to %d", scale), audioMode,
-				new Float(scale).intValue());
+				Boolean.valueOf(audioMode));
 	}
 
 
