@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
+import fr.snapgames.bgf.core.gfx.Render;
 import fr.snapgames.bgf.core.math.Vector2D;
 
 /**
@@ -151,10 +152,10 @@ public class Camera extends GameObject implements GameEntity {
 	/**
 	 * define the Game view to compute camera position.
 	 * 
-	 * @param view
+	 * @param render
 	 */
-	public Camera setView(Rectangle view) {
-		this.view = view;
+	public Camera setView(Render render) {
+		this.view = render.getViewport();
 		this.size.x = this.view.width - 20;
 		this.size.y = this.view.height - 20;
 

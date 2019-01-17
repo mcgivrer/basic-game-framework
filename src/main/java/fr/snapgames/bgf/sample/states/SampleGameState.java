@@ -112,8 +112,11 @@ public class SampleGameState extends GameStateDefault implements GameState {
 					.setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = ((Camera) Camera.builder("cam1").setDebugInfoOffset(new Vector2D("offset"))).setTarget(player)
-					.setTween(0.98f).setView(app.getRender().getViewport());
+			Camera cam1 = ((Camera) Camera.builder("cam1"))
+					.setDebugInfoOffset(new Vector2D("offset",-10.0f,-10.0f))
+					.setTarget(player)
+					.setTween(0.98f)
+					.setView(app.getRender().getViewport());
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
