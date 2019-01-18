@@ -107,16 +107,17 @@ public class SampleGameState extends GameStateDefault implements GameState {
 					.setVelocity(0.0f, 0.0f)
 					.setLayer(10)
 					.setPriority(100)
-					.setElasticity(0.12f)
-					.setFriction(1.0f/0.75f)
+					.setElasticity(0.04f)
+					.setFriction(0.75f)
 					.setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
-			Camera cam1 = ((Camera) Camera.builder("cam1"))
-					.setDebugInfoOffset(new Vector2D("offset",-10.0f,-10.0f))
+			Camera cam1 = ((Camera) Camera.builder("cam1")
+					.setDebugInfoOffset(new Vector2D("offset",-10.0f,-10.0f)))
 					.setTarget(player)
 					.setTween(0.98f)
-					.setView(app.getRender().getViewport());
+					.setView(app.getRender());
+					
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
