@@ -29,7 +29,7 @@ public class ResourceManager {
 	 */
 	public void addResource(String name, String path) {
 		// Manage image (PNG or JPG)
-		if (path.toLowerCase().endsWith(".png") || path.toLowerCase().endsWith(".png")) {
+		if (path.toLowerCase().endsWith(".png") || path.toLowerCase().endsWith(".jpg")) {
 			try {
 				BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("/" + path));
 				objects.put(name, image);
@@ -54,4 +54,5 @@ public class ResourceManager {
 			throw new ResourceUnknownException(String.format("Unknown resource named %s", name));
 		}
 	}
+	
 }

@@ -20,17 +20,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fr.snapgames.bgf.core.Game;
+import fr.snapgames.bgf.core.entity.BoundingBox;
 import fr.snapgames.bgf.core.entity.Camera;
 import fr.snapgames.bgf.core.entity.GameEntity;
 import fr.snapgames.bgf.core.entity.GameObject;
@@ -52,7 +53,7 @@ public class Render {
 		 * Fixed flag:if true, layer does not follow camera moves.
 		 */
 		private boolean fixed;
-		private List<GameEntity> objects = new CopyOnWriteArrayList<>();
+		private List<GameEntity> objects = new ArrayList<>();
 
 		public Layer(int index, String name) {
 			this.index = index;
@@ -73,7 +74,7 @@ public class Render {
 	Game app;
 
 	private Map<Integer, Layer> layers = new ConcurrentHashMap<>();
-	private List<Layer> sortLayers = new CopyOnWriteArrayList<>();
+	private List<Layer> sortLayers = new ArrayList<>();
 
 	private int WIDTH = 320;
 	private int HEIGHT = 240;
@@ -82,7 +83,7 @@ public class Render {
 	private Color clearColor = Color.BLACK;
 	private Rectangle viewport;
 	private Dimension dimension;
-	private Camera camera;
+	private Camera activeCamera;
 
 	int debug = 0;
 	private Font dbgFont;
@@ -99,7 +100,7 @@ public class Render {
 	/**
 	 * List of object to be rendered.
 	 */
-	List<GameEntity> renderingList = new CopyOnWriteArrayList<>();
+	List<GameEntity> renderingList = new ArrayList<>();
 
 	/**
 	 * default path to store image captures.
@@ -143,20 +144,20 @@ public class Render {
 			if (!layer.fixed) {
 				if (app.getActiveCamera() != null) {
 					app.getActiveCamera().preRender(app, g);
-				} else if (camera != null) {
-					camera.preRender(app, g);
+				} else if (activeCamera != null) {
+					activeCamera.preRender(app, g);
 				}
 			}
 
-			drawViewPort(app, g);			
+			drawViewPort(app, g);
 
 			// render anything game ?
 			for (GameEntity o : layer.getObjects()) {
-				o.render(g);
+				drawObject(g, o);
 				// Display debug information if requested.
 				if (debug > 0) {
 					if (debug >= 2) {
-						o.getBoundingBox().render(g);
+						drawBoundingBox(g, o.getBoundingBox());
 					}
 					if (debug >= 3) {
 						drawObjectDebugInfo(g, o);
@@ -164,13 +165,12 @@ public class Render {
 				}
 			}
 
-
 			// Camera postRender operation
 			if (!layer.fixed) {
 				if (app.getActiveCamera() != null) {
 					app.getActiveCamera().postRender(app, g);
-				} else if (camera != null) {
-					camera.postRender(app, g);
+				} else if (activeCamera != null) {
+					activeCamera.postRender(app, g);
 				}
 			}
 
@@ -201,14 +201,67 @@ public class Render {
 		}
 	}
 
+	/**
+	 * Draw rectangle around the Camera viewport.
+	 * 
+	 * @param app
+	 * @param g
+	 */
 	private void drawViewPort(Game app, Graphics2D g) {
-		if(debug>=2) {
+		if (debug >= 2) {
 			g.setColor(Color.ORANGE);
 			g.setStroke(basicStroke);
 			g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
 		}
-		//g.setColor(Color.BLUE);
-		//g.fillRect(viewport.x, viewport.y, viewport.width, viewport.height);
+	}
+
+	/**
+	 * <p>
+	 * Draw the {@link GameEntity} <code>o</code> with the {@link Graphics2D} API
+	 * <code>g</code>.
+	 * <p>
+	 * If the object contains an {@link GameObject#image}, the image is rendered,
+	 * else a rectangle with the {@link GameObject#color} is rendered.
+	 * <p>
+	 * The {@link GameObject#scale} factor is applied at rendering.
+	 * 
+	 * @param g2d     the Graphics API to be used to render things.
+	 * @param gEntity the GameEntity to be rendered.
+	 */
+	private void drawObject(Graphics2D g2d, GameEntity gEntity) {
+
+		GameObject gObject = (GameObject) gEntity;
+		// compute scaled size
+		int rWidth = (int) (gObject.size.x * gObject.scale);
+		int rHeight = (int) (gObject.size.y * gObject.scale);
+		if (gObject.image != null) {
+			g2d.drawImage(gObject.image, (int) gObject.position.x, (int) gObject.position.y, rWidth, rHeight, null);
+		} else {
+			g2d.setColor(gObject.color);
+			g2d.fillRect((int) gObject.position.x, (int) gObject.position.y, rWidth, rHeight);
+			g2d.setColor(Color.BLACK);
+			g2d.drawRect((int) gObject.position.x, (int) gObject.position.y, rWidth, rHeight);
+		}
+
+	}
+
+	/**
+	 * render the bounding box. mainly used for Debug purpose.
+	 * 
+	 * @param g
+	 */
+	private void drawBoundingBox(Graphics2D g, BoundingBox bBox) {
+		g.setColor(bBox.color);
+		switch (bBox.type) {
+		case CIRCLE:
+			g.drawArc((int) bBox.box.x, (int) bBox.box.y, (int) bBox.box.width, (int) bBox.box.height, 0, 360);
+			break;
+		case RECTANGLE:
+			g.drawRect((int) bBox.box.x, (int) bBox.box.y, (int) bBox.box.width, (int) bBox.box.height);
+			break;
+		default:
+			break;
+		}
 	}
 
 	/**
@@ -249,13 +302,13 @@ public class Render {
 	 */
 	public void drawGlobalDebugInformation(Graphics2D g) {
 		g.setFont(dbgFont);
-		String debugString = String.format("dbg:%s | FPS:%d | Objects:%d | Rendered:%d",
-				(debug == 0 ? "off" : "" + debug), app.getRealFPS(), app.getObjects().size(), renderingList.size());
-		int dbgStringHeight = g.getFontMetrics().getHeight() + 8;
+		String debugString = String.format("Dbg:%s | FPS:%d | Objects:%d | Rendered:%d | pause:%s",
+				(debug == 0 ? "off" : "" + debug), app.getRealFPS(), app.getObjects().size(), renderingList.size(), pause?"on":"off");
+		int dbgStringHeight = g.getFontMetrics().getHeight() + 4;
 		g.setColor(new Color(0.0f, 0.0f, 0.0f, 0.8f));
-		g.fillRect(0, HEIGHT - (dbgStringHeight + 8), WIDTH, (dbgStringHeight));
+		g.fillRect(0, HEIGHT - (dbgStringHeight), WIDTH, dbgStringHeight);
 		g.setColor(Color.ORANGE);
-		g.drawString(debugString, 4, HEIGHT - dbgStringHeight);
+		g.drawString(debugString, 4, HEIGHT-2);
 	}
 
 	/**
@@ -263,7 +316,8 @@ public class Render {
 	 */
 	public void drawRenderBufferToScreen() {
 		Graphics g2 = app.getGraphics();
-		g2.drawImage(buffer, 0, 0, (int) (WIDTH * SCALE), (int) (HEIGHT * SCALE), null);
+		float scaler =  SCALE*(activeCamera!=null?activeCamera.scale:1.0f);
+		g2.drawImage(buffer, 0, 0, (int) (WIDTH * scaler), (int) (HEIGHT * scaler), null);
 		g2.dispose();
 	}
 
@@ -432,7 +486,7 @@ public class Render {
 	}
 
 	public void setCamera(Camera cam) {
-		this.camera = cam;
+		this.activeCamera = cam;
 	}
 
 	/**

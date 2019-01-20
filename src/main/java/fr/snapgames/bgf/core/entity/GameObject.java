@@ -98,7 +98,7 @@ public class GameObject implements GameEntity {
 	public Vector2D gravity = new Vector2D("gravity");
 	public List<Vector2D> forces = new ArrayList<>();
 	public Vector2D debugInfoOffset = new Vector2D("offset", 10, 10);
-	public float mass;
+	public float mass=1.0f;
 	public float friction = 0.13f;
 	public float elasticity = 0.98f;
 
@@ -143,7 +143,8 @@ public class GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		position = position.add(speed.multiply(dt).multiply(friction));
+		position = position.add(speed.multiply(dt));
+		speed = speed.multiply(friction).multiply(1.0f/mass); 
 		bBox.update(this);
 	}
 

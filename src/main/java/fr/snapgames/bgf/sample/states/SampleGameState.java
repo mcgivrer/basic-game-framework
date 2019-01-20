@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -55,6 +56,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 	private Font scoreFont;
 	private UIText scoreUiText;
 	private GameObject player;
+	private GameObject backgroundImg;
 
 	/*
 	 * (non-Javadoc)
@@ -69,8 +71,9 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		app.resManager.addResource("images/playerBall", "res/images/blue-bouncing-ball-64x64.png");
 		app.resManager.addResource("images/enemyBall", "res/images/red-bouncing-ball-64x64.png");
-		app.soundCtrl.load("sounds/boing", "res/audio/sounds/boing1.wav");
-
+		app.resManager.addResource("images/background", "res/images/background-image.jpg");
+		app.soundCtrl.load("sounds/boing", "res/audio/sounds/bump-7.wav");
+		// app.soundCtrl.load("music/title", "res/audio/sounds/woodland-fantasy.mp3");
 	}
 
 	/*
@@ -86,38 +89,38 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		scoreFont = app.getRender().getGraphics().getFont().deriveFont(16.0f);
 
-		scoreUiText = (UIText) UIText.builder("score")
-				.setFont(scoreFont)
-				.setText("00000")
-				.setThickness(2)
-				.moveTo(12, 24)
-				.setLayer(20)
-				.setPriority(100)
-				.setFixed(true);
+		scoreUiText = (UIText) UIText.builder("score").setFont(scoreFont).setText("00000").setThickness(2)
+				.moveTo(12, 24).setLayer(20).setPriority(100).setFixed(true);
 		add(scoreUiText);
 
 		try {
+			BufferedImage img = app.resManager.getImage("images/background");
+			backgroundImg = GameObject.builder("player").setImage(img).setScale(1.25f)
+					.setSize(img.getWidth(), img.getHeight()).moveTo(0, 0).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f))
+					.setVelocity(0.0f, 0.0f).setLayer(0).setPriority(100);
+			add(backgroundImg);
+
 			// create a simple blue ball as a player
 			player = GameObject.builder("player")
 					.setSize(32, 32)
 					.setImage(app.resManager.getImage("images/playerBall"))
-					.setScale(1f)
 					.moveTo(0, 0)
 					.setColor(Color.GREEN)
 					.setVelocity(0.0f, 0.0f)
 					.setLayer(10)
 					.setPriority(100)
-					.setElasticity(0.04f)
-					.setFriction(0.75f)
+					.setElasticity(0.95f)
+					.setFriction(0.90f)
 					.setBoundingType(BoundingBoxType.CIRCLE);
 			add(player);
 			// add a camera to follow the player object in a centered cam viewport.
 			Camera cam1 = ((Camera) Camera.builder("cam1")
-					.setDebugInfoOffset(new Vector2D("offset",-10.0f,-10.0f)))
+					.setDebugInfoOffset(new Vector2D("offset", -10.0f, -10.0f))
+					.moveTo(320,200))
 					.setTarget(player)
 					.setTween(0.98f)
 					.setView(app.getRender());
-					
+
 			add(cam1);
 
 		} catch (ResourceUnknownException rue) {
@@ -125,6 +128,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		createGameObjects(app, "enemy_", 10);
+		// app.soundCtrl.play("music/title");
 
 	}
 
@@ -138,12 +142,17 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		Rectangle vp = app.getRender().getViewport();
 		try {
 			for (int i = 0; i < nbEnemies; i++) {
-				GameObject enemy = GameObject.builder(baseName + objects.size() + 1).setSize(16, 16)
+				GameObject enemy = GameObject.builder(baseName + objects.size() + 1)
+						.setSize(8, 8)
 						.setImage(app.resManager.getImage("images/enemyBall"))
 						.moveTo((int) (Math.random() * vp.width), (int) (Math.random() * vp.height))
 						.setVelocity((float) (Math.random() * 0.04f) - 0.02f, (float) (Math.random() * 0.04f) - 0.02f)
-						.setColor(randomColor()).setPriority(100 - i).setLayer(1).setElasticity(0.98f)
-						.setFriction(0.96f).setBoundingType(BoundingBoxType.CIRCLE);
+						.setColor(randomColor())
+						.setPriority(100 - i)
+						.setLayer(1)
+						.setElasticity(0.98f)
+						.setFriction(0.96f)
+						.setBoundingType(BoundingBoxType.CIRCLE);
 				add(enemy);
 			}
 		} catch (ResourceUnknownException rue) {
@@ -185,7 +194,7 @@ public class SampleGameState extends GameStateDefault implements GameState {
 
 		// remove all matching objects from objects buffer.
 		removeAll(collect.values());
-		
+
 		// re-fulfill the rendering buffer.
 		app.suspendRendering(false);
 	}
@@ -207,20 +216,17 @@ public class SampleGameState extends GameStateDefault implements GameState {
 		}
 
 		if (inputListener.getKey(KeyEvent.VK_LEFT)) {
-			goPlayer.speed.x = -1f * factor;
+			goPlayer.speed.x = -1f * factor*goPlayer.elasticity;
 		}
 		if (inputListener.getKey(KeyEvent.VK_RIGHT)) {
-			goPlayer.speed.x = 1f * factor;
+			goPlayer.speed.x = 1f * factor*goPlayer.elasticity;
 		}
 		if (inputListener.getKey(KeyEvent.VK_UP)) {
-			goPlayer.speed.y = -1f * factor;
+			goPlayer.speed.y = -1f * factor*goPlayer.elasticity;
 		}
 		if (inputListener.getKey(KeyEvent.VK_DOWN)) {
-			goPlayer.speed.y = 1f * factor;
+			goPlayer.speed.y = 1f * factor*goPlayer.elasticity;
 		}
-		goPlayer.speed.y *= goPlayer.friction;
-		goPlayer.speed.x *= goPlayer.friction;
-
 	}
 
 	@Override

@@ -3,6 +3,7 @@
  */
 package fr.snapgames.bgf.core.entity;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -10,7 +11,6 @@ import java.awt.image.BufferedImage;
 import fr.snapgames.bgf.core.Game;
 import fr.snapgames.bgf.core.entity.BoundingBox.BoundingBoxType;
 import fr.snapgames.bgf.core.gfx.Render;
-import fr.snapgames.bgf.core.math.Vector2D;
 
 /**
  * @author frede
@@ -49,6 +49,9 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	@Override
 	public void render(Graphics2D g) {
+		g.setColor(Color.BLUE);
+		g.fillRect(view.x, view.y, view.width, view.height);
+
 	}
 
 	/*
@@ -109,13 +112,15 @@ public class Camera extends GameObject implements GameEntity {
 	 */
 	@Override
 	public void update(long dt) {
-		/*Vector2D view2D = new Vector2D("view",view.x,view.y);
-		position = position.add(trackedObject.position.sub(view2D.multiply(0.5f))).multiply(tweenFactor*dt/1000.0f);
-		*/
-			
-		position.x += (trackedObject.position.x - (view.width / 2) - this.position.x) * tweenFactor * dt/1000;
-		position.y += (trackedObject.position.y - (view.height / 2) - this.position.y) * tweenFactor * dt/1000;
-		
+		/*
+		 * Vector2D view2D = new Vector2D("view",view.x,view.y); position =
+		 * position.add(trackedObject.position.sub(view2D.multiply(0.5f))).multiply(
+		 * tweenFactor*dt/1000.0f);
+		 */
+
+		position.x += (trackedObject.position.x - (view.width / 2) - this.position.x) * tweenFactor * dt / 1000;
+		position.y += (trackedObject.position.y - (view.height / 2) - this.position.y) * tweenFactor * dt / 1000;
+
 	}
 
 	/**

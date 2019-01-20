@@ -45,11 +45,7 @@ public class Vector2D {
      * @param v
      */
     public Vector2D add(Vector2D v) {
-        if (v != null) {
-            this.x += v.x;
-            this.y += v.y;
-        }
-        return this;
+        return new Vector2D(this.name,x+v.x,y+v.y);
     }
 
     /**
@@ -67,9 +63,7 @@ public class Vector2D {
      * @param f
      */
     public Vector2D multiply(float f) {
-        this.x *= f;
-        this.y *= f;
-        return this;
+        return new Vector2D(this.name, x*f,y*f);
     }
 
     /**

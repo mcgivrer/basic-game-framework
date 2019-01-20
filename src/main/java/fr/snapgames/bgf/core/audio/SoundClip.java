@@ -61,10 +61,16 @@ public class SoundClip {
 				AudioInputStream ais = AudioSystem.getAudioInputStream(bufferedIn);
 				AudioFormat baseFormat = ais.getFormat();
 
-				AudioFormat decodeFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(),
-						16, baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
+				AudioFormat decodeFormat = new AudioFormat(
+						AudioFormat.Encoding.PCM_SIGNED, 
+						baseFormat.getSampleRate(),
+						16, 
+						baseFormat.getChannels(), 
+						baseFormat.getChannels() * 2, 
+						baseFormat.getSampleRate(), 
+						false);
 				AudioInputStream dais = AudioSystem.getAudioInputStream(decodeFormat, ais);
-				clip = AudioSystem.getClip();
+				clip = AudioSystem.getClip(null);
 				/*
 				 * bugfix proposed
 				 * 
@@ -77,6 +83,7 @@ public class SoundClip {
 						clip.close();
 					}
 				});
+				
 				clip.open(dais);
 
 				if (clip.isControlSupported(FloatControl.Type.BALANCE)) {

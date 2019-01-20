@@ -180,10 +180,10 @@ public class Game extends JPanel {
 			myKB.put(KeyBinding.LEFT, KeyEvent.VK_LEFT);
 			myKB.put(KeyBinding.RIGHT, KeyEvent.VK_RIGHT);
 
-			myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD2);
-			myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD5);
-			myKB.put(KeyBinding.FIRE3, KeyEvent.VK_PAGE_UP);
-			myKB.put(KeyBinding.FIRE4, KeyEvent.VK_PAGE_DOWN);
+			myKB.put(KeyBinding.FIRE1, KeyEvent.VK_NUMPAD0);
+			myKB.put(KeyBinding.FIRE2, KeyEvent.VK_NUMPAD1);
+			myKB.put(KeyBinding.FIRE3, KeyEvent.VK_NUMPAD2);
+			myKB.put(KeyBinding.FIRE4, KeyEvent.VK_NUMPAD3);
 
 			myKB.put(KeyBinding.PAUSE, KeyEvent.VK_P);
 			myKB.put(KeyBinding.QUIT, KeyEvent.VK_ESCAPE);
@@ -206,9 +206,10 @@ public class Game extends JPanel {
 	private void writeKeyMapping(Map<KeyBinding, Integer> myKB) {
 
 		Gson gson = new Gson();
+		String path = System.getProperty("user.home");
 		logger.info("Keymapping:" + gson.toJson(myKB));
 		try {
-			Path filePath = Paths.get(jarPath.substring(1) + "/keymapping.json").toAbsolutePath();
+			Path filePath = Paths.get(path + "/keymapping.json").toAbsolutePath();
 			Files.write(filePath, gson.toJson(myKB).getBytes("utf-8"));
 			logger.debug("mapping keys:" + "keymapping.json");
 		} catch (Exception ioe) {

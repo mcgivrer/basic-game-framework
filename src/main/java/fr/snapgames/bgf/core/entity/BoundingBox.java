@@ -36,9 +36,9 @@ public class BoundingBox {
 		RECTANGLE, CIRCLE
 	}
 
-	private Rectangle2D.Float box;
-	private BoundingBoxType type;
-	private Color color = Color.ORANGE;
+	public Rectangle2D.Float box;
+	public BoundingBoxType type;
+	public Color color = Color.ORANGE;
 
 	BoundingBox(BoundingBoxType type) {
 		this.type = type;
@@ -71,25 +71,6 @@ public class BoundingBox {
 		this.box.y = go.position.y;
 		this.box.width = go.size.x;
 		this.box.height = go.size.y;
-	}
-
-	/**
-	 * render the bounding box. mainly used for Debug purpose.
-	 * 
-	 * @param g
-	 */
-	public void render(Graphics2D g) {
-		g.setColor(this.color);
-		switch (type) {
-		case CIRCLE:
-			g.drawArc((int) box.x, (int) box.y, (int) box.width, (int) box.height, 0, 360);
-			break;
-		case RECTANGLE:
-			g.drawRect((int) box.x, (int) box.y, (int) box.width, (int) box.height);
-			break;
-		default:
-			break;
-		}
 	}
 
 	/**
